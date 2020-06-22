@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: #EEEEEE;
+
+}
+
+#loginContainer {
+    box-sizing: border-box;
+    width: 380px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #CFD8DC;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+#userForm {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-item {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#userForm input[type="password"],
+#userForm input[type="email"] {
+    border: none;
+    background: transparent;
+    text-align: center;
+    outline: none;
+    padding: 8px;
+    background-image: none;
+    border: 1px solid #3498db;
+    width: 70%;
+
+}
+
+.btn {
+    background: #3949AB;
+    outline: none;
+    border: 1px #27ae60;
+    padding: 5px 15px;
+}
+
+.btn:hover {
+    background: #9ea8e6;
+    transition: all .2s;
+    transform: scale(1.1);
+}
+.signOut{
+    background: #2742f1;
+    color: white;
+}
+
+
+/*                 MAP             */
+#billboardDetails{
+    width: auto;
+    height: 90%;
+}
+#map {  
+    width: 90%;
+    height: 70%;
+    margin: 10px auto;
+}
+
+h3 {
+    text-align: center;
+}
+.poi{
+    width: 10px;
+    height: 20px;
+}
+.header{
+    width: 90%;
+    margin: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 10px;
+}
+.header h2{
+    margin: auto;
+    font-size: x-large;
+    text-transform: uppercase;
+    text-decoration: underline;
+}
+
+#signOut{
+    display: block;
+}
+#uploadForm{
+    margin: 10px auto;
+    width: fit-content;
+    padding: 8px;
+    background-color: gold;
+    /* margin-left: 30px; */
+}
+.leaflet-popup-content-wrapper{
+    width:300px ;
+    background-color: #FFF9C4;
+    color: rgb(8, 10, 10);
+    text-align: center;
+}
+
+.billboardImage{
+    height: 150px;
+    display: block ;
+    margin: auto;
+    
+}
+.leaflet-right{
+    background-color:#FFCA28;
+}
+
+.leaflet-panel-layers-list{
+    height: fit-content;
+}
+.description{
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    width: 90%;
+}
+.description h5{
+    text-align: start;
+}
+.description h5{
+    font-size: 16px;
+}
+.description h4, h5, p{
+    margin: 0;
+    padding: 5px;
+}
