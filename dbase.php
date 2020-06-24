@@ -68,16 +68,20 @@ class billboard
 
         $sql = "INSERT INTO 
                     billboard_locations
+                    (billboardi, routename, selectmedi, site_light, zone_, size_, `condition`, 
+                    orientatio, visibility, traffic, photo, photo_long, road_type, lat, 
+                    long_, scoutname, date_, angle, billboard_, constituen, customerbr, customerin,
+                    direction_, height, mediaowner, site_run_u )
                 VALUES(
-                    billboardi =:billboardi, routename=:routename, selectmedi=:selectmedi,
-                    site_light=:site_light, zone_=:zone_, size_=:size, condition=:condition_, 
-                    orientatio=:orientation, visibility=:visibility, traffic=:traffic, 
-                    photo=:photo, photo_long=:photo_long, road_type=:road_type, lat=:lat, long_=:long_, scoutname=:scout_name, date_=:date_, angle=:angle, billboard_=:billboard_empty, constituen=:constituency, customerbr=:customer_brand, customerin=:customer_industry,
-                    direction_=:direction_from_cbd, height=:height, mediaowner=:media_owner, 
-                    site_run_u=:site_run_up )";
+                    :billboardi, :routename, :selectmedi,:site_light, :zone_, :size, :condition_, 
+                    :orientation, :visibility, :traffic, :photo, :photo_long, :road_type,
+                    :lat, :long_, :scout_name, :date_, :angle, :billboard_empty, :constituency,
+                    :customer_brand, :customer_industry, :direction_from_cbd, :height, :media_owner, 
+                    :site_run_up )";
         //
         // prepare the statement
         $this->statement = $this->db->prepare($sql);
+        $z = $this->statement;
         //
         // bind parameters
         $this->statement->bindParam(':billboardi', $this->billboardi);
@@ -121,42 +125,49 @@ class billboard
         // fetch result
         return $statement->fetchAll(PDO::FETCH_CLASS);
     }
+    private function convertDate($date){
+        return date("Y-m-d", strtotime(str_replace('/', '-', $date)));
+    }
     public function createBillboard($billboard)
     {
         foreach ($billboard as $data) {
 
-            $this->billboardi = $data->billboard_id;
-            $this->routename = $data->route_name;
-            $this->selectmedi  = $data->select_medium;
-            $this->site_light  = $data->site_lighting_illumination;
-            $this->zone_  = $data->zone;
-            $this->size_  = $data->size;
-            $this->condition  = $data->condition;
-            $this->orientatio  = $data->orientation;
-            $this->visibility  = $data->visibility;
-            $this->traffic  = $data->traffic;
-            $this->photo  = $data->photo;
-            $this->photo_long  = $data->photo_longrange;
-            $this->road_type  = $data->road_type;
-            $this->lat  = $data->lat;
-            $this->long_  = $data->long;
-            $this->scoutname  = $data->scout_name;
-            $this->date_  = $data->date;
-            $this->angle = $data->angle;
-            $this->billboard_  = $data->billboard_empty;
-            $this->constituen  = $data->constituency;
-            $this->customerbr  = $data->customer_brand;
-            $this->customerin  = $data->customer_industry;
-            $this->direction_  = $data->direction_from_cbd;
-            $this->height  = $data->height;
-            $this->mediaowner  = $data->media_owner;
-            $this->site_run_u  = $data->site_run_up;
+            $this->billboardi = isset($data->billboard_id) ? $data->billboard_id : null;
+            $this->routename = isset($data->route_name) ? $data->route_name : null;
+            $this->selectmedi  = isset($data->select_medium) ? $data->select_medium : null;
+            $this->site_light  = isset($data->site_lighting_illumination) ? $data->site_lighting_illumination : null;
+            $this->zone_  = isset($data->zone) ? $data->zone : null;
+            $this->size_  = isset($data->size) ? $data->size : null;
+            $this->condition  = isset($data->condition) ?  $data->condition : null;
+            $this->orientatio  = isset($data->orientation) ? $data->orientation : null;
+            $this->visibility  = isset($data->visibility) ? $data->visibility : null;
+            $this->traffic  = isset($data->traffic) ? $data->traffic : null;
+            $this->photo  = isset($data->photo) ? $data->photo : null;
+            $this->photo_long  = isset($data->photo_longrange) ? $data->photo_longrange : null;
+            $this->road_type  = isset($data->road_type) ? $data->road_type : null;
+            $this->lat  = isset($data->lat) ? $data->lat : null;
+            $this->long_  = isset($data->long) ? $data->long : null;
+            $this->scoutname  = isset($data->scout_name) ? $data->scout_name : null;
+            $this->date_  = isset($data->date) ? $this->convertDate($data->date) : null;
+            $this->angle = isset($data->angle) ? $data->angle : null;
+            $this->billboard_  = isset($data->billboard_empty) ? $data->billboard_empty : null;
+            $this->constituen  = isset($data->constituency) ? $data->constituency : null;
+            $this->customerbr  = isset($data->customer_brand) ? $data->customer_brand : null;
+            $this->customerin  = isset($data->customer_industry) ? $data->customer_industry : null;
+            $this->direction_  = isset($data->direction_from_cbd) ? $data->direction_from_cbd : null;
+            $this->height  = isset($data->height) ? $data->direction_from_cbd : null;
+            $this->mediaowner  = isset($data->media_owner) ? $data->media_owner : null;
+            $this->site_run_u  = isset($data->site_run_up) ? $data->site_run_up : null;
             // execute
-            if ($this->statement->execute()) {
-                return http_response_code(201);
+            try {
+                $this->statement->execute();
+                http_response_code(201);
+            } catch (Exception $e) {
+                //throw $th;
+                http_response_code(500);
             }
-            $x= $this->statement->errorCode();
         }
+        return http_response_code();
     }
 }
 class uber

@@ -31,5 +31,4 @@ class getData
 }
 return new getData();
 
-
 ?>

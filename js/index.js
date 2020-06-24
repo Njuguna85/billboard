@@ -11,19 +11,15 @@ async function fetchData() {
         // 
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
-        let data = await response.json();
-        state.mapData = data;
-
+        data = await response.json();
+        createMap(data)
     } else {
-
         alert('Something went wrong while fetching data. Error: ' + response.status);
-
     }
 };
-fetchData();
+var my_map;
 
 function createMap(data) {
-
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw'
 
     const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
@@ -44,17 +40,18 @@ function createMap(data) {
         });
 
     // Create a new instance of the map class
-    const my_map = L.map(
+    my_map = L.map(
         'map', {
         center: [-1.28333, 36.816667],
         zoom: 12
     });
 
-    setTimeout(function(){ my_map.invalidateSize()}, 100);
+    setTimeout(function () { my_map.invalidateSize() }, 100);
 
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
+
     const popIcon = L.icon({
         iconUrl: 'images/marker.png',
         iconSize: [20, 20],
@@ -351,7 +348,7 @@ function signOut() {
 auth.onAuthStateChanged(function (user) {
     if (user) {
         // User is signed in. 
-        createMap(state.mapData);
+        fetchData();
         document.querySelector('#loginContainer').style.display = 'none';
         document.querySelector('#billboardDetails').style.display = 'initial';
     } else {
@@ -362,20 +359,42 @@ auth.onAuthStateChanged(function (user) {
 });
 
 function readFile() {
-    
     const fileUpload = document.getElementById('xlsFile');
     //Validate whether File is valid Excel file.
-    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+    const regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+
+    const expectedrows = ['angle', 'billboard_empty', 'billboard_id', 'condition', 'constituency', 'date', 'direction_from_cbd', 'height', 'lat', 'long', 'orientation', 'photo', 'photo_longrange', 'road_type', 'route_name', 'scout_name', 'select_medium', 'site_lighting_illumination', 'site_run_up', 'size', 'traffic', 'visibility', 'zone'];
 
     if (regex.test(fileUpload.value.toLowerCase())) {
         if (typeof (FileReader) != "undefined") {
-            var reader = new FileReader();
-            var files = fileUpload.files, f = files[0];
+            const reader = new FileReader();
+            const files = fileUpload.files, f = files[0];
             reader.onload = function (e) {
-                var data = new Uint8Array(e.target.result);
-                datatoJson(data);
+
+                const data = e.target.result;
+
+                const workbook = XLSX.read(data, { type: 'binary' });
+
+                //get the name of First Sheet.
+                const Sheet = workbook.SheetNames[0];
+                const workSheet = workbook.Sheets[Sheet];
+
+                // convert the data in the first sheet to json
+                const jsonData = XLSX.utils.sheet_to_row_object_array(workSheet);
+                
+                // check if the sheet has the expected columns
+                let hasexpectedColumn;
+
+                expectedrows.forEach(expRow => {
+                    if (jsonData[0].hasOwnProperty(expRow)) {
+                        hasexpectedColumn = true;
+                    } else {
+                        hasexpectedColumn = false;
+                    }
+                });
+                if (hasexpectedColumn) { saveSheet(jsonData) } else { alert('The Excel file does not have the necessary columns. Please check it.') }
             };
-            reader.readAsArrayBuffer(f);
+            reader.readAsBinaryString(f);
 
         } else {
             alert("This browser does not support HTML5.");
@@ -383,29 +402,30 @@ function readFile() {
     } else {
         alert("Please upload a valid Excel file.");
     }
+
 }
 
-function datatoJson(data) {
-    var workbook = XLSX.read(data, {
-        type: 'array'
-    })
-
-    //get the name of First Sheet.
-    var Sheet = workbook.SheetNames[0];
-
-    // convert the data in the first sheet to json
-    var data = XLSX.utils.sheet_to_json(workbook.Sheets[Sheet]);
-    
+async function saveSheet(data) {
     //
     //Create a form data object to hold the property data json and photos.
     const formData = new FormData();
 
     // url where the data will be posted
     const url = './upload.php';
-    formData.append('billboardData', JSON.stringify(data))
-    // fetch(url, {
-    //     method: 'POST',
-    //     body: formData,
-    // })
+
+    console.log(data)
+    formData.append('billboardData', JSON.stringify(data));
+
+    const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+    });
+    if (response.status == 201) {
+        alert('File saved successfully');
+        my_map.remove();
+        fetchData();
+    } else if (response.status == 500) {
+        alert('The file could not be saved. There is something wrong its format');
+    }
 
 }
