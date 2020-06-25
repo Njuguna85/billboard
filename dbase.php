@@ -78,10 +78,11 @@ class billboard
                     :lat, :long_, :scout_name, :date_, :angle, :billboard_empty, :constituency,
                     :customer_brand, :customer_industry, :direction_from_cbd, :height, :media_owner, 
                     :site_run_up )";
+
         //
         // prepare the statement
         $this->statement = $this->db->prepare($sql);
-        $z = $this->statement;
+        
         //
         // bind parameters
         $this->statement->bindParam(':billboardi', $this->billboardi);
@@ -209,33 +210,203 @@ class uber
     }
 }
 
-class sublocation
+class subcounties
 {
-
-    public $divname;
-    public $sub_name;
-    public $SHAPE;
-    public $OGR_FID;
-    public $locname;
-    public $distname;
-    public $provname;
-    public $code_sub;
-    public $db;
 
     public function __construct()
     {
         $this->db = database::getInstance();
     }
-    public function getSublocation()
+    public function getsubcounties()
     {
         // sql
         $sql = "
-         SELECT 
-             objectid, divname as Division, sub_name as Sublocation,
-             ST_AsGeoJSON(SHAPE) As geojson
-         FROM 
-             nairobi_sublocations
-         ";
+            SELECT 
+                ST_AsGeoJSON(SHAPE) As geojson, adm2_en as SubCounty, male, 
+                female, intersex, numberofho, average_ho,  population,
+                populati_1 As totalPop
+            FROM 
+                nairobisucounties 
+            ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class atm
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getAtm()
+    {
+        // sql
+        $sql = "
+        SELECT
+            ST_AsGeoJSON(SHAPE) As geojson, operator 
+        FROM atms  
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class bank
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getBank()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM 
+            banks
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+class hospital
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getHospital()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM 
+            hospitals
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class kibera
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getKibera()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM 
+            kibera
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class mathare
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getMathare()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM 
+            mathare
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+class police
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getPolicePost()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM 
+            police_post
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+class schools
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getSchools()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name, accessibil
+        FROM 
+            schools
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+class universities
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getUniversity()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name
+        FROM 
+            universities
+        ";
         // query the sql
         $statement =  $this->db->query($sql);
         // fetch result

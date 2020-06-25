@@ -12,7 +12,10 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
-        createMap(data)
+        // console.log(data);
+
+        createMap(data);
+
     } else {
         alert('Something went wrong while fetching data. Error: ' + response.status);
     }
@@ -23,7 +26,6 @@ function createMap(data) {
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw'
 
     const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
-
     //
     // map styles
     const streets = L.tileLayer(mapboxUrl, {
@@ -38,7 +40,6 @@ function createMap(data) {
             zoomOffset: -1,
             attribution: mapboxAttribution
         });
-
     // Create a new instance of the map class
     my_map = L.map(
         'map', {
@@ -105,79 +106,255 @@ function createMap(data) {
         }
     });
 
-    /*           POINTS OF INTEREST DATA                      */
-    const poiData = data.poi;
-    const poiJSON = [];
-    poiData.forEach(poi => {
+    /*          ATM             */
+    const atmData = data.atms;
+    const atmJSON = [];
+    atmData.forEach(atm => {
 
         let features = {
             type: 'Feature',
             properties: {
-                'title': poi.title,
-                'type': poi.type,
-                'subtype': poi.subtype,
-                'level': poi.level,
+                'operator': atm.operator,
             },
-            geometry: JSON.parse(poi.geojson),
+            geometry: JSON.parse(atm.geojson),
         };
-        poiJSON.push(features);
+        atmJSON.push(features);
     });
-    var poiGeoJSON = {
+    var atmGeoJSON = {
         type: 'FeatureCollection',
-        features: poiJSON
+        features: atmJSON
     };
-    const poisIcon = L.icon({
-        iconUrl: 'images/pmarker2.png',
+    const atmIcon = L.icon({
+        iconUrl: 'images/atm.png',
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
 
-    const pois = L.geoJson(poiGeoJSON, {
+    const atms = L.geoJson(atmGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
-                icon: poisIcon
+                icon: atmIcon
             });
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.title + '</b><br/>' +
-                'Type: <b>' + feature.properties.type + '</b> <br/>' +
-                'Subtype: <b>' + feature.properties.subtype + '</b> </br>'
+                'Operator: <b>' + feature.properties.operator + '</b><br/>'
             )
         }
     });
     //
-    // clusters for the points of interest
-    const poiMarkers = new L.MarkerClusterGroup();
-    poiMarkers.addLayer(pois);
+    // clusters for the atms
+    const atmMarkers = new L.MarkerClusterGroup();
+    atmMarkers.addLayer(atms);
 
-    /*           SUBLOCATION DATA                      */
-    const sublocationStyle = {
-        "fillColor": "#FFFDE7",
-        "weight": 1,
-        "opacity": .7,
-        "color": '#039BE5',
-        'dashArray': '3',
-        "fillOpacity": 0.7
-    };
-    const sublocations = data.sublocation;
-
-    sublocationsJSON = [];
-    sublocations.forEach(sublocation => {
+    /*          banKS             */
+    const bankData = data.banks;
+    const bankJSON = [];
+    bankData.forEach(bank => {
         let features = {
             type: 'Feature',
             properties: {
-                'id': sublocation.objectid,
-                'division': sublocation.division,
-                'Sublocation': sublocation.sublocation
+                'name': bank.name,
             },
-            geometry: JSON.parse(sublocation.geojson),
+            geometry: JSON.parse(bank.geojson),
+        };
+        bankJSON.push(features);
+    });
+    var bankGeoJSON = {
+        type: 'FeatureCollection',
+        features: bankJSON
+    };
+    const bankIcon = L.icon({
+        iconUrl: 'images/bank.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const banks = L.geoJson(bankGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: bankIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + feature.properties.name + '</b><br/>'
+            )
         }
-        sublocationsJSON.push(features);
     });
-    const nairobiSublocations = L.geoJson(sublocationsJSON, {
-        style: sublocationStyle
+    //
+    // clusters for the banks
+    const bankMarkers = new L.MarkerClusterGroup();
+    bankMarkers.addLayer(banks);
+
+    /*          HOSPITALS             */
+    const hospitalData = data.hospitals;
+    const hospitalJSON = [];
+    hospitalData.forEach(hospital => {
+
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': hospital.name,
+            },
+            geometry: JSON.parse(hospital.geojson),
+        };
+        hospitalJSON.push(features);
     });
+    var hospitalGeoJSON = {
+        type: 'FeatureCollection',
+        features: hospitalJSON
+    };
+    const hospitalIcon = L.icon({
+        iconUrl: 'images/hospital.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const hospitals = L.geoJson(hospitalGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: hospitalIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + feature.properties.name + '</b><br/>'
+            )
+        }
+    });
+    //
+    // clusters for the hospitals
+    const hospitalMarkers = new L.MarkerClusterGroup();
+    hospitalMarkers.addLayer(hospitals);
+
+    /*          HOSPITALS             */
+    const policeData = data.police;
+    const policeJSON = [];
+    policeData.forEach(police => {
+
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': police.name,
+            },
+            geometry: JSON.parse(police.geojson),
+        };
+        policeJSON.push(features);
+    });
+    var policeGeoJSON = {
+        type: 'FeatureCollection',
+        features: policeJSON
+    };
+    const policeIcon = L.icon({
+        iconUrl: 'images/police.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const polices = L.geoJson(policeGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: policeIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + feature.properties.name + '</b><br/>'
+            )
+        }
+    });
+    //
+    // clusters for the polices
+    const policeMarkers = new L.MarkerClusterGroup();
+    policeMarkers.addLayer(polices);
+
+
+
+    /*          School             */
+    const schoolData = data.schools;
+    const schoolJSON = [];
+    schoolData.forEach(school => {
+
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': school.name,
+                'accessibility': school.accessibil
+            },
+            geometry: JSON.parse(school.geojson),
+        };
+        schoolJSON.push(features);
+    });
+    var schoolGeoJSON = {
+        type: 'FeatureCollection',
+        features: schoolJSON
+    };
+    const schoolIcon = L.icon({
+        iconUrl: 'images/school.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const schools = L.geoJson(schoolGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: schoolIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + feature.properties.name + '</b><br/>' +
+                'Accessibility: ' + feature.properties.accessibility + '</b><br/>'
+            )
+        }
+    });
+    //
+    // clusters for the schools
+    const schoolMarkers = new L.MarkerClusterGroup();
+    schoolMarkers.addLayer(schools);
+
+
+    /*          HOSPITALS             */
+    const uniData = data.universities;
+    const uniJSON = [];
+    uniData.forEach(uni => {
+
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': uni.name,
+            },
+            geometry: JSON.parse(uni.geojson),
+        };
+        uniJSON.push(features);
+    });
+    var uniGeoJSON = {
+        type: 'FeatureCollection',
+        features: uniJSON
+    };
+    const uniIcon = L.icon({
+        iconUrl: 'images/university.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const unis = L.geoJson(uniGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: uniIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + feature.properties.name + '</b><br/>'
+            )
+        }
+    });
+    //
+    // clusters for the unis
+    const uniMarkers = new L.MarkerClusterGroup();
+    uniMarkers.addLayer(unis);
 
     /*           UBER MEAN DISTANCE DATA                      */
 
@@ -257,6 +434,88 @@ function createMap(data) {
         onEachFeature: onEachFeature
     });
 
+    /*           SUBCOUNTIES  DATA                      */
+    const subCountyStyle = {
+        "fillColor": "#FEB24C",
+        "weight": 2,
+    };
+    const subCounties = data.subCounties;
+
+    subCountyJSON = [];
+    subCounties.forEach(subCounty => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'Name': subCounty.SubCounty,
+                'Male': subCounty.male,
+                'Female': subCounty.female,
+                'TotalPopulation': subCounty.totalPop
+            },
+            geometry: JSON.parse(subCounty.geojson),
+        }
+        subCountyJSON.push(features);
+    });
+    const nairobiSubCounties = L.geoJson(subCountyJSON, {
+        style: subCountyStyle,
+        onEachFeature: onEachFeature
+    });
+
+    /* Mathare */
+    const mathareStyle = {
+        "fillColor": "#FEB24C",
+        "weight": 2,
+        'opacity': 1,
+        'color': 'white',
+        'dashArray': '3',
+        'fillOpacity': 0.7
+    };
+    const mathareData = data.mathare;
+    mathareJSON = [];
+    mathareData.forEach(area => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'Name': area.name,
+
+            },
+            geometry: JSON.parse(area.geojson),
+        }
+        mathareJSON.push(features);
+    });
+    const mathareArea = L.geoJson(mathareJSON, {
+        style: mathareStyle,
+        onEachFeature: onEachFeature
+    });
+
+    /* kibera area */
+    const kiberaStyle = {
+        "fillColor": "#FEB24C",
+        "weight": 2,
+        'opacity': 1,
+        'color': 'white',
+        'dashArray': '3',
+        'fillOpacity': 0.7
+    };
+    const kiberaData = data.kibera;
+    kiberaJSON = [];
+    kiberaData.forEach(area => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'Name': area.name,
+
+            },
+            geometry: JSON.parse(area.geojson),
+        }
+        kiberaJSON.push(features);
+    });
+    const kiberaArea = L.geoJson(kiberaJSON, {
+        style: kiberaStyle,
+        onEachFeature: onEachFeature
+    });
+
+
+    /* add layers */
     const baseLayers = [{
         active: true,
         name: "OpenStreetMap",
@@ -272,19 +531,60 @@ function createMap(data) {
         layer: billboards
     },
     {
-        name: "POI'S",
-        icon: '<img src="images/pmarker2.png" style="height:18px;"></img>',
-        layer: poiMarkers
+        group: 'Maps',
+        collapsed: true,
+        layers: [{
+            name: "Uber Travel Time From Nairobi",
+            layer: uber
+        },
+        {
+            name: "Nairobi Sub Counties",
+            layer: nairobiSubCounties
+        }, {
+            name: 'Mathare Area',
+            layer: mathareArea
+        }, {
+            name: 'Kibera Village',
+            layer: kiberaArea
+        }
+        ]
     },
     {
-        name: "Uber Travel Time",
-        layer: uber
-    },
-    {
-        name: "Sublocations",
-        layer: nairobiSublocations
-    }
-    ];
+        group: 'Points of Interest',
+        collapsed: true,
+        layers: [
+            {
+                name: "ATM",
+                icon: '<img src="images/atm.png" style="height:18px;"></img>',
+                layer: atmMarkers
+            },
+            {
+                name: "Bank",
+                icon: '<img src="images/bank.png" style="height:18px;"></img>',
+                layer: bankMarkers
+            },
+            {
+                name: "Hospital",
+                icon: '<img src="images/hospital.png" style="height:18px;"></img>',
+                layer: hospitalMarkers
+            },
+            {
+                name: "Police Post",
+                icon: '<img src="images/police.png" style="height:18px;"></img>',
+                layer: policeMarkers
+            },
+            {
+                name: "Schools",
+                icon: '<img src="images/school.png" style="height:18px;"></img>',
+                layer: schoolMarkers
+            },
+            {
+                name: "Universities",
+                icon: '<img src="images/university.png" style="height:18px;"></img>',
+                layer: uniMarkers
+            }
+        ]
+    }];
     var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers)
     my_map.addControl(panelLayers);
 
@@ -381,7 +681,7 @@ function readFile() {
 
                 // convert the data in the first sheet to json
                 const jsonData = XLSX.utils.sheet_to_row_object_array(workSheet);
-                
+
                 // check if the sheet has the expected columns
                 let hasexpectedColumn;
 
