@@ -28,8 +28,10 @@ function createMap(data) {
     const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
     //
     // map styles
+    //'streets-v11'
+    //'light-v10'
     const streets = L.tileLayer(mapboxUrl, {
-        id: 'streets-v11',
+        id: 'light-v10',
         tileSize: 512,
         zoomOffset: -1,
         attribution: mapboxAttribution
@@ -52,7 +54,6 @@ function createMap(data) {
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
-
     const popIcon = L.icon({
         iconUrl: 'images/marker.png',
         iconSize: [20, 20],
@@ -87,7 +88,6 @@ function createMap(data) {
         type: 'FeatureCollection',
         features: billboardJSON
     };
-
     const billboards = L.geoJson(billboardGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -110,7 +110,6 @@ function createMap(data) {
     const atmData = data.atms;
     const atmJSON = [];
     atmData.forEach(atm => {
-
         let features = {
             type: 'Feature',
             properties: {
@@ -129,7 +128,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const atms = L.geoJson(atmGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -142,8 +140,6 @@ function createMap(data) {
             )
         }
     });
-    //
-    // clusters for the atms
     const atmMarkers = new L.MarkerClusterGroup();
     atmMarkers.addLayer(atms);
 
@@ -169,7 +165,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const banks = L.geoJson(bankGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -182,8 +177,6 @@ function createMap(data) {
             )
         }
     });
-    //
-    // clusters for the banks
     const bankMarkers = new L.MarkerClusterGroup();
     bankMarkers.addLayer(banks);
 
@@ -191,7 +184,6 @@ function createMap(data) {
     const hospitalData = data.hospitals;
     const hospitalJSON = [];
     hospitalData.forEach(hospital => {
-
         let features = {
             type: 'Feature',
             properties: {
@@ -210,7 +202,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const hospitals = L.geoJson(hospitalGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -232,7 +223,6 @@ function createMap(data) {
     const policeData = data.police;
     const policeJSON = [];
     policeData.forEach(police => {
-
         let features = {
             type: 'Feature',
             properties: {
@@ -251,7 +241,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const polices = L.geoJson(policeGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -264,18 +253,13 @@ function createMap(data) {
             )
         }
     });
-    //
-    // clusters for the polices
     const policeMarkers = new L.MarkerClusterGroup();
     policeMarkers.addLayer(polices);
-
-
 
     /*          School             */
     const schoolData = data.schools;
     const schoolJSON = [];
     schoolData.forEach(school => {
-
         let features = {
             type: 'Feature',
             properties: {
@@ -295,7 +279,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const schools = L.geoJson(schoolGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -309,13 +292,10 @@ function createMap(data) {
             )
         }
     });
-    //
-    // clusters for the schools
     const schoolMarkers = new L.MarkerClusterGroup();
     schoolMarkers.addLayer(schools);
 
-
-    /*          HOSPITALS             */
+    /*          UNIVERSITIES             */
     const uniData = data.universities;
     const uniJSON = [];
     uniData.forEach(uni => {
@@ -338,7 +318,6 @@ function createMap(data) {
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-
     const unis = L.geoJson(uniGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
@@ -351,16 +330,12 @@ function createMap(data) {
             )
         }
     });
-    //
-    // clusters for the unis
     const uniMarkers = new L.MarkerClusterGroup();
     uniMarkers.addLayer(unis);
 
     /*           UBER MEAN DISTANCE DATA                      */
-
     const uMD = data.uber;
     uDMJSON = [];
-
     function getColor(d) {
         return d > 3318 ? '#800026' :
             d > 2878 ? '#BD0026' :
@@ -400,7 +375,7 @@ function createMap(data) {
     }
 
     function highLightUber(e) {
-        const layer = e.target;
+        var layer = e.target;
 
         layer.setStyle({
             weight: 5,
@@ -411,14 +386,17 @@ function createMap(data) {
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
         }
+        info.update(layer.feature.properties);
+
     }
 
     function resetHighlightUber(e) {
         uber.resetStyle(e.target);
+        info.update(layer.feature.properties);
     }
 
-    function zoomToFeatureUber(params) {
-        map.fitBounds(e.target.getBounds());
+    function zoomToFeatureUber(e) {
+        my_map.flyToBounds(e.target.getBounds());
     }
 
     function onEachFeature(feature, layer) {
@@ -433,6 +411,25 @@ function createMap(data) {
         style: style,
         onEachFeature: onEachFeature
     });
+    /*          custom information control              */
+    var info = L.control({ position: 'topleft' });
+    info.onAdd = function (my_map) {
+        this._div = L.DomUtil.create('div', 'info') // create a div with the class of info
+        this.update();
+        return this._div;
+    };
+    // update the info control based on feature properties
+    info.update = function (props) {
+        this._div.innerHTML =
+            '<h4>Uber Travel Data</h4>' +
+            (props ?
+                'Area Name: ' + '<b>' + props.areaName + '</b><br/>' +
+                'Travel Time: ' + '<b>' + props.travelTime + '</b><br/>'
+                : 'Hover Over a region');
+    };
+
+    info.addTo(my_map);
+    // update the control on hover 
 
     /*           SUBCOUNTIES  DATA                      */
     const subCountyStyle = {
@@ -518,77 +515,82 @@ function createMap(data) {
     /* add layers */
     const baseLayers = [{
         active: true,
-        name: "OpenStreetMap",
+        name: "Streets",
         layer: streets
     }, {
         name: "Satellite",
         layer: satellite
     }];
-    const overLayers = [{
-        active: true,
-        name: "Billboards",
-        icon: '<img src="images/marker.png" style="height:15px;"></img>',
-        layer: billboards
-    },
-    {
-        group: 'Maps',
-        collapsed: true,
-        layers: [{
-            name: "Uber Travel Time From Nairobi",
-            layer: uber
+    const overLayers = [
+        {
+            active: true,
+            name: "Billboards",
+            icon: '<img src="images/marker.png" style="height:15px;"></img>',
+            layer: billboards
         },
         {
-            name: "Nairobi Sub Counties",
-            layer: nairobiSubCounties
-        }, {
-            name: 'Mathare Area',
-            layer: mathareArea
-        }, {
-            name: 'Kibera Village',
-            layer: kiberaArea
-        }
-        ]
-    },
-    {
-        group: 'Points of Interest',
-        collapsed: true,
-        layers: [
-            {
-                name: "ATM",
-                icon: '<img src="images/atm.png" style="height:18px;"></img>',
-                layer: atmMarkers
+            group: 'Maps',
+            collapsed: true,
+            layers: [{
+                name: "Uber Travel Time From CBD",
+                layer: uber
             },
             {
-                name: "Bank",
-                icon: '<img src="images/bank.png" style="height:18px;"></img>',
-                layer: bankMarkers
-            },
-            {
-                name: "Hospital",
-                icon: '<img src="images/hospital.png" style="height:18px;"></img>',
-                layer: hospitalMarkers
-            },
-            {
-                name: "Police Post",
-                icon: '<img src="images/police.png" style="height:18px;"></img>',
-                layer: policeMarkers
-            },
-            {
-                name: "Schools",
-                icon: '<img src="images/school.png" style="height:18px;"></img>',
-                layer: schoolMarkers
-            },
-            {
-                name: "Universities",
-                icon: '<img src="images/university.png" style="height:18px;"></img>',
-                layer: uniMarkers
+                name: "Nairobi Sub Counties",
+                layer: nairobiSubCounties
+            }, {
+                name: 'Mathare Area',
+                layer: mathareArea
+            }, {
+                name: 'Kibera Village',
+                layer: kiberaArea
             }
-        ]
-    }];
-    var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers)
+            ]
+        },
+        {
+            group: 'Points of Interest',
+            collapsed: true,
+            layers: [
+                {
+                    name: "ATM",
+                    icon: '<img src="images/atm.png" style="height:18px;"></img>',
+                    layer: atmMarkers
+                },
+                {
+                    name: "Bank",
+                    icon: '<img src="images/bank.png" style="height:18px;"></img>',
+                    layer: bankMarkers
+                },
+                {
+                    name: "Hospital",
+                    icon: '<img src="images/hospital.png" style="height:18px;"></img>',
+                    layer: hospitalMarkers
+                },
+                {
+                    name: "Police Post",
+                    icon: '<img src="images/police.png" style="height:18px;"></img>',
+                    layer: policeMarkers
+                },
+                {
+                    name: "Schools",
+                    icon: '<img src="images/school.png" style="height:18px;"></img>',
+                    layer: schoolMarkers
+                },
+                {
+                    name: "Universities",
+                    icon: '<img src="images/university.png" style="height:18px;"></img>',
+                    layer: uniMarkers
+                }
+            ]
+        }];
+    var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
+        title: 'LEGEND ',
+        className: 'legend',
+        compact: true,
+    })
     my_map.addControl(panelLayers);
-
 }
+
 // Your web app's Firebase configuration
 var firebaseConfig = {
     apiKey: "AIzaSyANAkViYvvzsHNzdqeIgdZD2pnspcfjikM",

@@ -4,10 +4,13 @@ html,
 body {
     padding: 0;
     margin: 0;
-    height: 100vh;
-    width: 100vw;
-    background-color: #EEEEEE;
+}
 
+body {
+    height: 100vh;
+    width: 98vw;
+    background-color: #EEEEEE;
+    box-sizing: border-box;
 }
 
 #loginContainer {
@@ -59,7 +62,7 @@ body {
     background: #3949AB;
     outline: none;
     border: 1px #27ae60;
-    padding: 5px 15px;
+    padding: 10px 15px;
     color: white;
 }
 
@@ -77,18 +80,63 @@ body {
 
 /*                 MAP             */
 #billboardDetails {
-    width: auto;
+    width: 98%;
     height: 90%;
 }
 
-#map {
+.description {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
     width: 90%;
-    height: 70%;
+    margin: 0 auto;
+}
+
+.description h5 {
+    font-size: 16px;
+}
+
+.description h4,
+h5,
+p {
+    margin: 0;
+    padding: 5px;
+}
+
+.description__modules {
+    display: flex;
+    justify-items: center;
+    margin: 20px auto;
+    flex-wrap: wrap;
+}
+
+.module {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    max-height: initial;
+    align-items: center;
+    margin: 5px auto;
+    background-color: whitesmoke;
+    justify-content: left;
+    padding: 0 15px 10px 15px;
+    transition: ease-in-out .2s;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+
+}
+.module:hover{
+    transform: scale(1.09);
+}
+#map {
+    width: 95%;
+    height: 80%;
     margin: 10px auto;
 }
 
 h3 {
     text-align: center;
+}
+h4{
+    font-size: 17px;
 }
 
 .poi {
@@ -97,7 +145,7 @@ h3 {
 }
 
 .header {
-    width: 90%;
+    width: 80%;
     margin: auto;
     display: flex;
     flex-wrap: nowrap;
@@ -118,7 +166,7 @@ h3 {
 }
 
 #uploadForm {
-    margin: 10px auto;
+    margin: 0 auto;
     width: fit-content;
     padding: 8px;
     background-color: gold;
@@ -143,34 +191,25 @@ h3 {
     height: 150px;
     display: block;
     margin: auto;
-
-}
-
-.leaflet-right {
-    background-color: #FFCA28;
 }
 
 .leaflet-panel-layers-list {
     height: fit-content;
 }
-
-.description {
-    font-family: 'Open Sans', sans-serif;
-    text-align: center;
-    width: 90%;
+.legend{
+    background-color: #FFCA28;
 }
 
-.description h5 {
-    text-align: start;
+/* custom info control */
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
 }
-
-.description h5 {
-    font-size: 16px;
-}
-
-.description h4,
-h5,
-p {
-    margin: 0;
-    padding: 5px;
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
 }
