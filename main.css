@@ -89,6 +89,9 @@ body {
     text-align: center;
     width: 90%;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .description h5 {
@@ -104,28 +107,31 @@ p {
 
 .description__modules {
     display: flex;
-    justify-items: center;
-    margin: 20px auto;
     flex-wrap: wrap;
+    align-items: initial;
+    justify-content: center;
+
 }
 
 .module {
     display: flex;
     flex-direction: column;
-    width: 30%;
-    max-height: initial;
+    max-width: 300px;
+    max-height: 200px;
     align-items: center;
-    margin: 5px auto;
+    margin: 15px;
     background-color: whitesmoke;
     justify-content: left;
     padding: 0 15px 10px 15px;
     transition: ease-in-out .2s;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 
 }
-.module:hover{
+
+.module:hover {
     transform: scale(1.09);
 }
+
 #map {
     width: 95%;
     height: 80%;
@@ -134,9 +140,6 @@ p {
 
 h3 {
     text-align: center;
-}
-h4{
-    font-size: 17px;
 }
 
 .poi {
@@ -156,7 +159,7 @@ h4{
 
 .header h2 {
     margin: auto;
-    font-size: x-large;
+    font-size: xx-large;
     text-transform: uppercase;
     text-decoration: underline;
 }
@@ -167,17 +170,16 @@ h4{
 
 #uploadForm {
     margin: 0 auto;
-    width: fit-content;
+    width: max-content;
     padding: 8px;
-    background-color: gold;
+    background-color: #FFF59D;
 }
 
 .uploadForm__alert {
-    padding: 10px;
     font-size: medium;
     background-color: greenyellow;
-    margin: 5px auto 0;
-    width: fit-content;
+    margin: 0 auto;
+    width: max-content;
 }
 
 .leaflet-popup-content-wrapper {
@@ -196,7 +198,8 @@ h4{
 .leaflet-panel-layers-list {
     height: fit-content;
 }
-.legend{
+
+.legend {
     background-color: #FFCA28;
 }
 
@@ -204,12 +207,32 @@ h4{
 .info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
+    background: rgb(191, 245, 178);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
-.info h4 {
+
+.info h4,
+.sCountyinfo h4 {
     margin: 0 0 5px;
-    color: #777;
+    color: rgb(0, 0, 0);
 }
+
+.sCountyinfo {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: rgb(99, 236, 156);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+table {
+    border-collapse: collapse;
+    margin: 0;
+}
+td{
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 0 5px;
+}
+tr:nth-child(even) {
+    background-color: #dddddd;
+  }

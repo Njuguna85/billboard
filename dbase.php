@@ -82,7 +82,7 @@ class billboard
         //
         // prepare the statement
         $this->statement = $this->db->prepare($sql);
-        
+
         //
         // bind parameters
         $this->statement->bindParam(':billboardi', $this->billboardi);
@@ -126,7 +126,8 @@ class billboard
         // fetch result
         return $statement->fetchAll(PDO::FETCH_CLASS);
     }
-    private function convertDate($date){
+    private function convertDate($date)
+    {
         return date("Y-m-d", strtotime(str_replace('/', '-', $date)));
     }
     public function createBillboard($billboard)
@@ -221,12 +222,10 @@ class subcounties
     {
         // sql
         $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE) As geojson, adm2_en as SubCounty, male, 
-                female, intersex, numberofho, average_ho,  population,
-                populati_1 As totalPop
-            FROM 
-                nairobisucounties 
+                SELECT 
+                    ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, totaldisab, totalpopul, malepopula, femalepopu
+                FROM 
+                    nairobisubcounties
             ";
         // query the sql
         $statement =  $this->db->query($sql);

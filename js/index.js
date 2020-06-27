@@ -96,11 +96,11 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>' +
-                'Route: <b>' + feature.properties.routename + '</b> <br/>' +
-                'Size: <b>' + feature.properties.size + '</b> <br/>' +
-                'Visibility: <b>' + feature.properties.visibility + '</b> <br/>' +
-                'Medium: <b>' + feature.properties.selectmedi + '</b> </br>' +
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>' +
+                'Route: <b>' + parseData(feature.properties.routename) + '</b> <br/>' +
+                'Size: <b>' + parseData(feature.properties.size) + '</b> <br/>' +
+                'Visibility: <b>' + parseData(feature.properties.visibility) + '</b> <br/>' +
+                'Medium: <b>' + parseData(feature.properties.selectmedi) + '</b> </br>' +
                 '<img class="billboardImage" alt="billboard photo" src=' + feature.properties.photo + '></img>'
             )
         }
@@ -136,7 +136,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Operator: <b>' + feature.properties.operator + '</b><br/>'
+                'Operator: <b>' + parseData(feature.properties.operator)+ '</b><br/>'
             )
         }
     });
@@ -173,7 +173,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
             )
         }
     });
@@ -210,7 +210,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
             )
         }
     });
@@ -249,7 +249,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
             )
         }
     });
@@ -287,8 +287,8 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>' +
-                'Accessibility: ' + feature.properties.accessibility + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>' +
+                'Accessibility: ' + parseData(feature.properties.accessibility) + '</b><br/>'
             )
         }
     });
@@ -326,7 +326,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + feature.properties.name + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
             )
         }
     });
@@ -336,16 +336,6 @@ function createMap(data) {
     /*           UBER MEAN DISTANCE DATA                      */
     const uMD = data.uber;
     uDMJSON = [];
-    function getColor(d) {
-        return d > 3318 ? '#800026' :
-            d > 2878 ? '#BD0026' :
-                d > 2437 ? '#E31A1C' :
-                    d > 1997 ? '#FC4E2A' :
-                        d > 1556 ? '#FD8D3C' :
-                            d > 1116 ? '#FEB24C' :
-                                d > 675 ? '#FED976' :
-                                    '#FFEDA0';
-    }
     uMD.forEach(uber => {
         let features = {
             type: 'Feature',
@@ -363,6 +353,16 @@ function createMap(data) {
         uDMJSON.push(features);
     });
 
+    function getColor(d) {
+        return d > 3318 ? '#800026' :
+            d > 2878 ? '#BD0026' :
+                d > 2437 ? '#E31A1C' :
+                    d > 1997 ? '#FC4E2A' :
+                        d > 1556 ? '#FD8D3C' :
+                            d > 1116 ? '#FEB24C' :
+                                d > 675 ? '#FED976' :
+                                    '#FFEDA0';
+    }
     function style(feature) {
         return {
             fillColor: getColor(feature.properties.travelTime),
@@ -373,7 +373,6 @@ function createMap(data) {
             fillOpacity: 0.7
         };
     }
-
     function highLightUber(e) {
         var layer = e.target;
 
@@ -381,7 +380,7 @@ function createMap(data) {
             weight: 5,
             color: '#666',
             dashArray: '',
-            fillOpacity: 0.7
+            fillOpacity: 0
         });
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
@@ -389,16 +388,13 @@ function createMap(data) {
         info.update(layer.feature.properties);
 
     }
-
     function resetHighlightUber(e) {
         uber.resetStyle(e.target);
-        info.update(layer.feature.properties);
+        info.update();
     }
-
     function zoomToFeatureUber(e) {
         my_map.flyToBounds(e.target.getBounds());
     }
-
     function onEachFeature(feature, layer) {
         layer.on({
             mouseover: highLightUber,
@@ -406,11 +402,11 @@ function createMap(data) {
             click: zoomToFeatureUber
         });
     }
-
-    const uber = L.geoJson(uDMJSON, {
+    var uber = L.geoJson(uDMJSON, {
         style: style,
         onEachFeature: onEachFeature
     });
+
     /*          custom information control              */
     var info = L.control({ position: 'topleft' });
     info.onAdd = function (my_map) {
@@ -424,38 +420,90 @@ function createMap(data) {
             '<h4>Uber Travel Data</h4>' +
             (props ?
                 'Area Name: ' + '<b>' + props.areaName + '</b><br/>' +
-                'Travel Time: ' + '<b>' + props.travelTime + '</b><br/>'
-                : 'Hover Over a region');
+                'Travel Time: ' + '<b>' + parseValues(props.travelTime) + '</b><br/>'
+                : 'Enable the uber layer <br/>and Hover Over a region');
     };
-
     info.addTo(my_map);
-    // update the control on hover 
 
     /*           SUBCOUNTIES  DATA                      */
     const subCountyStyle = {
-        "fillColor": "#FEB24C",
+        "fillColor": "#B3E5FC",
         "weight": 2,
     };
     const subCounties = data.subCounties;
-
     subCountyJSON = [];
     subCounties.forEach(subCounty => {
         let features = {
             type: 'Feature',
             properties: {
-                'Name': subCounty.SubCounty,
-                'Male': subCounty.male,
-                'Female': subCounty.female,
-                'TotalPopulation': subCounty.totalPop
+                'name': subCounty.subcontnam,
+                'maleTotalPoulation': subCounty.malepopula,
+                'femaleTotalPoulation': subCounty.femalepopu,
+                'totalPopulation': subCounty.totalpopul,
+                'totalAbove5Years': subCounty.total5abov,
+                'totaldisabled': subCounty.totaldisab
             },
             geometry: JSON.parse(subCounty.geojson),
         }
         subCountyJSON.push(features);
     });
+    function highLightsubCounty(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#BA68C8',
+            // fillOpacity: 0
+            fillColor: '#42A5F5'
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+        sCountyinfo.update(layer.feature.properties);
+
+    }
+    function resetHighlightsubCounty(e) {
+        nairobiSubCounties.resetStyle(e.target);
+        sCountyinfo.update();
+    }
+
+    function zoomToSubCounty(e) {
+        my_map.flyToBounds(e.target.getBounds());
+    }
+    function onEachSubCounty(feature, layer) {
+        layer.on({
+            mouseover: highLightsubCounty,
+            mouseout: resetHighlightsubCounty,
+            click: zoomToSubCounty
+        });
+    }
     const nairobiSubCounties = L.geoJson(subCountyJSON, {
         style: subCountyStyle,
-        onEachFeature: onEachFeature
+        onEachFeature: onEachSubCounty
     });
+    // custom information
+    var sCountyinfo = L.control({ position: 'topleft' });
+    sCountyinfo.onAdd = function (my_map) {
+        this._div = L.DomUtil.create('div', 'sCountyinfo') // create a div with the class of sCountyinfo
+        this.update();
+        return this._div;
+    };
+    // update the sCountyinfo control based on feature properties
+    sCountyinfo.update = function (props) {
+        this._div.innerHTML =
+            '<h4>2019 Census Data</h4>' +
+            (props ?
+                '<table>' +
+                '<tr><td>Area Name: </td>' + '<b></td><td>' + props.name + '</td></b></tr>' +
+                '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(props.totalPopulation) + '</td></b></tr>' +
+                '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(props.maleTotalPoulation) + '</td><br/>' +
+                '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(props.femaleTotalPoulation) + '</td></b></tr>' +
+                '<tr><td>Total Population Above 5 Years: ' + '<b></td><td>' + parseValues(props.totalAbove5Years) + '</td></b></tr>' +
+                '<tr><td>Total Population Living with Disability: ' + '<b></td><td>' + parseValues(props.totaldisabled) + '</td></b></tr>' +
+                '</table>'
+                : 'Enable the sub counties layer <br/>and Hover Over a County');
+    };
+    sCountyinfo.addTo(my_map);
 
     /* Mathare */
     const mathareStyle = {
@@ -480,8 +528,7 @@ function createMap(data) {
         mathareJSON.push(features);
     });
     const mathareArea = L.geoJson(mathareJSON, {
-        style: mathareStyle,
-        onEachFeature: onEachFeature
+        style: mathareStyle
     });
 
     /* kibera area */
@@ -507,11 +554,8 @@ function createMap(data) {
         kiberaJSON.push(features);
     });
     const kiberaArea = L.geoJson(kiberaJSON, {
-        style: kiberaStyle,
-        onEachFeature: onEachFeature
+        style: kiberaStyle
     });
-
-
     /* add layers */
     const baseLayers = [{
         active: true,
@@ -590,7 +634,18 @@ function createMap(data) {
     })
     my_map.addControl(panelLayers);
 }
-
+function parseValues(val) {
+    if (val == null || val == undefined) {
+        return ''
+    }
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function parseData(val) {
+    if (val == null || val == undefined) {
+        return ''
+    }
+    return val;
+}
 // Your web app's Firebase configuration
 var firebaseConfig = {
     apiKey: "AIzaSyANAkViYvvzsHNzdqeIgdZD2pnspcfjikM",
