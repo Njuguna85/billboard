@@ -4,7 +4,7 @@ class database
 {
 
     private $host = "localhost";
-    private $db = "billboard";
+    private $db = "test";
     private $username = "dennis";
     private $password = "1234567890";
     private static $instance = null;
@@ -381,7 +381,7 @@ class schools
         // sql
         $sql = "
         SELECT 
-            ST_AsGeoJSON(SHAPE) As geojson, name, accessibil
+            ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
             schools
         ";

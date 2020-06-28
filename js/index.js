@@ -12,8 +12,6 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
-        console.log(data);
-
         createMap(data);
 
     } else {
@@ -257,14 +255,14 @@ function createMap(data) {
     policeMarkers.addLayer(polices);
 
     /*          School             */
+    /*
     const schoolData = data.schools;
     const schoolJSON = [];
     schoolData.forEach(school => {
         let features = {
             type: 'Feature',
             properties: {
-                'name': school.name,
-                'accessibility': school.accessibil
+                'name': school.name
             },
             geometry: JSON.parse(school.geojson),
         };
@@ -287,15 +285,17 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>' +
-                'Accessibility: ' + parseData(feature.properties.accessibility) + '</b><br/>'
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
             )
         }
     });
     const schoolMarkers = new L.MarkerClusterGroup();
     schoolMarkers.addLayer(schools);
+*/
+
 
     /*          UNIVERSITIES             */
+    /*
     const uniData = data.universities;
     const uniJSON = [];
     uniData.forEach(uni => {
@@ -332,7 +332,7 @@ function createMap(data) {
     });
     const uniMarkers = new L.MarkerClusterGroup();
     uniMarkers.addLayer(unis);
-
+*/
     /*           UBER MEAN DISTANCE DATA                      */
     const uMD = data.uber;
     uDMJSON = [];
@@ -615,7 +615,7 @@ function createMap(data) {
                     icon: '<img src="images/police.png" style="height:18px;"></img>',
                     layer: policeMarkers
                 },
-                {
+                /*{
                     name: "Schools",
                     icon: '<img src="images/school.png" style="height:18px;"></img>',
                     layer: schoolMarkers
@@ -624,7 +624,7 @@ function createMap(data) {
                     name: "Universities",
                     icon: '<img src="images/university.png" style="height:18px;"></img>',
                     layer: uniMarkers
-                }
+                }*/
             ]
         }];
     var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {

@@ -53,14 +53,32 @@ class getData
         $data->kibera = $kibera;
         $data->mathare = $mathare;
         $data->police = $police;
-        $data->schools = $school;
-        $data->universities = $university;
+        //$data->schools = $school;
+        //$data->universities = $university;
         // $data->poi = $poi;
-        $data1 = $data;
-        echo(json_encode($data));
+        
+        $final = json_encode($data);
+        $this->write_json_to_file($final);
+        echo $final;
+    }
+    
+    
+    //save to a file
+    private function write_json_to_file($data){
+        //append a timestamp on the file to distinguish them
+        $date = new DateTime();
+        $str = $date->format("H_m_s");
+        
+        //create the file and set it to writable
+        $json_file = fopen(__DIR__."/debug/debug_json_".$str.".json", "w"); 
+        
+        //write to file
+        fwrite($json_file, $data);
+        
+        //close the file
+        fclose($json_file);
     }
 }
-
 new getData();
 
 ?>
