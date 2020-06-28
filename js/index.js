@@ -4,16 +4,15 @@ async function fetchData() {
     //
     // await response for the fetch call
     // since there are no options passed, it will be a GET request
-    let response = await fetch('./download.php');
+    let response = await fetch('./php/download.php');
     //
     // check if the promises was resolved
     if (response.ok) {
         // 
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
-        console.log(response);
-        
         data = await response.json();
+        // console.log(data);
 
         createMap(data);
 

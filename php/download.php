@@ -56,7 +56,8 @@ class getData
         $data->schools = $school;
         $data->universities = $university;
         // $data->poi = $poi;
-        echo (json_encode($data));
+        
+        echo(json_encode($data));
     }
 }
 return new getData();

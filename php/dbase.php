@@ -116,7 +116,8 @@ class billboard
     public function getBillboardLocations()
     {
         // sql
-        $sql = "SELECT 
+        $sql = "
+            SELECT 
                 billboardi, routename, selectmedi, site_light, zone_, size_,'condition', orientatio, visibility, traffic, photo, road_type, lat As latitude, long_ As longitude
             FROM 
                 billboard_locations
