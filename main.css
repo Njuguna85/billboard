@@ -236,3 +236,10 @@ td{
 tr:nth-child(even) {
     background-color: #dddddd;
   }
+.footer{
+    display: flex;
+    justify-content: space-around;
+    background-color:#dddddd;
+    height: 20px;
+    font-size: 14px;
+}

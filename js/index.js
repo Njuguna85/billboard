@@ -12,7 +12,7 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
-        // console.log(data);
+        console.log(data);
 
         createMap(data);
 
