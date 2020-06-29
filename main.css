@@ -8,7 +8,7 @@ body {
 
 body {
     height: 100vh;
-    width: 98vw;
+    width: 100vw;
     background-color: #EEEEEE;
     box-sizing: border-box;
 }
@@ -59,6 +59,7 @@ body {
 }
 
 .btn {
+    display: block;
     background: #3949AB;
     outline: none;
     border: 1px #27ae60;
@@ -77,11 +78,10 @@ body {
     color: white;
 }
 
-
 /*                 MAP             */
 #billboardDetails {
-    width: 98%;
-    height: 90%;
+    width: 100%;
+    height: 99%;
 }
 
 .description {
@@ -94,12 +94,11 @@ body {
     flex-wrap: wrap;
 }
 
-.description h5 {
+.description__open {
     font-size: 16px;
 }
 
-.description h4,
-h5,
+.description h5,
 p {
     margin: 0;
     padding: 5px;
@@ -110,7 +109,6 @@ p {
     flex-wrap: wrap;
     align-items: initial;
     justify-content: center;
-
 }
 
 .module {
@@ -125,7 +123,6 @@ p {
     padding: 0 15px 10px 15px;
     transition: ease-in-out .2s;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-
 }
 
 .module:hover {
@@ -148,9 +145,10 @@ h3 {
 }
 
 .header {
-    width: 80%;
+    width: 100%;
     margin: auto;
     display: flex;
+    flex-direction: row-reverse;
     flex-wrap: nowrap;
     justify-content: space-evenly;
     align-items: center;
@@ -169,10 +167,18 @@ h3 {
 }
 
 #uploadForm {
-    margin: 0 auto;
-    width: max-content;
+    width: 100%;
+    height: 50px;
     padding: 8px;
-    background-color: #FFF59D;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-left: 50px;
+}
+
+#uploadForm label{
+    margin: 10px;
 }
 
 .uploadForm__alert {
@@ -228,18 +234,136 @@ table {
     border-collapse: collapse;
     margin: 0;
 }
-td{
+
+td {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 0 5px;
 }
+
 tr:nth-child(even) {
     background-color: #dddddd;
-  }
-.footer{
+}
+
+.footer {
     display: flex;
     justify-content: space-around;
-    background-color:#dddddd;
-    height: 20px;
+    background-color: #dddddd;
+    height: 30px;
     font-size: 14px;
+}
+
+/* 
+  ##Device = Desktops
+  ##Screen = 1281px to higher resolution desktops
+*/
+@media (min-width: 1281px) {
+    h2 {
+        font-size: xx-large;
+    }
+}
+
+/* 
+    ##Device = Laptops, Desktops
+    ##Screen = B/w 1025px to 1280px
+  */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    h2 {
+        font-size: x-large;
+    }
+}
+
+/* 
+    ##Device = Tablets, Ipads (portrait)
+    ##Screen = B/w 768px to 1024px
+  */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .header h2 {
+        font-size: 16px;
+    }
+}
+
+/* 
+    ##Device = Tablets, Ipads (landscape)
+    ##Screen = B/w 768px to 1024px
+  */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {}
+
+/* 
+    ##Device = Low Resolution Tablets, Mobiles (Landscape)
+    ##Screen = B/w 481px to 767px
+  */
+
+@media (min-width: 481px) and (max-width: 767px) {}
+
+/* 
+    ##Device = Most of the Smartphones Mobiles (Portrait)
+    ##Screen = B/w 320px to 479px
+  */
+
+@media (min-width: 320px) and (max-width: 480px) {
+    .header {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+    }
+
+    .header h2 {
+        font-size: 15px;
+    }
+
+    .header .btn {
+        margin: 5px 0;
+        padding: 2px;
+        align-self: flex-end;
+    }
+
+    .description {
+        font-size: 12px;
+    }
+
+    .description__open {
+        font-size: 13px;
+    }
+    .description__modules{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+        direction: unset;
+    }
+    .module {
+        display: flex;
+        flex-direction: column;
+        min-width: 70%;
+        min-height: 200px;
+        align-items: center;
+        margin: 10px;
+        background-color: whitesmoke;
+        padding: 0;
+        transition: ease-in-out .2s;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    
+    }
+    #uploadForm{
+        font-size: 10px;
+    }
+    #uploadForm input[type=file]{
+        display: none;
+        padding: 5px;
+    }
+    #uploadForm input[type=button]{
+        display: block;
+        padding: 3px;
+        border-radius: 0;
+        margin: 5px auto;
+    }
+    .uploadForm__alert {
+        font-size: medium;
+        background-color: greenyellow;
+        margin: 0 auto;
+        width: max-content;
+        padding: 0;
+        font-size: 12px;
+    }
 }

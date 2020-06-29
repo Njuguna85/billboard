@@ -19,7 +19,7 @@ async function fetchData() {
     }
 };
 var my_map;
-
+fetchData();
 function createMap(data) {
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw'
 
@@ -48,7 +48,6 @@ function createMap(data) {
     });
 
     setTimeout(function () { my_map.invalidateSize() }, 100);
-
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
@@ -134,7 +133,7 @@ function createMap(data) {
         },
         onEachFeature: (feature, layer) => {
             layer.bindPopup(
-                'Operator: <b>' + parseData(feature.properties.operator)+ '</b><br/>'
+                'Operator: <b>' + parseData(feature.properties.operator) + '</b><br/>'
             )
         }
     });
@@ -632,8 +631,14 @@ function createMap(data) {
         className: 'legend',
         compact: true,
     })
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    if (vw < 768) {
+        console.log(panelLayers);
+    }
     my_map.addControl(panelLayers);
 }
+
 function parseValues(val) {
     if (val == null || val == undefined) {
         return ''
@@ -658,8 +663,8 @@ var firebaseConfig = {
     measurementId: "G-NKLW873L8E"
 };
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+//firebase.initializeApp(firebaseConfig);
+//const auth = firebase.auth();
 const upload = document.querySelector('#upload');
 const signUpBtn = document.querySelector('#signUp');
 const signInBtn = document.querySelector('#signIn');
@@ -701,7 +706,7 @@ function signOut() {
     auth.signOut();
     alert('See You later');
 }
-
+/*
 auth.onAuthStateChanged(function (user) {
     if (user) {
         // User is signed in. 
@@ -714,7 +719,7 @@ auth.onAuthStateChanged(function (user) {
         document.querySelector('#billboardDetails').style.display = 'none';
     }
 });
-
+*/
 function readFile() {
     const fileUpload = document.getElementById('xlsFile');
     //Validate whether File is valid Excel file.

@@ -58,7 +58,7 @@ class getData
         // $data->poi = $poi;
         
         $final = json_encode($data);
-        $this->write_json_to_file($final);
+        //$this->write_json_to_file($final);
         echo $final;
     }
     
