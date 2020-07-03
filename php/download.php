@@ -53,8 +53,8 @@ class getData
         $data->kibera = $kibera;
         $data->mathare = $mathare;
         $data->police = $police;
-        //$data->schools = $school;
-        //$data->universities = $university;
+        $data->schools = $school;
+        $data->universities = $university;
         // $data->poi = $poi;
         
         $final = json_encode($data);

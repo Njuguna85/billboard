@@ -4,7 +4,7 @@ class database
 {
 
     private $host = "localhost";
-    private $db = "test";
+    private $db = "billboard";
     private $username = "dennis";
     private $password = "1234567890";
     private static $instance = null;
@@ -12,7 +12,7 @@ class database
     private function __construct()
     {
         // $dsn = "pgsql:host=$this->host; dbname=$this->db";
-        $dsn = "mysql:host=$this->host; dbname=$this->db";
+        $dsn = "mysql:host=$this->host;charset=utf8; dbname=$this->db";
         $options = [
             PDO::ATTR_PERSISTENT,
             PDO::ATTR_ERRMODE

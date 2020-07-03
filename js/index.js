@@ -1,17 +1,19 @@
 var state = {};
-
 async function fetchData() {
     //
     // await response for the fetch call
     // since there are no options passed, it will be a GET request
     let response = await fetch('./php/download.php');
+    let response2 = await fetch('http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020');
     //
     // check if the promises was resolved
-    if (response.ok) {
+    if (response.ok && response2.ok) {
         // 
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
+        deliveriesData =  await response2.json();
+        data.deliveries = deliveriesData.data;
         createMap(data);
 
     } else {
@@ -99,6 +101,52 @@ function createMap(data) {
                 'Visibility: <b>' + parseData(feature.properties.visibility) + '</b> <br/>' +
                 'Medium: <b>' + parseData(feature.properties.selectmedi) + '</b> </br>' +
                 '<img class="billboardImage" alt="billboard photo" src=' + feature.properties.photo + '></img>'
+            )
+        }
+    });
+
+    /*           DELIVERIES DATA                      */
+    const deliveriesData = data.deliveries;
+    const deliIcon = L.icon({
+        iconUrl: 'images/delivered.png',
+        iconSize: [20, 20],
+        popupAncor: [-3, -76],
+    });
+    const deliJSON = [];
+    deliveriesData.forEach(deli => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'product_name': deli.product_name,
+                'quantity': deli.quantity,
+                'product_description': deli.product_description,
+                'delivered_by': deli.user.first_name,
+                'photo': deli.photo,
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: [deli.longitude, deli.latitude]
+            }
+        };
+        deliJSON.push(features);
+    });
+    var delGeoJSON = {
+        type: 'FeatureCollection',
+        features: deliJSON
+    };
+    const deliveries = L.geoJson(delGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: deliIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
+                'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
+                'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
+                'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
+                '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
             )
         }
     });
@@ -254,7 +302,7 @@ function createMap(data) {
     policeMarkers.addLayer(polices);
 
     /*          School             */
-    /*
+
     const schoolData = data.schools;
     const schoolJSON = [];
     schoolData.forEach(school => {
@@ -290,11 +338,11 @@ function createMap(data) {
     });
     const schoolMarkers = new L.MarkerClusterGroup();
     schoolMarkers.addLayer(schools);
-*/
+
 
 
     /*          UNIVERSITIES             */
-    /*
+
     const uniData = data.universities;
     const uniJSON = [];
     uniData.forEach(uni => {
@@ -331,7 +379,7 @@ function createMap(data) {
     });
     const uniMarkers = new L.MarkerClusterGroup();
     uniMarkers.addLayer(unis);
-*/
+
     /*           UBER MEAN DISTANCE DATA                      */
     const uMD = data.uber;
     uDMJSON = [];
@@ -570,6 +618,11 @@ function createMap(data) {
             name: "Billboards",
             icon: '<img src="images/marker.png" style="height:15px;"></img>',
             layer: billboards
+        },{
+            active: true,
+            name: "Deliveries",
+            icon: '<img src="images/delivered.png" style="height:15px;"></img>',
+            layer: deliveries
         },
         {
             group: 'Maps',
@@ -614,7 +667,7 @@ function createMap(data) {
                     icon: '<img src="images/police.png" style="height:18px;"></img>',
                     layer: policeMarkers
                 },
-                /*{
+                {
                     name: "Schools",
                     icon: '<img src="images/school.png" style="height:18px;"></img>',
                     layer: schoolMarkers
@@ -623,7 +676,7 @@ function createMap(data) {
                     name: "Universities",
                     icon: '<img src="images/university.png" style="height:18px;"></img>',
                     layer: uniMarkers
-                }*/
+                }
             ]
         }];
     var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
@@ -766,7 +819,6 @@ function readFile() {
     }
 
 }
-
 async function saveSheet(data) {
     //
     //Create a form data object to hold the property data json and photos.
