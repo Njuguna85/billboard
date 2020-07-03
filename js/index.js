@@ -4,7 +4,13 @@ async function fetchData() {
     // await response for the fetch call
     // since there are no options passed, it will be a GET request
     let response = await fetch('./php/download.php');
-    let response2 = await fetch('http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020');
+    const url = 'http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020'
+    let response2 = await fetch(url, {
+        method: "GET",
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        }
+    });
     //
     // check if the promises was resolved
     if (response.ok && response2.ok) {
@@ -12,7 +18,7 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
-        deliveriesData =  await response2.json();
+        deliveriesData = await response2.json();
         data.deliveries = deliveriesData.data;
         createMap(data);
 
@@ -618,7 +624,7 @@ function createMap(data) {
             name: "Billboards",
             icon: '<img src="images/marker.png" style="height:15px;"></img>',
             layer: billboards
-        },{
+        }, {
             active: true,
             name: "Deliveries",
             icon: '<img src="images/delivered.png" style="height:15px;"></img>',
