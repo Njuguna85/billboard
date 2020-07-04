@@ -8,7 +8,9 @@ async function fetchData() {
     let response2 = await fetch(url, {
         method: "GET",
         headers: {
-            'Access-Control-Allow-Origin': '*'
+            'Access-Control-Allow-Methods': 'GET, POST',
+            'Access-Control-Allow-Origin': '*',
+            "Access-Control-Allow-Headers": "X-Requested-With"
         }
     });
     //
@@ -690,11 +692,7 @@ function createMap(data) {
         className: 'legend',
         compact: true,
     })
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    if (vw < 768) {
-        console.log(panelLayers);
-    }
+
     my_map.addControl(panelLayers);
 }
 
