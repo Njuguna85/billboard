@@ -30,8 +30,14 @@ async function fetchData() {
 };
 var my_map;
 fetchData();
+// reload the map after 3 minutes
+setInterval(() => {
+    fetchData();
+    my_map.remove()
+}, 180000);
+
 function createMap(data) {
-    const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw'
+    const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
 
     const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
     //
@@ -55,7 +61,7 @@ function createMap(data) {
         zoom: 12
     });
 
-    setTimeout(function () { my_map.invalidateSize() }, 100);
+    // setTimeout(function () { my_map.invalidateSize() }, 100);
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
