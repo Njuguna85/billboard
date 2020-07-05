@@ -20,6 +20,7 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
+
         deliveriesData = await response2.json();
         data.deliveries = deliveriesData.data;
         createMap(data);
@@ -351,8 +352,6 @@ function createMap(data) {
     const schoolMarkers = new L.MarkerClusterGroup();
     schoolMarkers.addLayer(schools);
 
-
-
     /*          UNIVERSITIES             */
 
     const uniData = data.universities;
@@ -560,9 +559,84 @@ function createMap(data) {
                 '<tr><td>Total Population Above 5 Years: ' + '<b></td><td>' + parseValues(props.totalAbove5Years) + '</td></b></tr>' +
                 '<tr><td>Total Population Living with Disability: ' + '<b></td><td>' + parseValues(props.totaldisabled) + '</td></b></tr>' +
                 '</table>'
-                : 'Enable the sub counties layer <br/>and Hover Over a County');
+                : 'Enable the sub counties layer <br/>and Hover Over a Region');
     };
     sCountyinfo.addTo(my_map);
+
+    /*           SUBCOUNTIES  DATA                      */
+
+    const subLocations = data.subLocations;
+    sublocationJSON = [];
+    subLocations.forEach(sublocation => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': sublocation.slname,
+                'maleTotalPoulation': sublocation.male_19,
+                'femaleTotalPoulation': sublocation.female_19,
+                'totalPopulation': sublocation.pop_19,
+                'totalHouseHold': sublocation.total_hh
+            },
+            geometry: JSON.parse(sublocation.geojson),
+        }
+        sublocationJSON.push(features);
+    });
+    function highLightsubLocation(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#BA68C8',
+            fillColor: '#42A5F5'
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+        sLocationInfo.update(layer.feature.properties);
+
+    }
+    function resetHighlightsubLocation(e) {
+        nairobiSubLocations.resetStyle(e.target);
+        sLocationInfo.update();
+    }
+
+    function zoomToSubLocation(e) {
+        my_map.flyToBounds(e.target.getBounds());
+    }
+    function onEachSubLocation(feature, layer) {
+        layer.on({
+            mouseover: highLightsubLocation,
+            mouseout: resetHighlightsubLocation,
+            click: zoomToSubLocation
+        });
+    }
+    const nairobiSubLocations = L.geoJson(sublocationJSON, {
+        style: subCountyStyle,
+        onEachFeature: onEachSubLocation
+    });
+    // custom information
+    var sLocationInfo = L.control({ position: 'topleft' });
+    sLocationInfo.onAdd = function (my_map) {
+        this._div = L.DomUtil.create('div', 'sLocationInfo') // create a div with the class of sLocationInfo
+        this.update();
+        return this._div;
+    };
+    // update the sLocationInfo control based on feature properties
+    sLocationInfo.update = function (props) {
+        this._div.innerHTML =
+            '<h4>Sublocations Data</h4>' +
+            (props ?
+                '<table>' +
+                '<tr><td>Area Name: </td>' + '<b></td><td>' + props.name + '</td></b></tr>' +
+                '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(props.totalPopulation) + '</td></b></tr>' +
+                '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(props.maleTotalPoulation) + '</td><br/>' +
+                '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(props.femaleTotalPoulation) + '</td></b></tr>' +
+                '<tr><td>Total HouseHolds: ' + '<b></td><td>' + parseValues(props.totalHouseHold) + '</td></b></tr>' +
+                '</table>'
+                : 'Enable the sub locations layer <br/>and Hover Over a Region');
+    };
+    sLocationInfo.addTo(my_map);
+
 
     /* Mathare */
     const mathareStyle = {
@@ -646,7 +720,12 @@ function createMap(data) {
             {
                 name: "Nairobi Sub Counties",
                 layer: nairobiSubCounties
-            }, {
+            },
+            {
+                name: "Nairobi Sub Locations",
+                layer: nairobiSubLocations
+            },
+            {
                 name: 'Mathare Area',
                 layer: mathareArea
             }, {

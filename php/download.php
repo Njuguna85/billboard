@@ -40,13 +40,13 @@ class getData
         $uni = new universities();
         $university = $uni->getUniversity();
         
-        // $po = new POI();
-        // $poi = $po->getPOI();
-
+        $subl = new sublocations();
+        $sublocations = $subl->getsubLocations();
 
         $data->billboards = $billboardData;
         $data->uber = $uber;
         $data->subCounties = $subcounties;
+        $data->subLocations = $sublocations;
         $data->atms = $atms;
         $data->banks= $banks;
         $data->hospitals = $hospitals;
@@ -55,8 +55,7 @@ class getData
         $data->police = $police;
         $data->schools = $school;
         $data->universities = $university;
-        // $data->poi = $poi;
-        
+
         $final = json_encode($data);
         //$this->write_json_to_file($final);
         echo $final;

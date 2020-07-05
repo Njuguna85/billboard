@@ -224,7 +224,13 @@ class subcounties
         // sql
         $sql = "
                 SELECT 
-                    ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, totaldisab, totalpopul, malepopula, femalepopu
+                    ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, male5above,
+                    fema5above, totaldisab, maledisabl, femaledisa, totalable, maleable, 
+                    femaleable, totalnotst, malenotsta, femalenots, percentdis, totalvisua, 
+                    malevisual, femalevisu, totalheari, malehearin, femalehear, totalmobil,
+                    malemobili, femalemobi, totalcogni, malecognit, femalecogn, totalselfc,
+                    maleselfca, femaleself, totalcommu, malecommun, femalecomm, totalpopul,
+                    malepopula, femalepopu, totalalbin, malealbini, femalealbi
                 FROM 
                     nairobisubcounties
             ";
@@ -234,6 +240,30 @@ class subcounties
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
+class sublocations
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getsubLocations()
+    {
+        // sql
+        $sql = "
+                SELECT 
+                    ST_AsGeoJSON(SHAPE) As geojson, slname, aligned_su, subloc_20, count_, pop_09, male_09, female_09, pop_19, male_19, female_19, makeshift_, pop_makesh, total_hh, hh_convern, hh_group_q, densityper, percnt_50Plus, percnt_65Plus, percnt_pop, improved_w, unimproved, likely_pri, open_waste, percent_mo, mean_habit, median_hab, informal_s, selfemploy, percent_in, ratio_avg_ 
+                FROM 
+                    nairobisublocations
+            ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
 
 class atm
 {

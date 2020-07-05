@@ -218,12 +218,13 @@ h3 {
 }
 
 .info h4,
-.sCountyinfo h4 {
+.sCountyinfo h4 
+.sLocationInfo h4{
     margin: 0 0 5px;
     color: rgb(0, 0, 0);
 }
 
-.sCountyinfo {
+.sCountyinfo, .sLocationInfo {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: rgb(99, 236, 156);
