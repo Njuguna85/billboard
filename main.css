@@ -130,11 +130,23 @@ p {
 }
 
 #map {
-    width: 95%;
-    height: 80%;
-    margin: 10px auto;
+    width: 98%;
+    height: 95%;
+    margin: 10px auto 0;
     /* transition: .2s ease-in-out; */
 }
+
+.leaflet-geosearch-bar {
+    position: relative;
+    display: block;
+    height: auto;
+    width: 400px;
+    max-width: calc(100% - 120px);
+    margin: 10px auto 0;
+    cursor: auto;
+    z-index: 1000;
+}
+
 
 h3 {
     text-align: center;
@@ -178,7 +190,7 @@ h3 {
     padding-left: 50px;
 }
 
-#uploadForm label{
+#uploadForm label {
     margin: 10px;
 }
 
@@ -190,14 +202,14 @@ h3 {
 }
 
 .leaflet-popup-content-wrapper {
-    width: 300px;
+    width: 200px;
     background-color: #FFF9C4;
     color: rgb(8, 10, 10);
     text-align: center;
 }
 
 .billboardImage {
-    height: 150px;
+    height: 100px;
     display: block;
     margin: auto;
 }
@@ -219,13 +231,13 @@ h3 {
 }
 
 .info h4,
-.sCountyinfo h4 
-.sLocationInfo h4{
+.sCountyinfo h4 .sLocationInfo h4 {
     margin: 0 0 5px;
     color: rgb(0, 0, 0);
 }
 
-.sCountyinfo, .sLocationInfo {
+.sCountyinfo,
+.sLocationInfo {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: rgb(99, 236, 156);
@@ -327,13 +339,15 @@ tr:nth-child(even) {
     .description__open {
         font-size: 13px;
     }
-    .description__modules{
+
+    .description__modules {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         overflow-x: scroll;
         direction: unset;
     }
+
     .module {
         display: flex;
         flex-direction: column;
@@ -345,21 +359,25 @@ tr:nth-child(even) {
         padding: 0;
         transition: ease-in-out .2s;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    
+
     }
-    #uploadForm{
+
+    #uploadForm {
         font-size: 10px;
     }
-    #uploadForm input[type=file]{
+
+    #uploadForm input[type=file] {
         display: none;
         padding: 5px;
     }
-    #uploadForm input[type=button]{
+
+    #uploadForm input[type=button] {
         display: block;
         padding: 3px;
         border-radius: 0;
         margin: 5px auto;
     }
+
     .uploadForm__alert {
         font-size: medium;
         background-color: greenyellow;

@@ -4,7 +4,7 @@ async function fetchData() {
     // await response for the fetch call
     // since there are no options passed, it will be a GET request
     let response = await fetch('./php/download.php');
-    const url = 'https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020'
+    const url = 'https://bi.predictiveanalytics.co.ke/api/all-deliveries'
     let response2 = await fetch(url, {
         method: "GET",
         headers: {
@@ -20,7 +20,6 @@ async function fetchData() {
         // if it was resolved, its ok is set to true which we check 
         // access the promise body
         data = await response.json();
-
         deliveriesData = await response2.json();
         data.deliveries = deliveriesData.data;
         createMap(data);
@@ -32,11 +31,12 @@ async function fetchData() {
 var my_map;
 fetchData();
 // reload the map after 1 min
+/*
 setInterval(() => {
     fetchData();
     my_map.remove()
 }, 60000);
-
+*/
 function createMap(data) {
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
 
@@ -59,10 +59,22 @@ function createMap(data) {
     my_map = L.map(
         'map', {
         center: [-1.28333, 36.816667],
-        zoom: 12
+        zoom: 11
     });
 
-    // setTimeout(function () { my_map.invalidateSize() }, 100);
+    // const search = new GeoSearch.GeoSearchControl({
+    //     provider: new GeoSearch.OpenStreetMapProvider(),
+    // });
+
+    // my_map.addControl(search);
+
+    // /* Routing */
+    // L.Routing.control({
+    //     waypoints: [
+    //         L.latLng(-1.28333, 36.816667),
+    //         L.latLng(-1.38333, 36.816667)
+    //     ]
+    // }).addTo(my_map)
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
@@ -163,6 +175,8 @@ function createMap(data) {
             )
         }
     });
+    const deliveryMarkers = new L.MarkerClusterGroup();
+    deliveryMarkers.addLayer(deliveries);
 
     /*          ATM             */
     const atmData = data.atms;
@@ -566,7 +580,7 @@ function createMap(data) {
     /*           SUBCOUNTIES  DATA                      */
     const subLocationStyle = {
         "fillColor": "#EEEEEE",
-        'color':'#4E342E',
+        'color': '#4E342E',
         "weight": 1,
     };
     const subLocations = data.subLocations;
@@ -712,7 +726,7 @@ function createMap(data) {
             active: true,
             name: "Deliveries",
             icon: '<img src="images/delivered.png" style="height:15px;"></img>',
-            layer: deliveries
+            layer: deliveryMarkers
         },
         {
             group: 'Maps',
@@ -795,75 +809,7 @@ function parseData(val) {
     }
     return val;
 }
-// Your web app's Firebase configuration
-var firebaseConfig = {
-    apiKey: "AIzaSyANAkViYvvzsHNzdqeIgdZD2pnspcfjikM",
-    authDomain: "billboard-sys.firebaseapp.com",
-    databaseURL: "https://billboard-sys.firebaseio.com",
-    projectId: "billboard-sys",
-    storageBucket: "billboard-sys.appspot.com",
-    messagingSenderId: "383019352632",
-    appId: "1:383019352632:web:506bd1c91cbf0c1efc9ccd",
-    measurementId: "G-NKLW873L8E"
-};
-// Initialize Firebase
-//firebase.initializeApp(firebaseConfig);
-//const auth = firebase.auth();
-const upload = document.querySelector('#upload');
-const signUpBtn = document.querySelector('#signUp');
-const signInBtn = document.querySelector('#signIn');
-const signOutBtn = document.querySelector('.signOut');
 
-
-if (upload) { upload.addEventListener('click', e => readFile(e), false); }
-if (signUpBtn) { signUpBtn.addEventListener('click', e => signUp(e)); }
-if (signInBtn) { signInBtn.addEventListener('click', e => logIn(e)); }
-if (signOutBtn) { signOutBtn.addEventListener('click', signOut); }
-
-function signUp(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const promise = auth.createUserWithEmailAndPassword(email.value, password.value);
-    promise.catch(e => {
-        alert(e.message)
-    });
-    alert('Thank you for Signing Up');
-
-}
-
-function logIn(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const promise = auth.signInWithEmailAndPassword(email.value, password.value);
-    promise.catch(e => {
-        alert(e.message)
-    });
-    alert('Welcome Back');
-
-}
-
-function signOut() {
-    auth.signOut();
-    alert('See You later');
-}
-/*
-auth.onAuthStateChanged(function (user) {
-    if (user) {
-        // User is signed in. 
-        fetchData();
-        document.querySelector('#loginContainer').style.display = 'none';
-        document.querySelector('#billboardDetails').style.display = 'initial';
-    } else {
-        // No user is signed in.
-        document.querySelector('#loginContainer').style.display = 'flex';
-        document.querySelector('#billboardDetails').style.display = 'none';
-    }
-});
-*/
 function readFile() {
     const fileUpload = document.getElementById('xlsFile');
     //Validate whether File is valid Excel file.
