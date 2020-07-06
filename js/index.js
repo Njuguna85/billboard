@@ -31,11 +31,11 @@ async function fetchData() {
 };
 var my_map;
 fetchData();
-// reload the map after 3 minutes
+// reload the map after 1 min
 setInterval(() => {
     fetchData();
     my_map.remove()
-}, 180000);
+}, 60000);
 
 function createMap(data) {
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
@@ -564,7 +564,11 @@ function createMap(data) {
     sCountyinfo.addTo(my_map);
 
     /*           SUBCOUNTIES  DATA                      */
-
+    const subLocationStyle = {
+        "fillColor": "#EEEEEE",
+        'color':'#4E342E',
+        "weight": 1,
+    };
     const subLocations = data.subLocations;
     sublocationJSON = [];
     subLocations.forEach(sublocation => {
@@ -586,8 +590,8 @@ function createMap(data) {
 
         layer.setStyle({
             weight: 5,
-            color: '#BA68C8',
-            fillColor: '#42A5F5'
+            color: '#2E7D32',
+            fillColor: '#FFEB3B'
         });
         if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
@@ -611,7 +615,7 @@ function createMap(data) {
         });
     }
     const nairobiSubLocations = L.geoJson(sublocationJSON, {
-        style: subCountyStyle,
+        style: subLocationStyle,
         onEachFeature: onEachSubLocation
     });
     // custom information

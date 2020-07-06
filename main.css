@@ -8,7 +8,7 @@ body {
 
 body {
     height: 100vh;
-    width: 100vw;
+    width: 98vw;
     background-color: #EEEEEE;
     box-sizing: border-box;
 }
@@ -133,6 +133,7 @@ p {
     width: 95%;
     height: 80%;
     margin: 10px auto;
+    /* transition: .2s ease-in-out; */
 }
 
 h3 {
