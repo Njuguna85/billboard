@@ -13,51 +13,6 @@ body {
     box-sizing: border-box;
 }
 
-#loginContainer {
-    box-sizing: border-box;
-    width: 380px;
-    height: 300px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #CFD8DC;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-}
-
-#userForm {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.form-item {
-    padding: 20px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#userForm input[type="password"],
-#userForm input[type="email"] {
-    border: none;
-    background: transparent;
-    text-align: center;
-    outline: none;
-    padding: 8px;
-    background-image: none;
-    border: 1px solid #3498db;
-    width: 70%;
-
-}
-
 .btn {
     display: block;
     background: #3949AB;
@@ -71,11 +26,6 @@ body {
     background: #9ea8e6;
     transition: all .2s;
     transform: scale(1.1);
-}
-
-.signOut {
-    background: #2742f1;
-    color: white;
 }
 
 /*                 MAP             */
@@ -152,11 +102,6 @@ h3 {
     text-align: center;
 }
 
-.poi {
-    width: 10px;
-    height: 20px;
-}
-
 .header {
     width: 100%;
     margin: auto;
@@ -177,28 +122,6 @@ h3 {
 
 #signOut {
     display: block;
-}
-
-#uploadForm {
-    width: 100%;
-    height: 50px;
-    padding: 8px;
-    text-align: center;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding-left: 50px;
-}
-
-#uploadForm label {
-    margin: 10px;
-}
-
-.uploadForm__alert {
-    font-size: medium;
-    background-color: greenyellow;
-    margin: 0 auto;
-    width: max-content;
 }
 
 .leaflet-popup-content-wrapper {

@@ -28,9 +28,9 @@
     <link rel="stylesheet" href="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.css">
     <script src="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.js"></script>
 
-    <!-- Leaflet Search -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
-    <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
+    <!-- Gecorder / search -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <!-- leaflet routing machine -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
@@ -79,13 +79,6 @@
                 </div>
             </div>
         </article>
-        <div id="uploadForm">
-            <span>Upload an xls or xlsx File: </span>
-            <input type="file" name="xlsFile" id="xlsFile" />
-            <input type="button" value="Upload" class="btn" id="upload" />
-            <p class="uploadForm__alert">Use MM.DD.YYYY Date Format</p>
-        </div>
-
         <div id="map"></div>
         <footer class="footer">
             <p>Email: <a href="mailto:gis@predictiveanalytics.co.ke">gis@predictiveanalytics.co.ke</a></p>

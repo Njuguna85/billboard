@@ -30,13 +30,6 @@ async function fetchData() {
 };
 var my_map;
 fetchData();
-// reload the map after 1 min
-/*
-setInterval(() => {
-    fetchData();
-    my_map.remove()
-}, 60000);
-*/
 function createMap(data) {
     const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
 
@@ -68,13 +61,35 @@ function createMap(data) {
 
     // my_map.addControl(search);
 
-    // /* Routing */
+    /* Routing */
     // L.Routing.control({
     //     waypoints: [
     //         L.latLng(-1.28333, 36.816667),
-    //         L.latLng(-1.38333, 36.816667)
-    //     ]
-    // }).addTo(my_map)
+    //         // L.latLng(-1.38333, 36.816667)
+    //     ],
+    //     position: 'bottomleft',
+    //     routeWhileDragging: true,
+    //     geocoder: L.Control.Geocoder.nominatim()
+    // }).addTo(my_map);
+
+    // // enable a user to create points for route search
+    // function createBtn(label, container) {
+    //     const btn = L.DomUtil.create('button', '', container);
+    //     btn.setAttribute('type', 'button');
+    //     btn.innerHTML = label;
+    //     return btn;
+    // }
+    // my_map.on('click', function (e) {
+    //     const container = L.DomUtil.create('div'),
+    //         innerHTML = 'Make a Trip',
+    //         startBtn = createBtn('Start From Here', container),
+    //         destbtn = createBtn('Go to this location', container);
+
+    //     L.popup()
+    //         .setContent(container)
+    //         .setLatLng(e.latlng)
+    //         .openOn(my_map);
+    // })
 
     /*           BILLBOARD DATA                      */
     const billboardsData = data.billboards;
@@ -479,24 +494,6 @@ function createMap(data) {
         onEachFeature: onEachFeature
     });
 
-    /*          custom information control              */
-    var info = L.control({ position: 'topleft' });
-    info.onAdd = function (my_map) {
-        this._div = L.DomUtil.create('div', 'info') // create a div with the class of info
-        this.update();
-        return this._div;
-    };
-    // update the info control based on feature properties
-    info.update = function (props) {
-        this._div.innerHTML =
-            '<h4>Uber Travel Data</h4>' +
-            (props ?
-                'Area Name: ' + '<b>' + props.areaName + '</b><br/>' +
-                'Travel Time: ' + '<b>' + parseValues(props.travelTime) + '</b><br/>'
-                : 'Enable the uber layer <br/>and Hover Over a region');
-    };
-    info.addTo(my_map);
-
     /*           SUBCOUNTIES  DATA                      */
     const subCountyStyle = {
         "fillColor": "#B3E5FC",
@@ -655,7 +652,6 @@ function createMap(data) {
     };
     sLocationInfo.addTo(my_map);
 
-
     /* Mathare */
     const mathareStyle = {
         "fillColor": "#FEB24C",
@@ -724,7 +720,7 @@ function createMap(data) {
             layer: billboards
         }, {
             active: true,
-            name: "Deliveries",
+            name: "Mobile Uploads",
             icon: '<img src="images/delivered.png" style="height:15px;"></img>',
             layer: deliveryMarkers
         },
