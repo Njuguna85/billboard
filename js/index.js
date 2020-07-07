@@ -1,98 +1,274 @@
-var state = {};
-async function fetchData() {
-    //
-    // await response for the fetch call
-    // since there are no options passed, it will be a GET request
-    let response = await fetch('./php/download.php');
-    const url = 'https://bi.predictiveanalytics.co.ke/api/all-deliveries'
-    let response2 = await fetch(url, {
+const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
+const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
+//
+// map styles
+const streets = L.tileLayer(mapboxUrl, {
+    id: 'light-v10',
+    tileSize: 512,
+    zoomOffset: -1,
+    attribution: mapboxAttribution
+}),
+    satellite = L.tileLayer(mapboxUrl, {
+        id: 'satellite-streets-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        attribution: mapboxAttribution
+    });
+// Create a new instance of the map class
+var my_map = L.map(
+    'map', {
+    center: [-1.28333, 36.816667],
+    zoom: 11
+});
+// we need to make a request for mobile uploads within 
+// the past one week from today(2 dates)
+const today = new Date();
+const oneWkAgo = today.setDate(today.getDate() - 7);
+const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
+const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
+fetchMobileUploads(oneWkAgoDate, todaysDate);
+fetchData();
+/*
+setInterval(() => {
+    fetchMobileUploads(oneWkAgoDate, todaysDate);
+}, 60000);
+*/
+async function fetchMobileUploads(oneWkAgoDate, todaysDate) {
+    const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${oneWkAgoDate}&end=${todaysDate}`;
+    let response = await fetch(url, {
         method: "GET",
         headers: {
-            'Access-Control-Allow-Methods': 'GET, POST',
+            'Access-Control-Allow-Methods': 'GET',
             'Access-Control-Allow-Origin': '*',
             "Access-Control-Allow-Headers": "X-Requested-With"
         }
     });
-    //
-    // check if the promises was resolved
-    if (response.ok && response2.ok) {
-        // 
-        // if it was resolved, its ok is set to true which we check 
-        // access the promise body
+    if (response.ok) {
+        mobileData = await response.json();
+        addmobile(mobileData.data);
+    } else {
+        alert('Something went wrong while fetching Mobile Uploads. Error: ' + response.status);
+    }
+}
+async function fetchData() {
+    let response = await fetch('./php/download.php');
+    if (response.ok) {
         data = await response.json();
-        deliveriesData = await response2.json();
-        data.deliveries = deliveriesData.data;
-        createMap(data);
-
+        addOverlays(data);
     } else {
         alert('Something went wrong while fetching data. Error: ' + response.status);
     }
 };
-var my_map;
-fetchData();
-function createMap(data) {
-    const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
+function addOverlays(data) {
+    let billboards = addBillboards(data.billboards);
+    let atmMarkers = addAtm(data.atms);
+    let bankMarkers = addBanks(data.banks);
+    let hospitalMarkers = addHospitals(data.hospitals);
+    let policeMarkers = addPolice(data.police);
+    let schoolMarkers = addSchool(data.schools);
+    let uniMarkers = addUni(data.universities);
+    let uber = addUber(data.uber);
+    let nairobiSubCounties = addSubCounties(data.subCounties);
+    let nairobiSubLocations = addSubLocations(data.subLocations);
+    let mathareArea = addMathare(data.mathare);
+    let kiberaArea = addKibera(data.kibera);
 
-    const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
-    //
-    // map styles
-    const streets = L.tileLayer(mapboxUrl, {
-        id: 'light-v10',
-        tileSize: 512,
-        zoomOffset: -1,
-        attribution: mapboxAttribution
-    }),
-        satellite = L.tileLayer(mapboxUrl, {
-            id: 'satellite-streets-v11',
-            tileSize: 512,
-            zoomOffset: -1,
-            attribution: mapboxAttribution
+    const baseLayers = [{
+        active: true,
+        name: "Streets",
+        layer: streets
+    }, {
+        name: "Satellite",
+        layer: satellite
+    }];
+    const overLayers = [
+        {
+            active: true,
+            name: "Billboards",
+            icon: '<img src="images/marker.png" style="height:15px;"></img>',
+            layer: billboards
+        },
+        {
+            group: 'Maps',
+            collapsed: true,
+            layers: [{
+                name: "Uber Travel Time From CBD",
+                layer: uber
+            },
+            {
+                name: "Nairobi Sub Counties",
+                layer: nairobiSubCounties
+            },
+            {
+                name: "Nairobi Sub Locations",
+                layer: nairobiSubLocations
+            },
+            {
+                name: 'Mathare Area',
+                layer: mathareArea
+            }, {
+                name: 'Kibera Village',
+                layer: kiberaArea
+            }
+            ]
+        },
+        {
+            group: 'Points of Interest',
+            collapsed: true,
+            layers: [
+                {
+                    name: "ATM",
+                    icon: '<img src="images/atm.png" style="height:18px;"></img>',
+                    layer: atmMarkers
+                },
+                {
+                    name: "Bank",
+                    icon: '<img src="images/bank.png" style="height:18px;">',
+                    layer: bankMarkers
+                },
+                {
+                    name: "Hospital",
+                    icon: '<img src="images/hospital.png" style="height:18px;"></img>',
+                    layer: hospitalMarkers
+                },
+                {
+                    name: "Police Post",
+                    icon: '<img src="images/police.png" style="height:18px;"></img>',
+                    layer: policeMarkers
+                },
+                {
+                    name: "Schools",
+                    icon: '<img src="images/school.png" style="height:18px;"></img>',
+                    layer: schoolMarkers
+                },
+                {
+                    name: "Universities",
+                    icon: '<img src="images/university.png" style="height:18px;"></img>',
+                    layer: uniMarkers
+                }
+            ]
+        }];
+    var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
+        title: 'LEGEND ',
+        className: 'legend',
+        compact: true,
+    })
+
+    my_map.addControl(panelLayers);
+}
+function addmobile(deliveriesData) {
+    //  console.log(deliveriesData);
+    // filter the data by dates. 
+    // first get all the dates 
+    // create a dropdown list with the dates
+    const uploadDates = [];
+    const mobileData = new Object();
+    const deliIcon = L.icon({
+        iconUrl: 'images/delivered.png',
+        iconSize: [20, 20],
+        popupAncor: [-3, -76],
+    });
+    function getmobileMarkers(deliveriesData) {
+        const deliJSON = [];
+        deliveriesData.forEach(deli => {
+            let features = {
+                type: 'Feature',
+                properties: {
+                    'product_name': deli.product_name,
+                    'quantity': deli.quantity,
+                    'product_description': deli.product_description,
+                    'delivered_by': deli.user.first_name,
+                    'photo': deli.photo,
+                },
+                geometry: {
+                    type: 'Point',
+                    coordinates: [deli.longitude, deli.latitude]
+                }
+            };
+            deliJSON.push(features);
+
+            // add list of dates
+            if (deli.created_at) {
+                let date = deli.created_at.slice(0, 10);
+                if (uploadDates.length == 0) {
+                    uploadDates.push(date);
+                } else {
+                    if (uploadDates.includes(date) == false) {
+                        uploadDates.push(date);
+                    }
+                }
+            }
         });
-    // Create a new instance of the map class
-    my_map = L.map(
-        'map', {
-        center: [-1.28333, 36.816667],
-        zoom: 11
+        mobileData.dates = uploadDates;
+
+        var delGeoJSON = {
+            type: 'FeatureCollection',
+            features: deliJSON
+        };
+        const deliveriesMarkers = L.geoJson(delGeoJSON, {
+            pointToLayer: (feature, latlng) => {
+                return L.marker(latlng, {
+                    icon: deliIcon
+                });
+            },
+            onEachFeature: (feature, layer) => {
+                layer.bindPopup(
+                    'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
+                    'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
+                    'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
+                    'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
+                    '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
+                )
+            }
+        });
+        mobileData.deliveriesMarkers = deliveriesMarkers;
+        return mobileData;
+    }
+    let deliveries = getmobileMarkers(deliveriesData);
+    const deliveryMarkers = new L.MarkerClusterGroup();
+    deliveryMarkers.addLayer(deliveries.deliveriesMarkers);
+    deliveryMarkers.addTo(my_map);
+
+    // we now have all our dates now 
+    // create a custom control 
+    var selectDate = L.control({ position: 'topleft' });
+    selectDate.onAdd = function (my_map) {
+        this._div = L.DomUtil.create('div', 'filterDate')
+        this.update();
+        return this._div;
+    };
+    selectDate.update = function () {
+        this._div.innerHTML = `
+        <h5>Filter Mobile Uploads By Date</h5>
+        <select id="uploadDate">
+            <option value="">Select A Date...</option>
+            ${deliveries.dates.map(date => { return `<option value="${date}">${date}</option>` })}
+        </select>
+        `;
+    };
+    selectDate.addTo(my_map);
+    //
+    // listen to a change in the select and capture its value
+    // clear the layers and add the layers with the condition
+    document.querySelector('#uploadDate').addEventListener('change', e => {
+        const newDate = document.querySelector('#uploadDate').value;
+        deliveryMarkers.clearLayers();
+        const newMarkers = []
+        deliveriesData.forEach(del => {
+            let date = del.created_at.slice(0, 10);
+            if (date === newDate) {
+                // deliveryMarkers.addLayer(del);
+                newMarkers.push(del);
+            }
+
+        })
+        deliveries = getmobileMarkers(newMarkers);
+        deliveryMarkers.addLayer(deliveries.deliveriesMarkers);
     });
 
-    // const search = new GeoSearch.GeoSearchControl({
-    //     provider: new GeoSearch.OpenStreetMapProvider(),
-    // });
 
-    // my_map.addControl(search);
-
-    /* Routing */
-    // L.Routing.control({
-    //     waypoints: [
-    //         L.latLng(-1.28333, 36.816667),
-    //         // L.latLng(-1.38333, 36.816667)
-    //     ],
-    //     position: 'bottomleft',
-    //     routeWhileDragging: true,
-    //     geocoder: L.Control.Geocoder.nominatim()
-    // }).addTo(my_map);
-
-    // // enable a user to create points for route search
-    // function createBtn(label, container) {
-    //     const btn = L.DomUtil.create('button', '', container);
-    //     btn.setAttribute('type', 'button');
-    //     btn.innerHTML = label;
-    //     return btn;
-    // }
-    // my_map.on('click', function (e) {
-    //     const container = L.DomUtil.create('div'),
-    //         innerHTML = 'Make a Trip',
-    //         startBtn = createBtn('Start From Here', container),
-    //         destbtn = createBtn('Go to this location', container);
-
-    //     L.popup()
-    //         .setContent(container)
-    //         .setLatLng(e.latlng)
-    //         .openOn(my_map);
-    // })
-
-    /*           BILLBOARD DATA                      */
-    const billboardsData = data.billboards;
+}
+function addBillboards(billboardsData) {
     const popIcon = L.icon({
         iconUrl: 'images/marker.png',
         iconSize: [20, 20],
@@ -127,7 +303,7 @@ function createMap(data) {
         type: 'FeatureCollection',
         features: billboardJSON
     };
-    const billboards = L.geoJson(billboardGeoJSON, {
+    return billboards = L.geoJson(billboardGeoJSON, {
         pointToLayer: (feature, latlng) => {
             return L.marker(latlng, {
                 icon: popIcon
@@ -145,56 +321,8 @@ function createMap(data) {
         }
     });
 
-    /*           DELIVERIES DATA                      */
-    const deliveriesData = data.deliveries;
-    const deliIcon = L.icon({
-        iconUrl: 'images/delivered.png',
-        iconSize: [20, 20],
-        popupAncor: [-3, -76],
-    });
-    const deliJSON = [];
-    deliveriesData.forEach(deli => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'product_name': deli.product_name,
-                'quantity': deli.quantity,
-                'product_description': deli.product_description,
-                'delivered_by': deli.user.first_name,
-                'photo': deli.photo,
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [deli.longitude, deli.latitude]
-            }
-        };
-        deliJSON.push(features);
-    });
-    var delGeoJSON = {
-        type: 'FeatureCollection',
-        features: deliJSON
-    };
-    const deliveries = L.geoJson(delGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: deliIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
-                'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
-                'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
-                'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
-                '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
-            )
-        }
-    });
-    const deliveryMarkers = new L.MarkerClusterGroup();
-    deliveryMarkers.addLayer(deliveries);
-
-    /*          ATM             */
-    const atmData = data.atms;
+}
+function addAtm(atmData) {
     const atmJSON = [];
     atmData.forEach(atm => {
         let features = {
@@ -228,10 +356,9 @@ function createMap(data) {
         }
     });
     const atmMarkers = new L.MarkerClusterGroup();
-    atmMarkers.addLayer(atms);
-
-    /*          banKS             */
-    const bankData = data.banks;
+    return atmMarkers.addLayer(atms);
+}
+function addBanks(bankData) {
     const bankJSON = [];
     bankData.forEach(bank => {
         let features = {
@@ -265,10 +392,10 @@ function createMap(data) {
         }
     });
     const bankMarkers = new L.MarkerClusterGroup();
-    bankMarkers.addLayer(banks);
+    return bankMarkers.addLayer(banks);
 
-    /*          HOSPITALS             */
-    const hospitalData = data.hospitals;
+}
+function addHospitals(hospitalData) {
     const hospitalJSON = [];
     hospitalData.forEach(hospital => {
         let features = {
@@ -304,10 +431,10 @@ function createMap(data) {
     //
     // clusters for the hospitals
     const hospitalMarkers = new L.MarkerClusterGroup();
-    hospitalMarkers.addLayer(hospitals);
+    return hospitalMarkers.addLayer(hospitals);
 
-    /*          HOSPITALS             */
-    const policeData = data.police;
+}
+function addPolice(policeData) {
     const policeJSON = [];
     policeData.forEach(police => {
         let features = {
@@ -341,11 +468,10 @@ function createMap(data) {
         }
     });
     const policeMarkers = new L.MarkerClusterGroup();
-    policeMarkers.addLayer(polices);
+    return policeMarkers.addLayer(polices);
 
-    /*          School             */
-
-    const schoolData = data.schools;
+}
+function addSchool(schoolData) {
     const schoolJSON = [];
     schoolData.forEach(school => {
         let features = {
@@ -379,11 +505,10 @@ function createMap(data) {
         }
     });
     const schoolMarkers = new L.MarkerClusterGroup();
-    schoolMarkers.addLayer(schools);
+    return schoolMarkers.addLayer(schools);
 
-    /*          UNIVERSITIES             */
-
-    const uniData = data.universities;
+}
+function addUni(uniData) {
     const uniJSON = [];
     uniData.forEach(uni => {
 
@@ -418,10 +543,9 @@ function createMap(data) {
         }
     });
     const uniMarkers = new L.MarkerClusterGroup();
-    uniMarkers.addLayer(unis);
-
-    /*           UBER MEAN DISTANCE DATA                      */
-    const uMD = data.uber;
+    return uniMarkers.addLayer(unis);
+}
+function addUber(uMD) {
     uDMJSON = [];
     uMD.forEach(uber => {
         let features = {
@@ -439,7 +563,6 @@ function createMap(data) {
         }
         uDMJSON.push(features);
     });
-
     function getColor(d) {
         return d > 3318 ? '#800026' :
             d > 2878 ? '#BD0026' :
@@ -489,17 +612,16 @@ function createMap(data) {
             click: zoomToFeatureUber
         });
     }
-    var uber = L.geoJson(uDMJSON, {
+    return uber = L.geoJson(uDMJSON, {
         style: style,
         onEachFeature: onEachFeature
     });
-
-    /*           SUBCOUNTIES  DATA                      */
+}
+function addSubCounties(subCounties) {
     const subCountyStyle = {
         "fillColor": "#B3E5FC",
         "weight": 2,
     };
-    const subCounties = data.subCounties;
     subCountyJSON = [];
     subCounties.forEach(subCounty => {
         let features = {
@@ -535,7 +657,6 @@ function createMap(data) {
         nairobiSubCounties.resetStyle(e.target);
         sCountyinfo.update();
     }
-
     function zoomToSubCounty(e) {
         my_map.flyToBounds(e.target.getBounds());
     }
@@ -546,10 +667,6 @@ function createMap(data) {
             click: zoomToSubCounty
         });
     }
-    const nairobiSubCounties = L.geoJson(subCountyJSON, {
-        style: subCountyStyle,
-        onEachFeature: onEachSubCounty
-    });
     // custom information
     var sCountyinfo = L.control({ position: 'topleft' });
     sCountyinfo.onAdd = function (my_map) {
@@ -574,13 +691,17 @@ function createMap(data) {
     };
     sCountyinfo.addTo(my_map);
 
-    /*           SUBCOUNTIES  DATA                      */
+    return nairobiSubCounties = L.geoJson(subCountyJSON, {
+        style: subCountyStyle,
+        onEachFeature: onEachSubCounty
+    });
+}
+function addSubLocations(subLocations) {
     const subLocationStyle = {
         "fillColor": "#EEEEEE",
-        'color': '#4E342E',
-        "weight": 1,
+        'color': '#78909C',
+        "weight": 1.5,
     };
-    const subLocations = data.subLocations;
     sublocationJSON = [];
     subLocations.forEach(sublocation => {
         let features = {
@@ -625,10 +746,6 @@ function createMap(data) {
             click: zoomToSubLocation
         });
     }
-    const nairobiSubLocations = L.geoJson(sublocationJSON, {
-        style: subLocationStyle,
-        onEachFeature: onEachSubLocation
-    });
     // custom information
     var sLocationInfo = L.control({ position: 'topleft' });
     sLocationInfo.onAdd = function (my_map) {
@@ -651,8 +768,12 @@ function createMap(data) {
                 : 'Enable the sub locations layer <br/>and Hover Over a Region');
     };
     sLocationInfo.addTo(my_map);
-
-    /* Mathare */
+    return nairobiSubLocations = L.geoJson(sublocationJSON, {
+        style: subLocationStyle,
+        onEachFeature: onEachSubLocation
+    });
+}
+function addMathare(mathareData) {
     const mathareStyle = {
         "fillColor": "#FEB24C",
         "weight": 2,
@@ -661,7 +782,6 @@ function createMap(data) {
         'dashArray': '3',
         'fillOpacity': 0.7
     };
-    const mathareData = data.mathare;
     mathareJSON = [];
     mathareData.forEach(area => {
         let features = {
@@ -674,11 +794,11 @@ function createMap(data) {
         }
         mathareJSON.push(features);
     });
-    const mathareArea = L.geoJson(mathareJSON, {
+    return mathareArea = L.geoJson(mathareJSON, {
         style: mathareStyle
     });
-
-    /* kibera area */
+}
+function addKibera(kiberaData) {
     const kiberaStyle = {
         "fillColor": "#FEB24C",
         "weight": 2,
@@ -687,7 +807,6 @@ function createMap(data) {
         'dashArray': '3',
         'fillOpacity': 0.7
     };
-    const kiberaData = data.kibera;
     kiberaJSON = [];
     kiberaData.forEach(area => {
         let features = {
@@ -700,99 +819,10 @@ function createMap(data) {
         }
         kiberaJSON.push(features);
     });
-    const kiberaArea = L.geoJson(kiberaJSON, {
+    return kiberaArea = L.geoJson(kiberaJSON, {
         style: kiberaStyle
     });
-    /* add layers */
-    const baseLayers = [{
-        active: true,
-        name: "Streets",
-        layer: streets
-    }, {
-        name: "Satellite",
-        layer: satellite
-    }];
-    const overLayers = [
-        {
-            active: true,
-            name: "Billboards",
-            icon: '<img src="images/marker.png" style="height:15px;"></img>',
-            layer: billboards
-        }, {
-            active: true,
-            name: "Mobile Uploads",
-            icon: '<img src="images/delivered.png" style="height:15px;"></img>',
-            layer: deliveryMarkers
-        },
-        {
-            group: 'Maps',
-            collapsed: true,
-            layers: [{
-                name: "Uber Travel Time From CBD",
-                layer: uber
-            },
-            {
-                name: "Nairobi Sub Counties",
-                layer: nairobiSubCounties
-            },
-            {
-                name: "Nairobi Sub Locations",
-                layer: nairobiSubLocations
-            },
-            {
-                name: 'Mathare Area',
-                layer: mathareArea
-            }, {
-                name: 'Kibera Village',
-                layer: kiberaArea
-            }
-            ]
-        },
-        {
-            group: 'Points of Interest',
-            collapsed: true,
-            layers: [
-                {
-                    name: "ATM",
-                    icon: '<img src="images/atm.png" style="height:18px;"></img>',
-                    layer: atmMarkers
-                },
-                {
-                    name: "Bank",
-                    icon: '<img src="images/bank.png" style="height:18px;"></img>',
-                    layer: bankMarkers
-                },
-                {
-                    name: "Hospital",
-                    icon: '<img src="images/hospital.png" style="height:18px;"></img>',
-                    layer: hospitalMarkers
-                },
-                {
-                    name: "Police Post",
-                    icon: '<img src="images/police.png" style="height:18px;"></img>',
-                    layer: policeMarkers
-                },
-                {
-                    name: "Schools",
-                    icon: '<img src="images/school.png" style="height:18px;"></img>',
-                    layer: schoolMarkers
-                },
-                {
-                    name: "Universities",
-                    icon: '<img src="images/university.png" style="height:18px;"></img>',
-                    layer: uniMarkers
-                }
-            ]
-        }];
-    var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
-        title: 'LEGEND ',
-        className: 'legend',
-        compact: true,
-    })
-
-    my_map.addControl(panelLayers);
 }
-
 function parseValues(val) {
     if (val == null || val == undefined) {
         return ''
@@ -804,75 +834,4 @@ function parseData(val) {
         return ''
     }
     return val;
-}
-
-function readFile() {
-    const fileUpload = document.getElementById('xlsFile');
-    //Validate whether File is valid Excel file.
-    const regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
-
-    const expectedrows = ['angle', 'billboard_empty', 'billboard_id', 'condition', 'constituency', 'date', 'direction_from_cbd', 'height', 'lat', 'long', 'orientation', 'photo', 'photo_longrange', 'road_type', 'route_name', 'scout_name', 'select_medium', 'site_lighting_illumination', 'site_run_up', 'size', 'traffic', 'visibility', 'zone'];
-
-    if (regex.test(fileUpload.value.toLowerCase())) {
-        if (typeof (FileReader) != "undefined") {
-            const reader = new FileReader();
-            const files = fileUpload.files, f = files[0];
-            reader.onload = function (e) {
-
-                const data = e.target.result;
-
-                const workbook = XLSX.read(data, { type: 'binary' });
-
-                //get the name of First Sheet.
-                const Sheet = workbook.SheetNames[0];
-                const workSheet = workbook.Sheets[Sheet];
-
-                // convert the data in the first sheet to json
-                const jsonData = XLSX.utils.sheet_to_row_object_array(workSheet);
-
-                // check if the sheet has the expected columns
-                let hasexpectedColumn;
-
-                expectedrows.forEach(expRow => {
-                    if (jsonData[0].hasOwnProperty(expRow)) {
-                        hasexpectedColumn = true;
-                    } else {
-                        hasexpectedColumn = false;
-                    }
-                });
-                if (hasexpectedColumn) { saveSheet(jsonData) } else { alert('The Excel file does not have the necessary columns. Please check it.') }
-            };
-            reader.readAsBinaryString(f);
-
-        } else {
-            alert("This browser does not support HTML5.");
-        }
-    } else {
-        alert("Please upload a valid Excel file.");
-    }
-
-}
-async function saveSheet(data) {
-    //
-    //Create a form data object to hold the property data json and photos.
-    const formData = new FormData();
-
-    // url where the data will be posted
-    const url = './upload.php';
-
-    console.log(data)
-    formData.append('billboardData', JSON.stringify(data));
-
-    const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-    });
-    if (response.status == 201) {
-        alert('File saved successfully');
-        my_map.remove();
-        fetchData();
-    } else if (response.status == 500) {
-        alert('The file could not be saved. There is something wrong its format');
-    }
-
 }
