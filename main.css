@@ -142,7 +142,7 @@ h3 {
 }
 
 .legend {
-    background-color: #FFCA28;
+    background-color: #FFEB3B;
 }
 
 /* custom info control */
@@ -160,12 +160,27 @@ h3 {
 }
 
 .sCountyinfo,
-.sLocationInfo,
-.filterDate {
+.sLocationInfo {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: rgb(99, 236, 156);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.filterDate {
+    background-color: #FFEB3B;
+    position: absolute;
+    top: 0;
+    padding: 0 5px;
+    right: 50%;
+    transform: translate(50%, 0);
+    display: flex;
+    align-items: center;
+}
+
+.leaflet-left {
+    position: relative;
+    left: 0;
 }
 
 table {
@@ -182,6 +197,7 @@ td {
 tr:nth-child(even) {
     background-color: #dddddd;
 }
+
 .footer {
     display: flex;
     justify-content: space-around;

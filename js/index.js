@@ -1,5 +1,5 @@
 const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
-const mapboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
+const mapboxAttribution = 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
 //
 // map styles
 const streets = L.tileLayer(mapboxUrl, {
@@ -18,8 +18,10 @@ const streets = L.tileLayer(mapboxUrl, {
 var my_map = L.map(
     'map', {
     center: [-1.28333, 36.816667],
-    zoom: 11
+    zoom: 11,
+    maxZoom: 18
 });
+var panelLayers;
 // we need to make a request for mobile uploads within 
 // the past one week from today(2 dates)
 const today = new Date();
@@ -74,10 +76,10 @@ function addOverlays(data) {
     let kiberaArea = addKibera(data.kibera);
 
     const baseLayers = [{
-        active: true,
         name: "Streets",
         layer: streets
     }, {
+        active: true,
         name: "Satellite",
         layer: satellite
     }];
@@ -148,24 +150,25 @@ function addOverlays(data) {
                 }
             ]
         }];
-    var panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
+    panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
         title: 'LEGEND ',
         className: 'legend',
-        compact: true,
+        collapsed: true,
+        compact:false,
+        collapsibleGroups: true
     })
 
     my_map.addControl(panelLayers);
 }
 function addmobile(deliveriesData) {
-    //  console.log(deliveriesData);
     // filter the data by dates. 
     // first get all the dates 
     // create a dropdown list with the dates
     const uploadDates = [];
     const mobileData = new Object();
     const deliIcon = L.icon({
-        iconUrl: 'images/delivered.png',
-        iconSize: [20, 20],
+        iconUrl: 'images/place.png',
+        iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
     function getmobileMarkers(deliveriesData) {
@@ -228,7 +231,12 @@ function addmobile(deliveriesData) {
     const deliveryMarkers = new L.MarkerClusterGroup();
     deliveryMarkers.addLayer(deliveries.deliveriesMarkers);
     deliveryMarkers.addTo(my_map);
-
+    panelLayers.addOverlay({
+        name: "Mobile Uploads",
+        icon: '<img src="images/place.png" style="height:17px;"></img>',
+        layer: deliveryMarkers
+    })
+    
     // we now have all our dates now 
     // create a custom control 
     var selectDate = L.control({ position: 'topleft' });
@@ -239,7 +247,7 @@ function addmobile(deliveriesData) {
     };
     selectDate.update = function () {
         this._div.innerHTML = `
-        <h5>Filter Mobile Uploads By Date</h5>
+        <h5>Filter Mobile Uploads By Date: </h5>
         <select id="uploadDate">
             <option value="">Select A Date...</option>
             ${deliveries.dates.map(date => { return `<option value="${date}">${date}</option>` })}
