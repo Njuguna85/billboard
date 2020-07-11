@@ -82,7 +82,7 @@ p {
 #map {
     width: 98%;
     height: 95%;
-    margin: 10px auto 0;
+    margin: 10px auto 5px;
     /* transition: .2s ease-in-out; */
 }
 
@@ -143,6 +143,17 @@ h3 {
 
 .legend {
     background-color: #FFEB3B;
+}
+
+div.leaflet-bottom.leaflet-right {
+    margin-right: 50%;
+}
+div.leaflet-panel-layers-group.collapsible.expanded > div:last-child{
+    margin-bottom: 30px;
+}
+.icons{
+    height: 20px;
+    padding: 1px;
 }
 
 /* custom info control */

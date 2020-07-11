@@ -21,20 +21,18 @@ var my_map = L.map(
     zoom: 11,
     maxZoom: 18
 });
-var panelLayers;
+
+let mapData = new Object();
+let mobileUploads = [];
 // we need to make a request for mobile uploads within 
 // the past one week from today(2 dates)
 const today = new Date();
 const oneWkAgo = today.setDate(today.getDate() - 7);
 const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
 const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
-fetchMobileUploads(oneWkAgoDate, todaysDate);
+
 fetchData();
-/*
-setInterval(() => {
-    fetchMobileUploads(oneWkAgoDate, todaysDate);
-}, 60000);
-*/
+
 async function fetchMobileUploads(oneWkAgoDate, todaysDate) {
     const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${oneWkAgoDate}&end=${todaysDate}`;
     let response = await fetch(url, {
@@ -47,7 +45,7 @@ async function fetchMobileUploads(oneWkAgoDate, todaysDate) {
     });
     if (response.ok) {
         mobileData = await response.json();
-        addmobile(mobileData.data);
+        filterMobile(mobileData.data);
     } else {
         alert('Something went wrong while fetching Mobile Uploads. Error: ' + response.status);
     }
@@ -60,20 +58,27 @@ async function fetchData() {
     } else {
         alert('Something went wrong while fetching data. Error: ' + response.status);
     }
-};
-function addOverlays(data) {
+}
+async function addOverlays(data) {
     let billboards = addBillboards(data.billboards);
     let atmMarkers = addAtm(data.atms);
-    let bankMarkers = addBanks(data.banks);
-    let hospitalMarkers = addHospitals(data.hospitals);
-    let policeMarkers = addPolice(data.police);
-    let schoolMarkers = addSchool(data.schools);
-    let uniMarkers = addUni(data.universities);
     let uber = addUber(data.uber);
     let nairobiSubCounties = addSubCounties(data.subCounties);
     let nairobiSubLocations = addSubLocations(data.subLocations);
     let mathareArea = addMathare(data.mathare);
     let kiberaArea = addKibera(data.kibera);
+
+    for (const [key, value] of Object.entries(data)) {
+        commD = [
+            'bank', 'hospital', 'police', 'school', 'university',
+            'bar', 'petrolStation', 'grocery', 'kiosk', 'pharmacy',
+            'restaraunt', 'saloon', 'supermarket'
+        ];
+        if (commD.includes(key)) {
+            add(key, value);
+        }
+    }
+    await fetchMobileUploads(oneWkAgoDate, todaysDate);
 
     const baseLayers = [{
         name: "Streets",
@@ -85,10 +90,15 @@ function addOverlays(data) {
     }];
     const overLayers = [
         {
-            active: true,
             name: "Billboards",
             icon: '<img src="images/marker.png" style="height:15px;"></img>',
             layer: billboards
+        },
+        {
+            active: true,
+            name: "Mobile Uploads",
+            icon: '<img src="images/place.png" style="height:17px;"></img>',
+            layer: await mobileUploads[0]
         },
         {
             group: 'Maps',
@@ -120,123 +130,191 @@ function addOverlays(data) {
             layers: [
                 {
                     name: "ATM",
-                    icon: '<img src="images/atm.png" style="height:18px;"></img>',
+                    icon: '<img src="images/atm.png" class="icons"></img>',
                     layer: atmMarkers
-                },
-                {
+                }, {
                     name: "Bank",
-                    icon: '<img src="images/bank.png" style="height:18px;">',
-                    layer: bankMarkers
-                },
-                {
+                    icon: '<img src="images/bank.png" class="icons">',
+                    layer: mapData.bank
+                }, {
                     name: "Hospital",
-                    icon: '<img src="images/hospital.png" style="height:18px;"></img>',
-                    layer: hospitalMarkers
-                },
-                {
+                    icon: '<img src="images/hospital.png" class="icons"></img>',
+                    layer: mapData.hospital
+                }, {
                     name: "Police Post",
-                    icon: '<img src="images/police.png" style="height:18px;"></img>',
-                    layer: policeMarkers
-                },
-                {
+                    icon: '<img src="images/police.png" class="icons"></img>',
+                    layer: mapData.police
+                }, {
                     name: "Schools",
-                    icon: '<img src="images/school.png" style="height:18px;"></img>',
-                    layer: schoolMarkers
+                    icon: '<img src="images/school.png" class="icons"></img>',
+                    layer: mapData.school
+                }, {
+                    name: "Universities",
+                    icon: '<img src="images/university.png" class="icons"></img>',
+                    layer: mapData.university
+                }, {
+                    name: "Bars",
+                    icon: '<img src="images/bar.png" class="icons"></img>',
+                    layer: mapData.bar
+                }, {
+                    name: "Petrol Station",
+                    icon: '<img src="images/petrolStation.png" class="icons"></img>',
+                    layer: mapData.petrolStation
+                }, {
+                    name: "Grocery",
+                    icon: '<img src="images/grocery.png" class="icons"></img>',
+                    layer: mapData.grocery
+                }, {
+                    name: "Kiosk",
+                    icon: '<img src="images/kiosk.png" class="icons"></img>',
+                    layer: mapData.kiosk
+                }, {
+                    name: "Pharmacy",
+                    icon: '<img src="images/pharmacy.png" class="icons"></img>',
+                    layer: mapData.pharmacy
+                }, {
+                    name: "Restaraunt",
+                    icon: '<img src="images/restaraunt.png" class="icons"></img>',
+                    layer: mapData.restaraunt
                 },
                 {
-                    name: "Universities",
-                    icon: '<img src="images/university.png" style="height:18px;"></img>',
-                    layer: uniMarkers
+                    name: "Saloon",
+                    icon: '<img src="images/saloon.png" class="icons"></img>',
+                    layer: mapData.saloon
+                }, {
+                    name: "SuperMarket",
+                    icon: '<img src="images/supermarket.png" class="icons"></img>',
+                    layer: mapData.supermarket
                 }
+
+
             ]
         }];
     panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
         title: 'LEGEND ',
         className: 'legend',
         collapsed: true,
-        compact:false,
+        compact: false,
         collapsibleGroups: true
     })
-
     my_map.addControl(panelLayers);
 }
-function addmobile(deliveriesData) {
-    // filter the data by dates. 
-    // first get all the dates 
-    // create a dropdown list with the dates
+function add(key, value) {
+
+    const json = [];
+
+    value.forEach(el => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': el.name,
+            },
+            geometry: JSON.parse(el.geojson),
+        };
+        json.push(features);
+    });
+
+    const GeoJSON = {
+        type: 'FeatureCollection',
+        features: json
+    };
+
+    const Icon = L.icon({
+        iconUrl: `images/${key}.png`,
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+
+    const iconLayer = L.geoJson(GeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: Icon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
+            )
+        }
+    });
+    const markers = new L.MarkerClusterGroup();
+    markers.addLayer(iconLayer);
+    mapData[`${key}`] = markers;
+}
+function getmobileMarkers(deliveriesData) {
+    mobileMarkersDates = new Object();
     const uploadDates = [];
-    const mobileData = new Object();
+    const deliJSON = [];
     const deliIcon = L.icon({
         iconUrl: 'images/place.png',
         iconSize: [25, 25],
         popupAncor: [-3, -76],
     });
-    function getmobileMarkers(deliveriesData) {
-        const deliJSON = [];
-        deliveriesData.forEach(deli => {
-            let features = {
-                type: 'Feature',
-                properties: {
-                    'product_name': deli.product_name,
-                    'quantity': deli.quantity,
-                    'product_description': deli.product_description,
-                    'delivered_by': deli.user.first_name,
-                    'photo': deli.photo,
-                },
-                geometry: {
-                    type: 'Point',
-                    coordinates: [deli.longitude, deli.latitude]
-                }
-            };
-            deliJSON.push(features);
-
-            // add list of dates
-            if (deli.created_at) {
-                let date = deli.created_at.slice(0, 10);
-                if (uploadDates.length == 0) {
-                    uploadDates.push(date);
-                } else {
-                    if (uploadDates.includes(date) == false) {
-                        uploadDates.push(date);
-                    }
-                }
-            }
-        });
-        mobileData.dates = uploadDates;
-
-        var delGeoJSON = {
-            type: 'FeatureCollection',
-            features: deliJSON
-        };
-        const deliveriesMarkers = L.geoJson(delGeoJSON, {
-            pointToLayer: (feature, latlng) => {
-                return L.marker(latlng, {
-                    icon: deliIcon
-                });
+    deliveriesData.forEach(deli => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'product_name': deli.product_name,
+                'quantity': deli.quantity,
+                'product_description': deli.product_description,
+                'delivered_by': deli.user.first_name,
+                'photo': deli.photo,
             },
-            onEachFeature: (feature, layer) => {
-                layer.bindPopup(
-                    'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
-                    'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
-                    'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
-                    'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
-                    '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
-                )
+            geometry: {
+                type: 'Point',
+                coordinates: [deli.longitude, deli.latitude]
             }
-        });
-        mobileData.deliveriesMarkers = deliveriesMarkers;
-        return mobileData;
-    }
-    let deliveries = getmobileMarkers(deliveriesData);
+        };
+        deliJSON.push(features);
+        // add list of dates
+        if (deli.created_at) {
+            let date = deli.created_at.slice(0, 10);
+            if (uploadDates.length == 0) {
+                uploadDates.push(date);
+            } else {
+                if (uploadDates.includes(date) == false) {
+                    uploadDates.push(date);
+                }
+            }
+        }
+    });
+    mobileMarkersDates.dates = uploadDates;
+
+    var delGeoJSON = {
+        type: 'FeatureCollection',
+        features: deliJSON
+    };
+    const deliveriesMarkers = L.geoJson(delGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: deliIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
+                'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
+                'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
+                'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
+                '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
+            )
+        }
+    });
+    mobileMarkersDates.markers = deliveriesMarkers;
+    return mobileMarkersDates;
+}
+async function filterMobile(deliveriesData) {
+    // filter the data by dates. 
+    // first get all the dates 
+    // create a dropdown list with the dates
+    const mobileMarkersDates = await getmobileMarkers(deliveriesData);
     const deliveryMarkers = new L.MarkerClusterGroup();
-    deliveryMarkers.addLayer(deliveries.deliveriesMarkers);
-    deliveryMarkers.addTo(my_map);
-    panelLayers.addOverlay({
-        name: "Mobile Uploads",
-        icon: '<img src="images/place.png" style="height:17px;"></img>',
-        layer: deliveryMarkers
-    })
-    
+    deliveryMarkers.addLayer(mobileMarkersDates.markers);
+
+    mobileUploads.push(deliveryMarkers);
+    console.log(mobileUploads.length);
+
+
     // we now have all our dates now 
     // create a custom control 
     var selectDate = L.control({ position: 'topleft' });
@@ -250,7 +328,7 @@ function addmobile(deliveriesData) {
         <h5>Filter Mobile Uploads By Date: </h5>
         <select id="uploadDate">
             <option value="">Select A Date...</option>
-            ${deliveries.dates.map(date => { return `<option value="${date}">${date}</option>` })}
+            ${mobileMarkersDates.dates.map(date => { return `<option value="${date}">${date}</option>` })}
         </select>
         `;
     };
@@ -259,19 +337,17 @@ function addmobile(deliveriesData) {
     // listen to a change in the select and capture its value
     // clear the layers and add the layers with the condition
     document.querySelector('#uploadDate').addEventListener('change', e => {
-        const newDate = document.querySelector('#uploadDate').value;
+        const choiceDate = document.querySelector('#uploadDate').value;
         deliveryMarkers.clearLayers();
         const newMarkers = []
         deliveriesData.forEach(del => {
             let date = del.created_at.slice(0, 10);
-            if (date === newDate) {
-                // deliveryMarkers.addLayer(del);
+            if (date === choiceDate) {
                 newMarkers.push(del);
             }
-
         })
-        deliveries = getmobileMarkers(newMarkers);
-        deliveryMarkers.addLayer(deliveries.deliveriesMarkers);
+        newDeliveries = getmobileMarkers(newMarkers);
+        deliveryMarkers.addLayer(newDeliveries.markers);
     });
 
 
@@ -365,193 +441,6 @@ function addAtm(atmData) {
     });
     const atmMarkers = new L.MarkerClusterGroup();
     return atmMarkers.addLayer(atms);
-}
-function addBanks(bankData) {
-    const bankJSON = [];
-    bankData.forEach(bank => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': bank.name,
-            },
-            geometry: JSON.parse(bank.geojson),
-        };
-        bankJSON.push(features);
-    });
-    var bankGeoJSON = {
-        type: 'FeatureCollection',
-        features: bankJSON
-    };
-    const bankIcon = L.icon({
-        iconUrl: 'images/bank.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const banks = L.geoJson(bankGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: bankIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    const bankMarkers = new L.MarkerClusterGroup();
-    return bankMarkers.addLayer(banks);
-
-}
-function addHospitals(hospitalData) {
-    const hospitalJSON = [];
-    hospitalData.forEach(hospital => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': hospital.name,
-            },
-            geometry: JSON.parse(hospital.geojson),
-        };
-        hospitalJSON.push(features);
-    });
-    var hospitalGeoJSON = {
-        type: 'FeatureCollection',
-        features: hospitalJSON
-    };
-    const hospitalIcon = L.icon({
-        iconUrl: 'images/hospital.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const hospitals = L.geoJson(hospitalGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: hospitalIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    //
-    // clusters for the hospitals
-    const hospitalMarkers = new L.MarkerClusterGroup();
-    return hospitalMarkers.addLayer(hospitals);
-
-}
-function addPolice(policeData) {
-    const policeJSON = [];
-    policeData.forEach(police => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': police.name,
-            },
-            geometry: JSON.parse(police.geojson),
-        };
-        policeJSON.push(features);
-    });
-    var policeGeoJSON = {
-        type: 'FeatureCollection',
-        features: policeJSON
-    };
-    const policeIcon = L.icon({
-        iconUrl: 'images/police.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const polices = L.geoJson(policeGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: policeIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    const policeMarkers = new L.MarkerClusterGroup();
-    return policeMarkers.addLayer(polices);
-
-}
-function addSchool(schoolData) {
-    const schoolJSON = [];
-    schoolData.forEach(school => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': school.name
-            },
-            geometry: JSON.parse(school.geojson),
-        };
-        schoolJSON.push(features);
-    });
-    var schoolGeoJSON = {
-        type: 'FeatureCollection',
-        features: schoolJSON
-    };
-    const schoolIcon = L.icon({
-        iconUrl: 'images/school.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const schools = L.geoJson(schoolGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: schoolIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    const schoolMarkers = new L.MarkerClusterGroup();
-    return schoolMarkers.addLayer(schools);
-
-}
-function addUni(uniData) {
-    const uniJSON = [];
-    uniData.forEach(uni => {
-
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': uni.name,
-            },
-            geometry: JSON.parse(uni.geojson),
-        };
-        uniJSON.push(features);
-    });
-    var uniGeoJSON = {
-        type: 'FeatureCollection',
-        features: uniJSON
-    };
-    const uniIcon = L.icon({
-        iconUrl: 'images/university.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const unis = L.geoJson(uniGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: uniIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    const uniMarkers = new L.MarkerClusterGroup();
-    return uniMarkers.addLayer(unis);
 }
 function addUber(uMD) {
     uDMJSON = [];
