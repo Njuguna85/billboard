@@ -67,6 +67,9 @@ class getData
         $su = new supermarket();
         $supermarket = $su->getsupermarket();
 
+        $ns = new nssf();
+        $nssf = $ns->getNssf();
+
         $data->billboards = $billboardData;
         $data->uber = $uber;
         $data->subCounties = $subcounties;
@@ -87,6 +90,7 @@ class getData
         $data->restaraunt = $restaraunt;
         $data->saloon = $saloon;
         $data->supermarket = $supermarket;
+        $data->nssf = $nssf;
 
         $final = json_encode($data);
         //$this->write_json_to_file($final);

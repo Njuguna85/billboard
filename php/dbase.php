@@ -688,3 +688,24 @@ class supermarket{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+class nssf
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getNssf()
+    {
+        // sql
+        $sql = "
+        SELECT
+            ST_AsGeoJSON(SHAPE) As geojson, name 
+        FROM ug_nssf  
+        ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}

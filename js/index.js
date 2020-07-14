@@ -62,6 +62,7 @@ async function fetchData() {
 async function addOverlays(data) {
     let billboards = addBillboards(data.billboards);
     let atmMarkers = addAtm(data.atms);
+    let nssf =  addNssf(data.nssf);
     let uber = addUber(data.uber);
     let nairobiSubCounties = addSubCounties(data.subCounties);
     let nairobiSubLocations = addSubLocations(data.subLocations);
@@ -136,6 +137,10 @@ async function addOverlays(data) {
                     name: "Bank",
                     icon: '<img src="images/bank.png" class="icons">',
                     layer: mapData.bank
+                },{
+                    name: "Nssf Ofices",
+                    icon: '<img src="images/office.png" class="icons">',
+                    layer: nssf
                 }, {
                     name: "Hospital",
                     icon: '<img src="images/hospital.png" class="icons"></img>',
@@ -441,6 +446,42 @@ function addAtm(atmData) {
     });
     const atmMarkers = new L.MarkerClusterGroup();
     return atmMarkers.addLayer(atms);
+}
+function addNssf(nssfData) {
+    const nssfJSON = [];
+    nssfData.forEach(nssf => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'name': nssf.name,
+            },
+            geometry: JSON.parse(nssf.geojson),
+        };
+        nssfJSON.push(features);
+    });
+    var nssfGeoJSON = {
+        type: 'FeatureCollection',
+        features: nssfJSON
+    };
+    const nssfIcon = L.icon({
+        iconUrl: 'images/office.png',
+        iconSize: [25, 25],
+        popupAncor: [-3, -76],
+    });
+    const nssfs = L.geoJson(nssfGeoJSON, {
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: nssfIcon
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(
+                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
+            )
+        }
+    });
+    const nssfMarkers = new L.MarkerClusterGroup();
+    return nssfMarkers.addLayer(nssfs);
 }
 function addUber(uMD) {
     uDMJSON = [];
