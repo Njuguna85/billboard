@@ -105,6 +105,14 @@ p {
 #legend img {
     vertical-align: middle;
 }
+#icons8{
+    height: 10px;
+    padding: 1px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
 
 #infoTab {
     margin-top: 5px;
@@ -201,6 +209,7 @@ tr:nth-child(even) {
     background-color: #dddddd;
     height: 30px;
     font-size: 14px;
+    position: relative;
 }
 
 /* 
