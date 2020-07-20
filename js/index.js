@@ -1,39 +1,92 @@
-const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
-const mapboxAttribution = 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
-//
-// map styles
-const streets = L.tileLayer(mapboxUrl, {
-    id: 'light-v10',
-    tileSize: 512,
-    zoomOffset: -1,
-    attribution: mapboxAttribution
-}),
-    satellite = L.tileLayer(mapboxUrl, {
-        id: 'satellite-streets-v11',
-        tileSize: 512,
-        zoomOffset: -1,
-        attribution: mapboxAttribution
-    });
-// Create a new instance of the map class
-var my_map = L.map(
-    'map', {
-    center: [-1.28333, 36.816667],
-    zoom: 11,
-    maxZoom: 18
-});
+let map;
+let infoWindow;
+var directionsService;
+var directionsRenderer;
+const mapContainer = document.getElementById("map");
 
-let mapData = new Object();
-let mobileUploads = [];
-// we need to make a request for mobile uploads within 
-// the past one week from today(2 dates)
-const today = new Date();
-const oneWkAgo = today.setDate(today.getDate() - 7);
-const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
-const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
+let legend = document.createElement('div');
+legend.setAttribute('id', 'legend')
+legend.innerHTML = ` <h3>Map Legend</h3>`;
 
-fetchData();
+infoTab = document.createElement('div');
+infoTab.setAttribute('id', 'infoTab');
+infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
 
-async function fetchMobileUploads(oneWkAgoDate, todaysDate) {
+const directionsPanel = document.createElement('div');
+directionsPanel.className = 'directionsPanel';
+directionsPanel.innerHTML = ` <h3>Directions</h3>`;
+const commD = [
+    'bank', 'hospital', 'police', 'school', 'university',
+    'bar', 'petrolStation', 'grocery', 'kiosk', 'pharmacy',
+    'restaraunt', 'saloon', 'supermarket'
+];
+
+function initMap() {
+    // set the zoom, scale, street view and full screen controls
+    // also create a custom map style 
+    const mapOptions = {
+        zoom: 12,
+        center: { lat: -1.28333, lng: 36.816667 },
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+            position: google.maps.ControlPosition.TOP_CENTER
+        },
+        zoomControl: true,
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.LEFT_TOP
+        },
+        scaleControl: true,
+        streetViewControl: true,
+        streetViewControlOptions: {
+            position: google.maps.ControlPosition.LEFT_TOP
+        },
+        fullscreenControl: true,
+        styles: [
+            { "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#444444" }] },
+            { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f2f2f2" }] },
+            { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+            { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
+            { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
+            { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+            { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+            { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#80DEEA" }, { "visibility": "on" }] }
+        ]
+    };
+
+    map = new google.maps.Map(mapContainer, mapOptions);
+    infoWindow = new google.maps.InfoWindow;
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
+    fetchMobileUploads();
+    fetchData();
+    // initialize directions service
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
+
+    // add traffic layer
+    // const trafficLayer = new google.maps.TrafficLayer();
+    // trafficLayer.setMap(map);
+}
+
+async function fetchData() {
+    let response = await fetch('./php/download.php');
+    if (response.ok) {
+        data = await response.json();
+        addOverlays(data);
+    } else {
+        alert('Something went wrong while fetching data. Error: ' + response.status);
+    }
+}
+
+async function fetchMobileUploads() {
+    // we need to make a request for mobile uploads within 
+    // the past one week from today(2 dates)
+    const today = new Date();
+    const oneWkAgo = today.setDate(today.getDate() - 7);
+    const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
+    const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
     const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${oneWkAgoDate}&end=${todaysDate}`;
     let response = await fetch(url, {
         method: "GET",
@@ -45,235 +98,222 @@ async function fetchMobileUploads(oneWkAgoDate, todaysDate) {
     });
     if (response.ok) {
         mobileData = await response.json();
-        filterMobile(mobileData.data);
+        getmobileMarkers(mobileData.data);
     } else {
         alert('Something went wrong while fetching Mobile Uploads. Error: ' + response.status);
     }
 }
-async function fetchData() {
-    let response = await fetch('./php/download.php');
-    if (response.ok) {
-        data = await response.json();
-        addOverlays(data);
-    } else {
-        alert('Something went wrong while fetching data. Error: ' + response.status);
-    }
-}
-async function addOverlays(data) {
-    let billboards = addBillboards(data.billboards);
-    let atmMarkers = addAtm(data.atms);
-    let nssf =  addNssf(data.nssf);
-    let uber = addUber(data.uber);
-    let nairobiSubCounties = addSubCounties(data.subCounties);
-    let nairobiSubLocations = addSubLocations(data.subLocations);
-    let mathareArea = addMathare(data.mathare);
-    let kiberaArea = addKibera(data.kibera);
 
+function addOverlays(data) {
+    addBillboards(data.billboards);
+    addAtm(data.atms);
+    addNssf(data.nssf);
+    addUber(data.uber);
+    addSubLocations(data.subLocations);
     for (const [key, value] of Object.entries(data)) {
-        commD = [
-            'bank', 'hospital', 'police', 'school', 'university',
-            'bar', 'petrolStation', 'grocery', 'kiosk', 'pharmacy',
-            'restaraunt', 'saloon', 'supermarket'
-        ];
         if (commD.includes(key)) {
             add(key, value);
         }
     }
-    await fetchMobileUploads(oneWkAgoDate, todaysDate);
-
-    const baseLayers = [{
-        name: "Streets",
-        layer: streets
-    }, {
-        active: true,
-        name: "Satellite",
-        layer: satellite
-    }];
-    const overLayers = [
-        {
-            name: "Billboards",
-            icon: '<img src="images/marker.png" style="height:15px;"></img>',
-            layer: billboards
-        },
-        {
-            active: true,
-            name: "Mobile Uploads",
-            icon: '<img src="images/place.png" style="height:17px;"></img>',
-            layer: await mobileUploads[0]
-        },
-        {
-            group: 'Maps',
-            collapsed: true,
-            layers: [{
-                name: "Uber Travel Time From CBD",
-                layer: uber
-            },
-            {
-                name: "Nairobi Sub Counties",
-                layer: nairobiSubCounties
-            },
-            {
-                name: "Nairobi Sub Locations",
-                layer: nairobiSubLocations
-            },
-            {
-                name: 'Mathare Area',
-                layer: mathareArea
-            }, {
-                name: 'Kibera Village',
-                layer: kiberaArea
-            }
-            ]
-        },
-        {
-            group: 'Points of Interest',
-            collapsed: true,
-            layers: [
-                {
-                    name: "ATM",
-                    icon: '<img src="images/atm.png" class="icons"></img>',
-                    layer: atmMarkers
-                }, {
-                    name: "Bank",
-                    icon: '<img src="images/bank.png" class="icons">',
-                    layer: mapData.bank
-                },{
-                    name: "Nssf Ofices",
-                    icon: '<img src="images/office.png" class="icons">',
-                    layer: nssf
-                }, {
-                    name: "Hospital",
-                    icon: '<img src="images/hospital.png" class="icons"></img>',
-                    layer: mapData.hospital
-                }, {
-                    name: "Police Post",
-                    icon: '<img src="images/police.png" class="icons"></img>',
-                    layer: mapData.police
-                }, {
-                    name: "Schools",
-                    icon: '<img src="images/school.png" class="icons"></img>',
-                    layer: mapData.school
-                }, {
-                    name: "Universities",
-                    icon: '<img src="images/university.png" class="icons"></img>',
-                    layer: mapData.university
-                }, {
-                    name: "Bars",
-                    icon: '<img src="images/bar.png" class="icons"></img>',
-                    layer: mapData.bar
-                }, {
-                    name: "Petrol Station",
-                    icon: '<img src="images/petrolStation.png" class="icons"></img>',
-                    layer: mapData.petrolStation
-                }, {
-                    name: "Grocery",
-                    icon: '<img src="images/grocery.png" class="icons"></img>',
-                    layer: mapData.grocery
-                }, {
-                    name: "Kiosk",
-                    icon: '<img src="images/kiosk.png" class="icons"></img>',
-                    layer: mapData.kiosk
-                }, {
-                    name: "Pharmacy",
-                    icon: '<img src="images/pharmacy.png" class="icons"></img>',
-                    layer: mapData.pharmacy
-                }, {
-                    name: "Restaraunt",
-                    icon: '<img src="images/restaraunt.png" class="icons"></img>',
-                    layer: mapData.restaraunt
-                },
-                {
-                    name: "Saloon",
-                    icon: '<img src="images/saloon.png" class="icons"></img>',
-                    layer: mapData.saloon
-                }, {
-                    name: "SuperMarket",
-                    icon: '<img src="images/supermarket.png" class="icons"></img>',
-                    layer: mapData.supermarket
-                }
-
-
-            ]
-        }];
-    panelLayers = new L.Control.PanelLayers(baseLayers, overLayers, {
-        title: 'LEGEND ',
-        className: 'legend',
-        collapsed: true,
-        compact: false,
-        collapsibleGroups: true
-    })
-    my_map.addControl(panelLayers);
 }
+
 function add(key, value) {
-
-    const json = [];
-
-    value.forEach(el => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': el.name,
-            },
-            geometry: JSON.parse(el.geojson),
-        };
-        json.push(features);
+    // create a markers array 
+    const markers = value.map(el => {
+        // the x and y of the marker
+        latitude = JSON.parse(el.geojson).coordinates[1];
+        longitude = JSON.parse(el.geojson).coordinates[0];
+        let latlng = new google.maps.LatLng(latitude, longitude);
+        iconUrl = `images/${key}.png`
+        let contentString = '<p><strong>' + el.name + '<strong></p>' +
+            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        // open a popup on click
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
     });
-
-    const GeoJSON = {
-        type: 'FeatureCollection',
-        features: json
-    };
-
-    const Icon = L.icon({
-        iconUrl: `images/${key}.png`,
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-
-    const iconLayer = L.geoJson(GeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: Icon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    );
+    div = document.createElement('div');
+    div.innerHTML = `<img src='${iconUrl}' style="height:20px;"/> ${key}<input id="${key}Checked" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById(`${key}Checked`)
+        // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
         }
-    });
-    const markers = new L.MarkerClusterGroup();
-    markers.addLayer(iconLayer);
-    mapData[`${key}`] = markers;
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+    })
 }
+
+function addBillboards(data) {
+    const markers = data.map(el => {
+        let latlng = new google.maps.LatLng(el.latitude, el.longitude)
+        let contentString =
+            '<div class ="infoWindow">' +
+            '<div>' + 'Name: <b>' + parseData(el.billboardi) + '</b></div>' +
+            '<div>' + 'Route: <b>' + parseData(el.routename) + '</b></div>' +
+            '<div>' + 'Size: <b>' + parseData(el.size) + '</b></div>' +
+            '<div>' + 'Visibility: <b>' + parseData(el.visibility) + '</b> </div>' +
+            '<div>' + 'Medium: <b>' + parseData(el.selectmedi) + '</b> </div>' +
+            '<div>' + 'Traffic: <b>' + parseData(el.traffic) + '</b> </div>' +
+            '</div>' +
+            '<img class="billboardImage" alt="billboard photo" src=' + el.photo + '>' +
+            '<button class="btn end" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Start Here</button>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/marker.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/marker.png' style="height:20px;"/>Billboards<input id="billboardChecked" checked type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('billboardChecked')
+        // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
+        }
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+    })
+}
+
+function addAtm(data) {
+    const markers = data.map(el => {
+        latitude = JSON.parse(el.geojson).coordinates[1];
+        longitude = JSON.parse(el.geojson).coordinates[0];
+        let latlng = new google.maps.LatLng(latitude, longitude);
+        let contentString = '<p>Operator: <strong>' + el.operator + '<strong></p>' +
+            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/atm.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/atm.png' style="height:20px;"/>ATM<input id="atmCheck" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('atmCheck')
+        // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
+        }
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+    })
+}
+
+function addNssf(data) {
+    const markers = data.map(el => {
+        let latlng = new google.maps.LatLng(JSON.parse(el.geojson).coordinates[1], JSON.parse(el.geojson).coordinates[0]);
+        let contentString = '<p><strong>' + el.name + '<strong></p>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/office.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/office.png' style="height:20px;"/>NSSF Offices<input id="nssfChecked" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('nssfChecked')
+        // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
+        }
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+
+
+    })
+}
+
 function getmobileMarkers(deliveriesData) {
     mobileMarkersDates = new Object();
     const uploadDates = [];
-    const deliJSON = [];
-    const deliIcon = L.icon({
-        iconUrl: 'images/place.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    deliveriesData.forEach(deli => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'product_name': deli.product_name,
-                'quantity': deli.quantity,
-                'product_description': deli.product_description,
-                'delivered_by': deli.user.first_name,
-                'photo': deli.photo,
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [deli.longitude, deli.latitude]
+    const markers = deliveriesData.map(el => {
+        let latlng = new google.maps.LatLng(el.latitude, el.longitude)
+        let contentString =
+            'Product Name: <b>' + parseData(el.product_name) + '</b><br/>' +
+            'Delivered By: <b>' + parseData(el.delivered_by) + '</b> <br/>' +
+            'Description: <b>' + parseData(el.product_description) + '</b> <br/>' +
+            'Quantity: <b>' + parseData(el.quantity) + '</b> <br/>' +
+            '<img class="billboardImage" alt="delivery photo" src=' + el.photo + '></img>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/place.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
             }
-        };
-        deliJSON.push(features);
+        })(marker, el));
         // add list of dates
-        if (deli.created_at) {
-            let date = deli.created_at.slice(0, 10);
+        if (el.created_at) {
+            let date = el.created_at.slice(0, 10);
             if (uploadDates.length == 0) {
                 uploadDates.push(date);
             } else {
@@ -282,365 +322,111 @@ function getmobileMarkers(deliveriesData) {
                 }
             }
         }
+        return marker
     });
     mobileMarkersDates.dates = uploadDates;
-
-    var delGeoJSON = {
-        type: 'FeatureCollection',
-        features: deliJSON
-    };
-    const deliveriesMarkers = L.geoJson(delGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: deliIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Product Name: <b>' + parseData(feature.properties.product_name) + '</b><br/>' +
-                'Delivered By: <b>' + parseData(feature.properties.delivered_by) + '</b> <br/>' +
-                'Description: <b>' + parseData(feature.properties.product_description) + '</b> <br/>' +
-                'Quantity: <b>' + parseData(feature.properties.quantity) + '</b> <br/>' +
-                '<img class="billboardImage" alt="delivery photo" src=' + feature.properties.photo + '></img>'
-            )
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/place.png' style="height:20px;"/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('mobileCheck')
+        // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
         }
-    });
-    mobileMarkersDates.markers = deliveriesMarkers;
-    return mobileMarkersDates;
-}
-async function filterMobile(deliveriesData) {
-    // filter the data by dates. 
-    // first get all the dates 
-    // create a dropdown list with the dates
-    const mobileMarkersDates = await getmobileMarkers(deliveriesData);
-    const deliveryMarkers = new L.MarkerClusterGroup();
-    deliveryMarkers.addLayer(mobileMarkersDates.markers);
-
-    mobileUploads.push(deliveryMarkers);
-    console.log(mobileUploads.length);
-
-
-    // we now have all our dates now 
-    // create a custom control 
-    var selectDate = L.control({ position: 'topleft' });
-    selectDate.onAdd = function (my_map) {
-        this._div = L.DomUtil.create('div', 'filterDate')
-        this.update();
-        return this._div;
-    };
-    selectDate.update = function () {
-        this._div.innerHTML = `
-        <h5>Filter Mobile Uploads By Date: </h5>
-        <select id="uploadDate">
-            <option value="">Select A Date...</option>
-            ${mobileMarkersDates.dates.map(date => { return `<option value="${date}">${date}</option>` })}
-        </select>
-        `;
-    };
-    selectDate.addTo(my_map);
-    //
-    // listen to a change in the select and capture its value
-    // clear the layers and add the layers with the condition
-    document.querySelector('#uploadDate').addEventListener('change', e => {
-        const choiceDate = document.querySelector('#uploadDate').value;
-        deliveryMarkers.clearLayers();
-        const newMarkers = []
-        deliveriesData.forEach(del => {
-            let date = del.created_at.slice(0, 10);
-            if (date === choiceDate) {
-                newMarkers.push(del);
-            }
-        })
-        newDeliveries = getmobileMarkers(newMarkers);
-        deliveryMarkers.addLayer(newDeliveries.markers);
-    });
-
-
-}
-function addBillboards(billboardsData) {
-    const popIcon = L.icon({
-        iconUrl: 'images/marker.png',
-        iconSize: [20, 20],
-        popupAncor: [-3, -76],
-    });
-    const billboardJSON = [];
-    billboardsData.forEach(billboard => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': billboard.billboardi,
-                'routename': billboard.routename,
-                'selectmedi': billboard.selectmedi,
-                'sitelight': billboard.site_light,
-                'zone': billboard.zone_,
-                'size': billboard.size_,
-                'orientation': billboard.orientatio,
-                'condition': billboard.condition,
-                'visibility': billboard.visibility,
-                'traffic': billboard.traffic,
-                'photo': billboard.photo,
-                'road_type': billboard.road_type
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [billboard.longitude, billboard.latitude]
-            }
-        };
-        billboardJSON.push(features);
-    });
-    var billboardGeoJSON = {
-        type: 'FeatureCollection',
-        features: billboardJSON
-    };
-    return billboards = L.geoJson(billboardGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: popIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>' +
-                'Route: <b>' + parseData(feature.properties.routename) + '</b> <br/>' +
-                'Size: <b>' + parseData(feature.properties.size) + '</b> <br/>' +
-                'Visibility: <b>' + parseData(feature.properties.visibility) + '</b> <br/>' +
-                'Medium: <b>' + parseData(feature.properties.selectmedi) + '</b> </br>' +
-                '<img class="billboardImage" alt="billboard photo" src=' + feature.properties.photo + '></img>'
-            )
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
         }
-    });
 
+
+    })
 }
-function addAtm(atmData) {
-    const atmJSON = [];
-    atmData.forEach(atm => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'operator': atm.operator,
-            },
-            geometry: JSON.parse(atm.geojson),
-        };
-        atmJSON.push(features);
-    });
-    var atmGeoJSON = {
-        type: 'FeatureCollection',
-        features: atmJSON
-    };
-    const atmIcon = L.icon({
-        iconUrl: 'images/atm.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const atms = L.geoJson(atmGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: atmIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Operator: <b>' + parseData(feature.properties.operator) + '</b><br/>'
-            )
-        }
-    });
-    const atmMarkers = new L.MarkerClusterGroup();
-    return atmMarkers.addLayer(atms);
+
+function getColor(d) {
+    return d > 3318 ? '#800026' :
+        d > 2878 ? '#BD0026' :
+            d > 2437 ? '#E31A1C' :
+                d > 1997 ? '#FC4E2A' :
+                    d > 1556 ? '#FD8D3C' :
+                        d > 1116 ? '#FEB24C' :
+                            d > 675 ? '#FED976' :
+                                '#FFEDA0';
 }
-function addNssf(nssfData) {
-    const nssfJSON = [];
-    nssfData.forEach(nssf => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': nssf.name,
-            },
-            geometry: JSON.parse(nssf.geojson),
-        };
-        nssfJSON.push(features);
-    });
-    var nssfGeoJSON = {
-        type: 'FeatureCollection',
-        features: nssfJSON
-    };
-    const nssfIcon = L.icon({
-        iconUrl: 'images/office.png',
-        iconSize: [25, 25],
-        popupAncor: [-3, -76],
-    });
-    const nssfs = L.geoJson(nssfGeoJSON, {
-        pointToLayer: (feature, latlng) => {
-            return L.marker(latlng, {
-                icon: nssfIcon
-            });
-        },
-        onEachFeature: (feature, layer) => {
-            layer.bindPopup(
-                'Name: <b>' + parseData(feature.properties.name) + '</b><br/>'
-            )
-        }
-    });
-    const nssfMarkers = new L.MarkerClusterGroup();
-    return nssfMarkers.addLayer(nssfs);
-}
-function addUber(uMD) {
+
+function addUber(uber) {
     uDMJSON = [];
-    uMD.forEach(uber => {
+    uber.forEach(el => {
         let features = {
             type: 'Feature',
             properties: {
-                'movement': uber.movement_i,
-                'areaName': uber.display_na,
-                'origin': uber.origin_dis,
-                'destination': uber.destinat_1,
-                'travelTime': uber.mean_trave,
-                'minTime': uber.range___lo,
-                'maxTime': uber.range___up
+                'movement': el.movement_i,
+                'areaName': el.display_na,
+                'origin': el.origin_dis,
+                'destination': el.destinat_1,
+                'travelTime': el.mean_trave,
+                'minTime': el.range___lo,
+                'maxTime': el.range___up
             },
-            geometry: JSON.parse(uber.geojson),
+            geometry: JSON.parse(el.geojson),
         }
         uDMJSON.push(features);
     });
-    function getColor(d) {
-        return d > 3318 ? '#800026' :
-            d > 2878 ? '#BD0026' :
-                d > 2437 ? '#E31A1C' :
-                    d > 1997 ? '#FC4E2A' :
-                        d > 1556 ? '#FD8D3C' :
-                            d > 1116 ? '#FEB24C' :
-                                d > 675 ? '#FED976' :
-                                    '#FFEDA0';
-    }
-    function style(feature) {
+    uDMGeoJSON = {
+        "type": "FeatureCollection",
+        "features": uDMJSON
+    };
+
+    map.data.setStyle((feature) => {
+        travelTime = feature.getProperty('travelTime');
         return {
-            fillColor: getColor(feature.properties.travelTime),
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            fillOpacity: 0.7
-        };
-    }
-    function highLightUber(e) {
-        var layer = e.target;
-
-        layer.setStyle({
-            weight: 5,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0
-        });
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
+            fillColor: getColor(travelTime),
+            fillOpacity: .9,
+            strokeColor: '#6D4C41',
+            strokeWeight: 1,
+            zIndex: 1000
         }
-        info.update(layer.feature.properties);
-
-    }
-    function resetHighlightUber(e) {
-        uber.resetStyle(e.target);
-        info.update();
-    }
-    function zoomToFeatureUber(e) {
-        my_map.flyToBounds(e.target.getBounds());
-    }
-    function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highLightUber,
-            mouseout: resetHighlightUber,
-            click: zoomToFeatureUber
-        });
-    }
-    return uber = L.geoJson(uDMJSON, {
-        style: style,
-        onEachFeature: onEachFeature
+    });
+    map.data.addListener('click', function (event) {
+        map.data.revertStyle();
+        map.data.overrideStyle(event.feature, { fillColor: '#CFD8DC' });
+    });
+    div = document.createElement('div');
+    div.innerHTML = `Uber Data<input id="uberCheck" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('uberCheck')
+        // if on
+        if (cb.checked) {
+            map.data.addGeoJson(uDMGeoJSON);
+        }
+        if (!cb.checked) {
+            map.data.forEach(function (feature) {
+                // if off
+                map.data.remove(feature);
+            })
+        }
     });
 }
-function addSubCounties(subCounties) {
-    const subCountyStyle = {
-        "fillColor": "#B3E5FC",
-        "weight": 2,
-    };
-    subCountyJSON = [];
-    subCounties.forEach(subCounty => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'name': subCounty.subcontnam,
-                'maleTotalPoulation': subCounty.malepopula,
-                'femaleTotalPoulation': subCounty.femalepopu,
-                'totalPopulation': subCounty.totalpopul,
-                'totalAbove5Years': subCounty.total5abov,
-                'totaldisabled': subCounty.totaldisab
-            },
-            geometry: JSON.parse(subCounty.geojson),
-        }
-        subCountyJSON.push(features);
-    });
-    function highLightsubCounty(e) {
-        var layer = e.target;
 
-        layer.setStyle({
-            weight: 5,
-            color: '#BA68C8',
-            // fillOpacity: 0
-            fillColor: '#42A5F5'
-        });
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        }
-        sCountyinfo.update(layer.feature.properties);
-
-    }
-    function resetHighlightsubCounty(e) {
-        nairobiSubCounties.resetStyle(e.target);
-        sCountyinfo.update();
-    }
-    function zoomToSubCounty(e) {
-        my_map.flyToBounds(e.target.getBounds());
-    }
-    function onEachSubCounty(feature, layer) {
-        layer.on({
-            mouseover: highLightsubCounty,
-            mouseout: resetHighlightsubCounty,
-            click: zoomToSubCounty
-        });
-    }
-    // custom information
-    var sCountyinfo = L.control({ position: 'topleft' });
-    sCountyinfo.onAdd = function (my_map) {
-        this._div = L.DomUtil.create('div', 'sCountyinfo') // create a div with the class of sCountyinfo
-        this.update();
-        return this._div;
-    };
-    // update the sCountyinfo control based on feature properties
-    sCountyinfo.update = function (props) {
-        this._div.innerHTML =
-            '<h4>2019 Census Data</h4>' +
-            (props ?
-                '<table>' +
-                '<tr><td>Area Name: </td>' + '<b></td><td>' + props.name + '</td></b></tr>' +
-                '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(props.totalPopulation) + '</td></b></tr>' +
-                '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(props.maleTotalPoulation) + '</td><br/>' +
-                '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(props.femaleTotalPoulation) + '</td></b></tr>' +
-                '<tr><td>Total Population Above 5 Years: ' + '<b></td><td>' + parseValues(props.totalAbove5Years) + '</td></b></tr>' +
-                '<tr><td>Total Population Living with Disability: ' + '<b></td><td>' + parseValues(props.totaldisabled) + '</td></b></tr>' +
-                '</table>'
-                : 'Enable the sub counties layer <br/>and Hover Over a Region');
-    };
-    sCountyinfo.addTo(my_map);
-
-    return nairobiSubCounties = L.geoJson(subCountyJSON, {
-        style: subCountyStyle,
-        onEachFeature: onEachSubCounty
-    });
+function sublocationsColors(d) {
+    return d > 78340 ? '#084081' :
+        d > 68600 ? '#0868ac' :
+            d > 58900 ? '#2b8cbe' :
+                d > 49200 ? '#4eb3d3' :
+                    d > 39500 ? '#7bccc4' :
+                        d > 29800 ? '#a8ddb5' :
+                            d > 20100 ? '#ccebc5' :
+                                d > 10400 ? '#e0f3db' :
+                                    d > 700 ? '#f7fcf0' :
+                                        '#fdfdfd';
 }
+
 function addSubLocations(subLocations) {
-    const subLocationStyle = {
-        "fillColor": "#EEEEEE",
-        'color': '#78909C',
-        "weight": 1.5,
-    };
-    sublocationJSON = [];
+    subLocationsJSON = [];
     subLocations.forEach(sublocation => {
         let features = {
             type: 'Feature',
@@ -653,123 +439,162 @@ function addSubLocations(subLocations) {
             },
             geometry: JSON.parse(sublocation.geojson),
         }
-        sublocationJSON.push(features);
+        subLocationsJSON.push(features);
     });
-    function highLightsubLocation(e) {
-        var layer = e.target;
-
-        layer.setStyle({
-            weight: 5,
-            color: '#2E7D32',
-            fillColor: '#FFEB3B'
-        });
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
+    subLocationsGeoJSON = {
+        "type": "FeatureCollection",
+        "features": subLocationsJSON
+    };
+    map.data.setStyle((feature) => {
+        totalPopulation = feature.getProperty('totalPopulation');
+        return {
+            fillColor: sublocationsColors(totalPopulation),
+            fillOpacity: 1,
+            strokeColor: '#FFF9C4',
+            strokeWeight: 1,
+            zIndex: 10
         }
-        sLocationInfo.update(layer.feature.properties);
+    });
+    const showDetails = (event) => {
+        map.data.revertStyle();
+        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        name = event.feature.getProperty('name');
+        totalPopulation = event.feature.getProperty('totalPopulation');
+        totalHouseHold = event.feature.getProperty('totalHouseHold');
+        maleTotalPoulation = event.feature.getProperty('maleTotalPoulation');
+        femaleTotalPoulation = event.feature.getProperty('femaleTotalPoulation');
+        info = infoTab.querySelector('.info')
+        info.innerHTML =
+            '<h4>2019 Census Data</h4>' +
+            '<table>' +
+            '<tr><td>Area Name: </td>' + '<b></td><td>' + name + '</td></b></tr>' +
+            '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(totalPopulation) + '</td></b></tr>' +
+            '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(maleTotalPoulation) + '</td><br/>' +
+            '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(femaleTotalPoulation) + '</td></b></tr>' +
+            '<tr><td>Total HouseHolds: ' + '<b></td><td>' + parseValues(totalHouseHold) + '</td></b></tr>' +
+            '</table>';
 
     }
-    function resetHighlightsubLocation(e) {
-        nairobiSubLocations.resetStyle(e.target);
-        sLocationInfo.update();
+    const key = () => {
+        info = infoTab.querySelector('.info')
+        info.innerHTML = `
+        <div class="sublocLegend">
+            <div>KEY</div>
+            <div><span class="subColor" style="background-color: #f7fcf0;"></span> >700 </div>
+            <div><span class="subColor" style="background-color: #e0f3db;"></span> >10400 </div>
+            <div><span class="subColor" style="background-color:#ccebc5;"></span> >20100 </div>
+            <div><span class="subColor" style="background-color: #a8ddb5;"></span> >29800 </div>
+            <div><span class="subColor" style="background-color: #7bccc4;"></span> >39500 </div>
+            <div><span class="subColor" style="background-color: #4eb3d3;"></span> >49200 </div>
+            <div><span class="subColor" style="background-color: #2b8cbe;"></span> >58900 </div>
+            <div><span class="subColor" style="background-color: #0868ac;"></span> >68600 </div>
+            <div><span class="subColor" style="background-color: #084081;"></span> >78339 </div>
+        </div>
+        `
     }
+    map.data.addListener('click', showDetails, false);
+    map.data.addListener('mouseover', showDetails, false);
+    map.data.addListener('mouseout', () => {
+        info = infoTab.querySelector('.info').innerHTML = ''
+        key();
+    });
 
-    function zoomToSubLocation(e) {
-        my_map.flyToBounds(e.target.getBounds());
-    }
-    function onEachSubLocation(feature, layer) {
-        layer.on({
-            mouseover: highLightsubLocation,
-            mouseout: resetHighlightsubLocation,
-            click: zoomToSubLocation
-        });
-    }
-    // custom information
-    var sLocationInfo = L.control({ position: 'topleft' });
-    sLocationInfo.onAdd = function (my_map) {
-        this._div = L.DomUtil.create('div', 'sLocationInfo') // create a div with the class of sLocationInfo
-        this.update();
-        return this._div;
-    };
-    // update the sLocationInfo control based on feature properties
-    sLocationInfo.update = function (props) {
-        this._div.innerHTML =
-            '<h4>Sublocations Data</h4>' +
-            (props ?
-                '<table>' +
-                '<tr><td>Area Name: </td>' + '<b></td><td>' + props.name + '</td></b></tr>' +
-                '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(props.totalPopulation) + '</td></b></tr>' +
-                '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(props.maleTotalPoulation) + '</td><br/>' +
-                '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(props.femaleTotalPoulation) + '</td></b></tr>' +
-                '<tr><td>Total HouseHolds: ' + '<b></td><td>' + parseValues(props.totalHouseHold) + '</td></b></tr>' +
-                '</table>'
-                : 'Enable the sub locations layer <br/>and Hover Over a Region');
-    };
-    sLocationInfo.addTo(my_map);
-    return nairobiSubLocations = L.geoJson(sublocationJSON, {
-        style: subLocationStyle,
-        onEachFeature: onEachSubLocation
+    div = document.createElement('div');
+    div.innerHTML = `Nairobi Sublocations<input id="sublCheck" type="checkbox">`;
+    legend.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById('sublCheck')
+        // if on
+        if (cb.checked) {
+            map.data.addGeoJson(subLocationsGeoJSON);
+            key();
+        }
+        if (!cb.checked) {
+            // if off
+            map.data.forEach(function (feature) {
+                map.data.remove(feature);
+            })
+            infoTab.querySelector('.info').innerHTML = ''
+        }
     });
 }
-function addMathare(mathareData) {
-    const mathareStyle = {
-        "fillColor": "#FEB24C",
-        "weight": 2,
-        'opacity': 1,
-        'color': 'white',
-        'dashArray': '3',
-        'fillOpacity': 0.7
-    };
-    mathareJSON = [];
-    mathareData.forEach(area => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'Name': area.name,
 
-            },
-            geometry: JSON.parse(area.geojson),
-        }
-        mathareJSON.push(features);
-    });
-    return mathareArea = L.geoJson(mathareJSON, {
-        style: mathareStyle
-    });
+function parseData(val) {
+    if (val == null || val == undefined) {
+        return ''
+    }
+    return val;
 }
-function addKibera(kiberaData) {
-    const kiberaStyle = {
-        "fillColor": "#FEB24C",
-        "weight": 2,
-        'opacity': 1,
-        'color': 'white',
-        'dashArray': '3',
-        'fillOpacity': 0.7
-    };
-    kiberaJSON = [];
-    kiberaData.forEach(area => {
-        let features = {
-            type: 'Feature',
-            properties: {
-                'Name': area.name,
 
-            },
-            geometry: JSON.parse(area.geojson),
-        }
-        kiberaJSON.push(features);
-    });
-    return kiberaArea = L.geoJson(kiberaJSON, {
-        style: kiberaStyle
-    });
-}
 function parseValues(val) {
     if (val == null || val == undefined) {
         return ''
     }
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-function parseData(val) {
-    if (val == null || val == undefined) {
-        return ''
+//
+// create routes
+const tracker = new Object();
+const stopPoints = [];
+mapContainer.addEventListener('click', e => {
+    if (e.target.matches('.start')) {
+        const lat = parseFloat(e.target.closest('.start').dataset.lat);
+        const long = parseFloat(e.target.closest('.start').dataset.long);
+        const LatLng = new google.maps.LatLng(lat, long);
+        tracker.start = LatLng
+        calcRoute(tracker);
+
     }
-    return val;
+    if (e.target.matches('.end')) {
+        const lat = parseFloat(e.target.closest('.end').dataset.lat);
+        const long = parseFloat(e.target.closest('.end').dataset.long);
+        const LatLng = new google.maps.LatLng(lat, long);
+        tracker.end = LatLng;
+        calcRoute(tracker);
+    }
+    if (e.target.matches('.stop')) {
+        const lat = parseFloat(e.target.closest('.stop').dataset.lat);
+        const long = parseFloat(e.target.closest('.stop').dataset.long);
+        const LatLng = new google.maps.LatLng(lat, long);
+        stopPoints.push({ location: LatLng, stopover: true })
+        tracker.stop = stopPoints;
+        calcRoute(tracker);
+    }
+});
+
+function calcRoute(tracker) {
+    div = document.createElement('div');
+    let start, end, waypts;
+    if (tracker.start) {
+        start = tracker.start;
+    }
+    if (tracker.end) {
+        end = tracker.end;
+    }
+    if (tracker.stop) {
+        if (tracker.stop.length > 8) {
+            window.alert('Please Minimize the stop points to 8')
+        }
+        waypts = tracker.stop
+    }
+    if (start != undefined && end != undefined) {
+        const request = {
+            origin: start,
+            destination: end,
+            waypoints: waypts,
+            optimizeWaypoints: true,
+            travelMode: 'DRIVING'
+        };
+        directionsService.route(request, function (response, status) {
+            if (status == 'OK') {
+                directionsRenderer.setDirections(response);
+                directionsRenderer.setPanel(div);
+                directionsPanel.appendChild(div);
+                map.controls[google.maps.ControlPosition.LEFT_TOP].push(directionsPanel);
+            } else {
+                window.alert("Directions request failed due to " + status);
+            }
+        });
+    }
+
 }

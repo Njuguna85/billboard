@@ -13,8 +13,8 @@ class getData
         $u = new uber();
         $uber = $u->getUbertime();
 
-        $sub = new subcounties();
-        $subcounties = $sub->getsubcounties();
+        // $sub = new subcounties();
+        // $subcounties = $sub->getsubcounties();
 
         $at = new atm();
         $atms = $at->getAtm();
@@ -25,11 +25,11 @@ class getData
         $hos = new hospital();
         $hospitals = $hos->getHospital();
 
-        $ki = new kibera();
-        $kibera = $ki->getKibera();
+        // $ki = new kibera();
+        // $kibera = $ki->getKibera();
 
-        $ma = new mathare();
-        $mathare = $ma->getMathare();
+        // $ma = new mathare();
+        // $mathare = $ma->getMathare();
 
         $pol = new police();
         $police = $pol->getPolicePost();
@@ -72,11 +72,11 @@ class getData
 
         $data->billboards = $billboardData;
         $data->uber = $uber;
-        $data->subCounties = $subcounties;
+        // $data->subCounties = $subcounties;
         $data->subLocations = $sublocations;
         $data->atms = $atms;
-        $data->kibera = $kibera;
-        $data->mathare = $mathare;
+        // $data->kibera = $kibera;
+        // $data->mathare = $mathare;
         $data->bank = $banks;
         $data->hospital = $hospitals;
         $data->police = $police;

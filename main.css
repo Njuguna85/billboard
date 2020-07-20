@@ -13,21 +13,6 @@ body {
     box-sizing: border-box;
 }
 
-.btn {
-    display: block;
-    background: #3949AB;
-    outline: none;
-    border: 1px #27ae60;
-    padding: 10px 15px;
-    color: white;
-}
-
-.btn:hover {
-    background: #9ea8e6;
-    transition: all .2s;
-    transform: scale(1.1);
-}
-
 /*                 MAP             */
 #billboardDetails {
     width: 100%;
@@ -83,25 +68,88 @@ p {
     width: 98%;
     height: 95%;
     margin: 10px auto 5px;
-    /* transition: .2s ease-in-out; */
 }
 
-.leaflet-geosearch-bar {
-    position: relative;
-    display: block;
-    height: auto;
-    width: 400px;
-    max-width: calc(100% - 120px);
-    margin: 10px auto 0;
-    cursor: auto;
-    z-index: 1000;
+#legend {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    /* backdrop-filter: blur(20px); */
+    background: #fffeee;
+    color: #050303;
+    padding: 10px;
+    font-weight: bold;
+    width: fit-content;
+    opacity: 1;
 }
 
+#legend>div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px;
+    align-items: center;
+    font-size: 13px;
+    text-transform: capitalize;
+}
 
-h3 {
+#legend>div:last-child {
+    margin-bottom: 20px;
+}
+
+#legend h3,
+#infoTab h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    text-transform: uppercase;
     text-align: center;
 }
 
+#legend img {
+    vertical-align: middle;
+}
+
+#infoTab {
+    margin-top: 5px;
+    width: 220px;
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: #fffeee;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.gm-style .gm-style-iw {
+    padding-top: 10px;
+    width: 280px;
+    text-align: center;
+}
+
+.infoWindow>div {
+    display: flex;
+    justify-content: start;
+}
+
+.billboardImage {
+    width: 70%;
+    display: block;
+    margin: auto;
+}
+
+.directionsPanel {
+    width: 320px;
+    background: #fffeee;
+    overflow-y: scroll;
+    top: 175px !important;
+}
+.sublocLegend{
+    width: 100%;
+    background: #fffeee;
+}
+.subColor{
+    width: 30px;
+    height: 20px;
+}
+.sublocLegend>div {
+    display: flex;
+    justify-content: start;
+  }
 .header {
     width: 100%;
     margin: auto;
@@ -120,64 +168,6 @@ h3 {
     text-decoration: underline;
 }
 
-#signOut {
-    display: block;
-}
-
-.leaflet-popup-content-wrapper {
-    width: 200px;
-    background-color: #FFF9C4;
-    color: rgb(8, 10, 10);
-    text-align: center;
-}
-
-.billboardImage {
-    height: 100px;
-    display: block;
-    margin: auto;
-}
-
-.leaflet-panel-layers-list {
-    height: fit-content;
-}
-
-.legend {
-    background-color: #FFEB3B;
-}
-
-div.leaflet-bottom.leaflet-right {
-    margin-right: 50%;
-}
-div.leaflet-panel-layers-group.collapsible.expanded > div:last-child{
-    margin-bottom: 30px;
-}
-.icons{
-    height: 20px;
-    padding: 1px;
-}
-
-/* custom info control */
-.info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: rgb(191, 245, 178);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
-.info h4,
-.sCountyinfo h4 .sLocationInfo h4 {
-    margin: 0 0 5px;
-    color: rgb(0, 0, 0);
-}
-
-.sCountyinfo,
-.sLocationInfo {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: rgb(99, 236, 156);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
 .filterDate {
     background-color: #FFEB3B;
     position: absolute;
@@ -189,10 +179,6 @@ div.leaflet-panel-layers-group.collapsible.expanded > div:last-child{
     align-items: center;
 }
 
-.leaflet-left {
-    position: relative;
-    left: 0;
-}
 
 table {
     border-collapse: collapse;
@@ -312,28 +298,5 @@ tr:nth-child(even) {
 
     }
 
-    #uploadForm {
-        font-size: 10px;
-    }
-
-    #uploadForm input[type=file] {
-        display: none;
-        padding: 5px;
-    }
-
-    #uploadForm input[type=button] {
-        display: block;
-        padding: 3px;
-        border-radius: 0;
-        margin: 5px auto;
-    }
-
-    .uploadForm__alert {
-        font-size: medium;
-        background-color: greenyellow;
-        margin: 0 auto;
-        width: max-content;
-        padding: 0;
-        font-size: 12px;
-    }
+    
 }
