@@ -1,93 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
 
     <!-- Leaflet css cdn link -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-        crossorigin="" />
-
-    <!-- Leaflet from a CDN -->
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-        crossorigin=""></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""
+    />
 
     <!-- Cluster Plugin -->
-    <link rel="stylesheet" href="plugins/Leaflet.markercluster-1.4.1/dist/MarkerCluster.css">
-    <link rel="stylesheet" href="plugins/Leaflet.markercluster-1.4.1/dist/MarkerCluster.Default.css">
-    <script src="plugins/Leaflet.markercluster-1.4.1/dist/leaflet.markercluster.js"></script>
+    <link
+      rel="stylesheet"
+      href="plugins/Leaflet.markercluster-1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="plugins/Leaflet.markercluster-1.4.1/dist/MarkerCluster.Default.css"
+    />
 
     <!-- panel Plugins -->
-    <link rel="stylesheet" href="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.css">
-    <script src="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.js"></script>
+    <link
+      rel="stylesheet"
+      href="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.css"
+    />
 
     <!-- Gecorder / search -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+    />
 
     <!-- leaflet routing machine -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+    />
+
+    <link rel="stylesheet" href="main.css" />
+
+    <title>Geo Location Intelligent System</title>
+  </head>
+
+  <body>
+    <div id="billboardDetails">
+      <div class="header">
+        <h2>Geo Location Intelligent System</h2>
+      </div>
+      <article class="description">
+        <p class="description__open">
+          This platform empowers organizations to visualize location information
+          in any specified geographic location automatically, thereby enhancing
+          decisions for your brand, service, product or organization.
+        </p>
+        <div class="description__modules">
+          <div class="module">
+            <h5>Module 1. Gather and View:</h5>
+            <p>
+              The platform is interlinked with our mobile app and has the
+              capability of gathering a wide spectrum of data across a diverse
+              geographical location and interlay with multiple layers of data to
+              give a more precise view of information.
+            </p>
+          </div>
+          <div class="module">
+            <h5>Module 2. Visualize and Analyze</h5>
+            <p>
+              Using various cutting edge visualization formats, the system
+              infuses models into graphical mapping displays and built in
+              analytics with an easy user interface to identify, curate and
+              understand relevant insights for your organisation.
+            </p>
+          </div>
+          <div class="module">
+            <h5>Module 3. Strategize and Act</h5>
+            <p>
+              The inbuilt Machine Learning recommender engine enables a
+              telescopic view to guide effective strategies, informed decisions
+              and proactive strategies.
+            </p>
+          </div>
+        </div>
+      </article>
+      <div id="map"></div>
+      <footer class="footer">
+        <p>
+          Email:
+          <a href="mailto:gis@predictiveanalytics.co.ke"
+            >gis@predictiveanalytics.co.ke</a
+          >
+        </p>
+        <p>Phone Number: <a href="tel:+254-722-816171">+254-722-816171</a></p>
+        <p>
+          <a href="https://training.predictiveanalytics.co.ke/#locationintel"
+            >Learn More</a
+          >
+        </p>
+        <a href="https://icons8.com/"
+          ><img src="images/icons8.png" alt="icons8" class="icons"
+        /></a>
+      </footer>
+    </div>
+
+    <!-- always load javascript afterpage -->
+    <!-- Leaflet from a CDN -->
+    <script
+      src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+      integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+      crossorigin=""
+    ></script>
+    <script src="plugins/Leaflet.markercluster-1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="plugins/leaflet-panel-layers-master/src/leaflet-panel-layers.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-
-
     <!-- D3 Library -->
     <script src=" https://d3js.org/d3.v4.min.js"></script>
 
-    <link rel="stylesheet" href="main.css">
-
-    <title>Geo Location Intelligent System</title>
-</head>
-
-<body>
-    <div id="billboardDetails">
-        <div class="header">
-            <h2>Geo Location Intelligent System</h2>
-        </div>
-        <article class="description">
-            <p class="description__open">This platform empowers organizations to visualize
-                location information in any specified geographic
-                location automatically, thereby enhancing decisions for
-                your brand, service, product or organization.
-            </p>
-            <div class="description__modules">
-                <div class="module">
-                    <h5>Module 1. Gather and View:</h5>
-                    <p>The platform is interlinked with our mobile app and has the capability of gathering a wide
-                        spectrum of data across a diverse geographical location and interlay with multiple layers of
-                        data to give a more precise view of information.
-                    </p>
-                </div>
-                <div class="module">
-                    <h5>Module 2. Visualize and Analyze</h5>
-                    <p>Using various cutting edge visualization formats, the system infuses models into graphical
-                        mapping displays and built in analytics with an easy user interface to identify, curate and
-                        understand relevant insights for your organisation.
-                    </p>
-                </div>
-                <div class="module">
-                    <h5>Module 3. Strategize and Act</h5>
-                    <p>The inbuilt Machine Learning recommender engine enables a telescopic view to guide
-                        effective strategies, informed decisions and proactive strategies.
-                    </p>
-                </div>
-            </div>
-        </article>
-        <div id="map"></div>
-        <footer class="footer">
-            <p>Email: <a href="mailto:gis@predictiveanalytics.co.ke">gis@predictiveanalytics.co.ke</a></p>
-            <p>Phone Number: <a href="tel:+254-722-816171">+254-722-816171</a></p>
-            <p><a href="https://training.predictiveanalytics.co.ke/#locationintel">Learn More</a></p>
-            <a href="https://icons8.com/"><img src="images/icons8.png" alt="icons8" class="icons"></a>
-        </footer>
-    </div>
     <script type="text/javascript" src="js/index.js"></script>
-</body>
-
+  </body>
 </html>
