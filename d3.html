@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- D3 Library -->
     <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -11,169 +10,200 @@
     <script src="https://d3js.org/d3-axis.v1.min.js"></script> -->
 
     <style>
-        svg rect {
-            fill: steelblue;
-        }
+      svg rect {
+        fill: steelblue;
+      }
 
-        svg text {
-            text-transform: capitalize;
-            font: 12px sans-serif;
-            text-anchor: end;
-        }
+      svg text {
+        text-transform: capitalize;
+        font: 12px sans-serif;
+        text-anchor: end;
+      }
 
-        /* line shown on mouse on/hover  */
-        line#limit {
-            /* stroke: #FED966; */
-            stroke-width: 3;
-            stroke-dasharray: 3 6;
-        }
+      /* line shown on mouse on/hover  */
+      line#limit {
+        /* stroke: #FED966; */
+        stroke-width: 3;
+        stroke-dasharray: 3 6;
+      }
 
-        .bar {
-            background-color: #720570;
-        }
+      .bar {
+        background-color: #720570;
+      }
     </style>
     <title>d3</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container"></div>
     <svg width="700" height="350"></svg>
     <script>
-        async function fetchData() {
-            //
-            // await response for the fetch call
-            // since there are no options passed, it will be a GET request
-            let response = await fetch('./php/download.php');
-            let response1 = await fetch('http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020');
-           
-            //
-            // check if the promises was resolved
-            if (response.ok) {
-                // 
-                // if it was resolved, its ok is set to true which we check 
-                // access the promise body
-                data = await response.json();
-                data1 = await response1.json();
-                data.deliveries = data1.data;
-                console.log(data)
+      async function fetchData() {
+        //chain your promises. Your response depends on response1 completion so start with that
+        fetch(
+          "http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020"
+        )
+          .then((response) => response.json())
+          .then((result) =>
+            fetch("./php/download.php")
+              .then((res) => res.json())
+              .then((data) => {
+                data.deliveries = result.data;
                 drawChart(data.subCounties);
-            } else {
-                alert('Something went wrong while fetching data. Error: ' + response.status);
-            }
-        };
-        fetchData();
+              })
+          )
+          .catch((err) => console.error(err));
+      }
+      //
+      // await response for the fetch call
+      // since there are no options passed, it will be a GET request
+      //     let response = await fetch("./php/download.php");
+      //     let response1 = await fetch(
+      //       "http://bi.predictiveanalytics.co.ke/api/all-deliveries?start=03-07-2020&end=03-07-2020"
+      //     );
 
-        function drawChart(censusData) {
-            // remove subcounties with null values
-            censusData = censusData.filter(d => d.totalpopul != null);
-            // select the svg container in the dom and give it border
-            const chartsContainer = d3.select('svg').style('border', '1px solid #ECEFF1');
-            // get the maximum population in the subCounties array
-            const maxPop = censusData.reduce((max, i) => parseInt(i.totalpopul) > max ? parseInt(i.totalpopul) : max, censusData[0].totalpopul);
+      //     //
+      //     // check if the promises was resolved
+      //     if (response.ok) {
+      //       //
+      //       // if it was resolved, its ok is set to true which we check
+      //       // access the promise body
+      //       data = await response.json();
+      //       data1 = await response1.json();
+      //       data.deliveries = data1.data;
+      //       console.log(data);
+      //       drawChart(data.subCounties);
+      //     } else {
+      //       alert(
+      //         "Something went wrong while fetching data. Error: " +
+      //           response.status
+      //       );
+      //     }
+      //   }
+      //   fetchData();
 
-            // a function to return the subCounty Name
-            const yValue = datapoint => datapoint.subcontnam.toLowerCase();
-            // get the svg's width and height from its attributes
-            const width = +chartsContainer.attr('width'), height = +chartsContainer.attr('height');
-            // create a margin object 
-            const margin = { top: 20, right: 20, bottom: 40, left: 100 };
+      function drawChart(censusData) {
+        // remove subcounties with null values
+        censusData = censusData.filter((d) => d.totalpopul != null);
+        // select the svg container in the dom and give it border
+        const chartsContainer = d3
+          .select("svg")
+          .style("border", "1px solid #ECEFF1");
+        // get the maximum population in the subCounties array
+        const maxPop = censusData.reduce(
+          (max, i) =>
+            parseInt(i.totalpopul) > max ? parseInt(i.totalpopul) : max,
+          censusData[0].totalpopul
+        );
 
-            // use the innerwidth after calc
-            const innerWidth = width - margin.left - margin.right;
-            const innerHeight = height - margin.top - margin.bottom;
+        // a function to return the subCounty Name
+        const yValue = (datapoint) => datapoint.subcontnam.toLowerCase();
+        // get the svg's width and height from its attributes
+        const width = +chartsContainer.attr("width"),
+          height = +chartsContainer.attr("height");
+        // create a margin object
+        const margin = { top: 20, right: 20, bottom: 40, left: 100 };
 
-            // the bar chart will be horizontal and thus we scale the bars on the x direction
-            const xScale = d3.scaleLinear().domain([0, maxPop + 100000]).range([0, innerWidth]);
+        // use the innerwidth after calc
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
 
-            // the y direction will have the different subcounties 
-            const yScale = d3.scaleBand().domain(censusData.map(yValue)).range([0, innerHeight]).padding(.2);
-            // create a scale for the y axis on the left
-            const yAxis = d3.axisLeft(yScale);
+        // the bar chart will be horizontal and thus we scale the bars on the x direction
+        const xScale = d3
+          .scaleLinear()
+          .domain([0, maxPop + 100000])
+          .range([0, innerWidth]);
 
-            const g = chartsContainer.append('g')
-                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+        // the y direction will have the different subcounties
+        const yScale = d3
+          .scaleBand()
+          .domain(censusData.map(yValue))
+          .range([0, innerHeight])
+          .padding(0.2);
+        // create a scale for the y axis on the left
+        const yAxis = d3.axisLeft(yScale);
 
-            // add the y axis labels
-            // anchor it to the middle, underline it and 
-            // trasform it to uppercase
-            chartsContainer.append('text')
-                .attr('x', -((innerHeight / 2)))
-                .attr('y', (20))
-                .attr('transform', 'rotate(-90)')
-                .attr('text-anchor', 'middle')
-                .text('Sub County')
-                .style('text-transform', 'uppercase')
-                .style('text-decoration', 'underline');
+        const g = chartsContainer
+          .append("g")
+          .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-            // add the x axis label
-            chartsContainer.append('text')
-                .attr('x', (width / 2) + 50)
-                .attr('y', height - 5)
-                .attr('text-anchor', 'middle')
-                .text('Total Population')
-                .style('text-transform', 'uppercase')
-                .style('text-decoration', 'underline');
+        // add the y axis labels
+        // anchor it to the middle, underline it and
+        // trasform it to uppercase
+        chartsContainer
+          .append("text")
+          .attr("x", -(innerHeight / 2))
+          .attr("y", 20)
+          .attr("transform", "rotate(-90)")
+          .attr("text-anchor", "middle")
+          .text("Sub County")
+          .style("text-transform", "uppercase")
+          .style("text-decoration", "underline");
 
-            // add the y axis and grids
-            yAxis(g.append('g'));
-            g.append('g')
-                .attr('transform', `translate(0, ${innerHeight})`)
-                .call(d3.axisBottom()
-                    .scale(xScale)
-                    .tickSize(-innerHeight, 0, 0));
+        // add the x axis label
+        chartsContainer
+          .append("text")
+          .attr("x", width / 2 + 50)
+          .attr("y", height - 5)
+          .attr("text-anchor", "middle")
+          .text("Total Population")
+          .style("text-transform", "uppercase")
+          .style("text-decoration", "underline");
 
-            // user interactivity
-            // svgElement
-            //     .on('mouseenter', function (actual, i) {
-            //         d3.select(this).attr('opacity', 0.5)
-            //     })
-            //     .on('mouseleave', function (actual, i) {
-            //         d3.select(this).attr('opacity', 1)
-            //     })
+        // add the y axis and grids
+        yAxis(g.append("g"));
+        g.append("g")
+          .attr("transform", `translate(0, ${innerHeight})`)
+          .call(d3.axisBottom().scale(xScale).tickSize(-innerHeight, 0, 0));
 
+        // user interactivity
+        // svgElement
+        //     .on('mouseenter', function (actual, i) {
+        //         d3.select(this).attr('opacity', 0.5)
+        //     })
+        //     .on('mouseleave', function (actual, i) {
+        //         d3.select(this).attr('opacity', 1)
+        //     })
 
-            const bars = g
-                .selectAll('bar')
-                .data(censusData)
-                .enter()
-                .append('rect')
-                .classed('bar', true)
-                .attr('width', d => xScale(parseInt(d.totalpopul)))
-                .attr('height', yScale.bandwidth())
-                .attr('y', dta => yScale(yValue(dta)));
+        const bars = g
+          .selectAll("bar")
+          .data(censusData)
+          .enter()
+          .append("rect")
+          .classed("bar", true)
+          .attr("width", (d) => xScale(parseInt(d.totalpopul)))
+          .attr("height", yScale.bandwidth())
+          .attr("y", (dta) => yScale(yValue(dta)));
 
-            bars
-                .on('mouseenter', function (actual, i) {
-                    d3.select(this).attr('opacity', 0)
-                    d3.select(this)
-                        .transition()
-                        .duration(300)
-                        .attr('opacity', 0.6)
-                        .attr('height', yScale.bandwidth() + 5)
+        bars
+          .on("mouseenter", function (actual, i) {
+            d3.select(this).attr("opacity", 0);
+            d3.select(this)
+              .transition()
+              .duration(300)
+              .attr("opacity", 0.6)
+              .attr("height", yScale.bandwidth() + 5);
 
-                    const x = xScale(actual.totalpopul)
+            const x = xScale(actual.totalpopul);
 
-                    g.append('line')
-                        .attr('id', 'limit')
-                        .attr('x1', x)
-                        .attr('y1', 0)
-                        .attr('x2', x)
-                        .attr('y2', innerHeight)
-                        .attr('stroke', '#FFAB40')
-
-                })
-                .on('mouseleave', function (actual, i) {
-                    d3.select(this).attr('opacity', 1)
-                        .transition()
-                        .duration(300)
-                        .attr('opacity', 1)
-                        .attr('height', yScale.bandwidth())
-                    g.selectAll('#limit').remove()
-                })
-
-
-        }
+            g.append("line")
+              .attr("id", "limit")
+              .attr("x1", x)
+              .attr("y1", 0)
+              .attr("x2", x)
+              .attr("y2", innerHeight)
+              .attr("stroke", "#FFAB40");
+          })
+          .on("mouseleave", function (actual, i) {
+            d3.select(this)
+              .attr("opacity", 1)
+              .transition()
+              .duration(300)
+              .attr("opacity", 1)
+              .attr("height", yScale.bandwidth());
+            g.selectAll("#limit").remove();
+          });
+      }
     </script>
-</body>
-
+  </body>
 </html>

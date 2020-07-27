@@ -1,3 +1,5 @@
+//hii javascript ni mingi sana ku critic
+
 const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGVubmlzODUiLCJhIjoiY2s5anJ4dmx3MHd2NjNxcTZjZG05ZTY3ZSJ9.5Xo8GyJuZFYHHCnWZdZvsw';
 const mapboxAttribution = 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
 //
@@ -62,7 +64,7 @@ async function fetchData() {
 async function addOverlays(data) {
     let billboards = addBillboards(data.billboards);
     let atmMarkers = addAtm(data.atms);
-    let nssf =  addNssf(data.nssf);
+    let nssf = addNssf(data.nssf);
     let uber = addUber(data.uber);
     let nairobiSubCounties = addSubCounties(data.subCounties);
     let nairobiSubLocations = addSubLocations(data.subLocations);
@@ -137,7 +139,7 @@ async function addOverlays(data) {
                     name: "Bank",
                     icon: '<img src="images/bank.png" class="icons">',
                     layer: mapData.bank
-                },{
+                }, {
                     name: "Nssf Ofices",
                     icon: '<img src="images/office.png" class="icons">',
                     layer: nssf

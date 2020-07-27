@@ -1,12 +1,14 @@
 <?php
+require "config.php";
+//read from a config file
 
 class database
 {
 
-    private $host = "localhost";
-    private $db = "billboard";
-    private $username = "dennis";
-    private $password = "1234567890";
+    private $host = HOSTNAME;
+    private $db = DATABASE;
+    private $username = USERNAME;
+    private $password = PASSWORD;
     private static $instance = null;
 
     private function __construct()
@@ -31,6 +33,49 @@ class database
         return self::$instance;
     }
 }
+
+
+// redundancy in your classes. all classes have the same get method the only difference is the sql.
+//use oop to lighten your work;
+//example
+abstract class Model
+{
+    protected static $db;
+    public $sql;
+    public function __construct()
+    {
+        self::$db = database::getInstance();
+    }
+
+    public function getRecords()
+    {
+        // query the sql
+        $statement =  self::$db->query($this->sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+//then implement them as 
+//example1
+class subcounty extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "SELECT 
+        ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, male5above,
+        fema5above, totaldisab, maledisabl, femaledisa, totalable, maleable, 
+        femaleable, totalnotst, malenotsta, femalenots, percentdis, totalvisua, 
+        malevisual, femalevisu, totalheari, malehearin, femalehear, totalmobil,
+        malemobili, femalemobi, totalcogni, malecognit, femalecogn, totalselfc,
+        maleselfca, femaleself, totalcommu, malecommun, femalecomm, totalpopul,
+        malepopula, femalepopu, totalalbin, malealbini, femalealbi
+    FROM 
+        nairobisubcounties";
+    }
+}
+
 class billboard
 {
     public $billboardi;
@@ -528,7 +573,8 @@ class POI
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class bar{
+class bar
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -548,7 +594,8 @@ class bar{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class fuel{
+class fuel
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -568,7 +615,8 @@ class fuel{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class grocery{
+class grocery
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -588,7 +636,8 @@ class grocery{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class kiosk{
+class kiosk
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -608,7 +657,8 @@ class kiosk{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class pharmacy{
+class pharmacy
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -628,7 +678,8 @@ class pharmacy{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class restaraunt{
+class restaraunt
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -648,7 +699,8 @@ class restaraunt{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class saloon{
+class saloon
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -668,7 +720,8 @@ class saloon{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class supermarket{
+class supermarket
+{
     public function __construct()
     {
         $this->db = database::getInstance();

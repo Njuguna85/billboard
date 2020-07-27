@@ -1,220 +1,222 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap");
 
+/* USE rem instead of px for font size
+    
+*/
 html,
 body {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 body {
-    height: 100vh;
-    width: 98vw;
-    background-color: #EEEEEE;
-    box-sizing: border-box;
+  height: 100vh;
+  width: 98vw;
+  background-color: #eeeeee;
+  box-sizing: border-box;
 }
 
 .btn {
-    display: block;
-    background: #3949AB;
-    outline: none;
-    border: 1px #27ae60;
-    padding: 10px 15px;
-    color: white;
+  display: block;
+  background: #3949ab;
+  outline: none;
+  border: 1px #27ae60;
+  padding: 10px 15px;
+  color: white;
 }
 
 .btn:hover {
-    background: #9ea8e6;
-    transition: all .2s;
-    transform: scale(1.1);
+  background: #9ea8e6;
+  transition: all 0.2s;
+  transform: scale(1.1);
 }
 
 /*                 MAP             */
 #billboardDetails {
-    width: 100%;
-    height: 99%;
+  width: 100%;
+  height: 99%;
 }
 
 .description {
-    font-family: 'Open Sans', sans-serif;
-    text-align: center;
-    width: 90%;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+  font-family: "Open Sans", sans-serif;
+  text-align: center;
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .description__open {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .description h5,
 p {
-    margin: 0;
-    padding: 5px;
+  margin: 0;
+  padding: 5px;
 }
 
 .description__modules {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: initial;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: initial;
+  justify-content: center;
 }
 
 .module {
-    display: flex;
-    flex-direction: column;
-    max-width: 300px;
-    max-height: 200px;
-    align-items: center;
-    margin: 15px;
-    background-color: whitesmoke;
-    justify-content: left;
-    padding: 0 15px 10px 15px;
-    transition: ease-in-out .2s;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  max-height: 200px;
+  align-items: center;
+  margin: 15px;
+  background-color: whitesmoke;
+  justify-content: left;
+  padding: 0 15px 10px 15px;
+  transition: ease-in-out 0.2s;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .module:hover {
-    transform: scale(1.09);
+  transform: scale(1.09);
 }
 
 #map {
-    width: 98%;
-    height: 95%;
-    margin: 10px auto 5px;
-    /* transition: .2s ease-in-out; */
+  width: 98%;
+  height: 95%;
+  margin: 10px auto 5px;
+  /* transition: .2s ease-in-out; */
 }
 
 .leaflet-geosearch-bar {
-    position: relative;
-    display: block;
-    height: auto;
-    width: 400px;
-    max-width: calc(100% - 120px);
-    margin: 10px auto 0;
-    cursor: auto;
-    z-index: 1000;
+  position: relative;
+  display: block;
+  height: auto;
+  width: 400px;
+  max-width: calc(100% - 120px);
+  margin: 10px auto 0;
+  cursor: auto;
+  z-index: 1000;
 }
 
-
 h3 {
-    text-align: center;
+  text-align: center;
 }
 
 .header {
-    width: 100%;
-    margin: auto;
-    display: flex;
-    flex-direction: row-reverse;
-    flex-wrap: nowrap;
-    justify-content: space-evenly;
-    align-items: center;
-    padding: 10px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 10px;
 }
 
 .header h2 {
-    margin: auto;
-    font-size: xx-large;
-    text-transform: uppercase;
-    text-decoration: underline;
+  margin: auto;
+  font-size: xx-large;
+  text-transform: uppercase;
+  text-decoration: underline;
 }
 
 #signOut {
-    display: block;
+  display: block;
 }
 
 .leaflet-popup-content-wrapper {
-    width: 200px;
-    background-color: #FFF9C4;
-    color: rgb(8, 10, 10);
-    text-align: center;
+  width: 200px;
+  background-color: #fff9c4;
+  color: rgb(8, 10, 10);
+  text-align: center;
 }
 
 .billboardImage {
-    height: 100px;
-    display: block;
-    margin: auto;
+  height: 100px;
+  display: block;
+  margin: auto;
 }
 
 .leaflet-panel-layers-list {
-    height: fit-content;
+  height: fit-content;
 }
 
 .legend {
-    background-color: #FFEB3B;
+  background-color: #ffeb3b;
 }
 
 div.leaflet-bottom.leaflet-right {
-    margin-right: 50%;
+  margin-right: 50%;
 }
-div.leaflet-panel-layers-group.collapsible.expanded > div:last-child{
-    margin-bottom: 30px;
+div.leaflet-panel-layers-group.collapsible.expanded > div:last-child {
+  margin-bottom: 30px;
 }
-.icons{
-    height: 20px;
-    padding: 1px;
+.icons {
+  height: 20px;
+  padding: 1px;
 }
 
 /* custom info control */
 .info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: rgb(191, 245, 178);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: rgb(191, 245, 178);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .info h4,
 .sCountyinfo h4 .sLocationInfo h4 {
-    margin: 0 0 5px;
-    color: rgb(0, 0, 0);
+  margin: 0 0 5px;
+  color: rgb(0, 0, 0);
 }
 
 .sCountyinfo,
 .sLocationInfo {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: rgb(99, 236, 156);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: rgb(99, 236, 156);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .filterDate {
-    background-color: #FFEB3B;
-    position: absolute;
-    top: 0;
-    padding: 0 5px;
-    right: 50%;
-    transform: translate(50%, 0);
-    display: flex;
-    align-items: center;
+  background-color: #ffeb3b;
+  position: absolute;
+  top: 0;
+  padding: 0 5px;
+  right: 50%;
+  transform: translate(50%, 0);
+  display: flex;
+  align-items: center;
 }
 
 .leaflet-left {
-    position: relative;
-    left: 0;
+  position: relative;
+  left: 0;
 }
 
 table {
-    border-collapse: collapse;
-    margin: 0;
+  border-collapse: collapse;
+  margin: 0;
 }
 
 td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 0 5px;
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 0 5px;
 }
 
 tr:nth-child(even) {
-    background-color: #dddddd;
+  background-color: #dddddd;
 }
 
 .footer {
-    display: flex;
-    justify-content: space-around;
-    background-color: #dddddd;
-    height: 30px;
-    font-size: 14px;
+  display: flex;
+  justify-content: space-around;
+  background-color: #dddddd;
+  height: 30px;
+  font-size: 14px;
 }
 
 /* 
@@ -222,9 +224,9 @@ tr:nth-child(even) {
   ##Screen = 1281px to higher resolution desktops
 */
 @media (min-width: 1281px) {
-    h2 {
-        font-size: xx-large;
-    }
+  h2 {
+    font-size: xx-large;
+  }
 }
 
 /* 
@@ -232,9 +234,9 @@ tr:nth-child(even) {
     ##Screen = B/w 1025px to 1280px
   */
 @media (min-width: 1025px) and (max-width: 1280px) {
-    h2 {
-        font-size: x-large;
-    }
+  h2 {
+    font-size: x-large;
+  }
 }
 
 /* 
@@ -242,23 +244,25 @@ tr:nth-child(even) {
     ##Screen = B/w 768px to 1024px
   */
 @media (min-width: 768px) and (max-width: 1024px) {
-    .header h2 {
-        font-size: 16px;
-    }
+  .header h2 {
+    font-size: 16px;
+  }
 }
 
 /* 
     ##Device = Tablets, Ipads (landscape)
     ##Screen = B/w 768px to 1024px
   */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {}
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+}
 
 /* 
     ##Device = Low Resolution Tablets, Mobiles (Landscape)
     ##Screen = B/w 481px to 767px
   */
 
-@media (min-width: 481px) and (max-width: 767px) {}
+@media (min-width: 481px) and (max-width: 767px) {
+}
 
 /* 
     ##Device = Most of the Smartphones Mobiles (Portrait)
@@ -266,74 +270,73 @@ tr:nth-child(even) {
   */
 
 @media (min-width: 320px) and (max-width: 480px) {
-    .header {
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-    }
+  .header {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
 
-    .header h2 {
-        font-size: 15px;
-    }
+  .header h2 {
+    font-size: 15px;
+  }
 
-    .header .btn {
-        margin: 5px 0;
-        padding: 2px;
-        align-self: flex-end;
-    }
+  .header .btn {
+    margin: 5px 0;
+    padding: 2px;
+    align-self: flex-end;
+  }
 
-    .description {
-        font-size: 12px;
-    }
+  .description {
+    font-size: 12px;
+  }
 
-    .description__open {
-        font-size: 13px;
-    }
+  .description__open {
+    font-size: 13px;
+  }
 
-    .description__modules {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: scroll;
-        direction: unset;
-    }
+  .description__modules {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    direction: unset;
+  }
 
-    .module {
-        display: flex;
-        flex-direction: column;
-        min-width: 70%;
-        min-height: 200px;
-        align-items: center;
-        margin: 10px;
-        background-color: whitesmoke;
-        padding: 0;
-        transition: ease-in-out .2s;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  .module {
+    display: flex;
+    flex-direction: column;
+    min-width: 70%;
+    min-height: 200px;
+    align-items: center;
+    margin: 10px;
+    background-color: whitesmoke;
+    padding: 0;
+    transition: ease-in-out 0.2s;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  }
 
-    }
+  #uploadForm {
+    font-size: 10px;
+  }
 
-    #uploadForm {
-        font-size: 10px;
-    }
+  #uploadForm input[type="file"] {
+    display: none;
+    padding: 5px;
+  }
 
-    #uploadForm input[type=file] {
-        display: none;
-        padding: 5px;
-    }
+  #uploadForm input[type="button"] {
+    display: block;
+    padding: 3px;
+    border-radius: 0;
+    margin: 5px auto;
+  }
 
-    #uploadForm input[type=button] {
-        display: block;
-        padding: 3px;
-        border-radius: 0;
-        margin: 5px auto;
-    }
-
-    .uploadForm__alert {
-        font-size: medium;
-        background-color: greenyellow;
-        margin: 0 auto;
-        width: max-content;
-        padding: 0;
-        font-size: 12px;
-    }
+  .uploadForm__alert {
+    font-size: medium;
+    background-color: greenyellow;
+    margin: 0 auto;
+    width: max-content;
+    padding: 0;
+    font-size: 12px;
+  }
 }
