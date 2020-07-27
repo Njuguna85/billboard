@@ -70,6 +70,12 @@ class getData
         $ns = new nssf();
         $nssf = $ns->getNssf();
 
+        $ga =  new ghanaDistrictPop();
+        $ghanaDistrictPop = $ga->getPopulation();
+
+        $popPj = new ugPopProj();
+        $popProj = $popPj->getPopulationProjection();
+
         $data->billboards = $billboardData;
         $data->uber = $uber;
         // $data->subCounties = $subcounties;
@@ -91,6 +97,8 @@ class getData
         $data->saloon = $saloon;
         $data->supermarket = $supermarket;
         $data->nssf = $nssf;
+        $data->popProj = $popProj;
+        $data->ghanaDistrictPop = $ghanaDistrictPop;
 
         $final = json_encode($data);
         //$this->write_json_to_file($final);

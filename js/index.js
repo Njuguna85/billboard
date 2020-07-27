@@ -5,8 +5,23 @@ var directionsRenderer;
 const mapContainer = document.getElementById("map");
 
 let legend = document.createElement('div');
-legend.setAttribute('id', 'legend')
-legend.innerHTML = ` <h3>Map Legend</h3>`;
+legend.setAttribute('id', 'legend');
+legend.innerHTML = `<h3>Map Legend</h3>`;
+
+essentialLayers = document.createElement('div');
+essentialLayers.className = 'essentialLayers';
+legend.appendChild(essentialLayers);
+
+mapLayers = document.createElement('div');
+mapLayers.innerHTML = '<h5>Map Layers</h5>';
+mapLayers.className = 'mapLayers';
+legend.appendChild(mapLayers);
+
+poiLayers = document.createElement('div');
+poiLayers.innerHTML = '<h5>POI</h5>';
+poiLayers.className = 'poiLayers';
+legend.appendChild(poiLayers);
+
 
 infoTab = document.createElement('div');
 infoTab.setAttribute('id', 'infoTab');
@@ -64,10 +79,6 @@ function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
-
-    // add traffic layer
-    // const trafficLayer = new google.maps.TrafficLayer();
-    // trafficLayer.setMap(map);
 }
 
 async function fetchData() {
@@ -107,14 +118,39 @@ async function fetchMobileUploads() {
 function addOverlays(data) {
     addBillboards(data.billboards);
     addAtm(data.atms);
+    addTrafficLayer();
     addNssf(data.nssf);
     addUber(data.uber);
     addSubLocations(data.subLocations);
+    addugPopProj(data.popProj);
+    addGhanaPopulation(data.ghanaDistrictPop);
     for (const [key, value] of Object.entries(data)) {
         if (commD.includes(key)) {
             add(key, value);
         }
     }
+}
+
+function addTrafficLayer() {
+    const trafficLayer = new google.maps.TrafficLayer();
+
+    div = document.createElement('div');
+    div.innerHTML = `Traffic Layer <input id="trafficChecked" type="checkbox" />`;
+
+    mapLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#trafficChecked')) {
+            cb = document.getElementById(`trafficChecked`)
+            // if on
+            if (cb.checked) {
+                trafficLayer.setMap(map);
+            }
+            if (!cb.checked) {
+                // if off
+                trafficLayer.setMap(null);
+            }
+        }
+    })
 }
 
 function add(key, value) {
@@ -147,8 +183,8 @@ function add(key, value) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     );
     div = document.createElement('div');
-    div.innerHTML = `<img src='${iconUrl}' style="height:20px;"/> ${key}<input id="${key}Checked" type="checkbox">`;
-    legend.appendChild(div);
+    div.innerHTML = `<img src='${iconUrl}'/> ${key}<input id="${key}Checked" type="checkbox" />`;
+    poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
         cb = document.getElementById(`${key}Checked`)
         // if on
@@ -195,19 +231,22 @@ function addBillboards(data) {
         map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/marker.png' style="height:20px;"/>Billboards<input id="billboardChecked" checked type="checkbox">`;
-    legend.appendChild(div);
+    div.innerHTML = `<img src='images/marker.png'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
+    essentialLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('billboardChecked')
-        // if on
-        if (cb.checked) {
-            markerCluster.addMarkers(markers)
-        }
-        if (!cb.checked) {
-            // if off
-            markerCluster.removeMarkers(markers)
+        if (e.target.matches('#billboardChecked')) {
+            cb = document.getElementById('billboardChecked')
+            // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
         }
     })
+
 }
 
 function addAtm(data) {
@@ -236,25 +275,35 @@ function addAtm(data) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/atm.png' style="height:20px;"/>ATM<input id="atmCheck" type="checkbox">`;
-    legend.appendChild(div);
+    div.innerHTML = `<img src='images/atm.png'/>ATM<input id="atmCheck" type="checkbox">`;
+    poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('atmCheck')
-        // if on
-        if (cb.checked) {
-            markerCluster.addMarkers(markers)
-        }
-        if (!cb.checked) {
-            // if off
-            markerCluster.removeMarkers(markers)
+        if (e.target.matches('#atmCheck')) {
+            cb = document.getElementById('atmCheck')
+            // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
         }
     })
 }
 
 function addNssf(data) {
     const markers = data.map(el => {
-        let latlng = new google.maps.LatLng(JSON.parse(el.geojson).coordinates[1], JSON.parse(el.geojson).coordinates[0]);
-        let contentString = '<p><strong>' + el.name + '<strong></p>';
+        latitude = JSON.parse(el.geojson).coordinates[1];
+        longitude = JSON.parse(el.geojson).coordinates[0];
+        let latlng = new google.maps.LatLng(latitude, longitude);
+
+        let contentString =
+            '<p><strong>' + el.name + '<strong></p>' +
+            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+
         let marker = new google.maps.Marker({
             position: latlng,
             icon: { url: `images/office.png`, scaledSize: new google.maps.Size(20, 20) },
@@ -272,19 +321,20 @@ function addNssf(data) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/office.png' style="height:20px;"/>NSSF Offices<input id="nssfChecked" type="checkbox">`;
-    legend.appendChild(div);
+    div.innerHTML = `<img src='images/office.png'/>NSSF Offices<input id="nssfChecked" type="checkbox">`;
+    poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('nssfChecked')
-        // if on
-        if (cb.checked) {
-            markerCluster.addMarkers(markers)
+        if (e.target.matches('#nssfChecked')) {
+            cb = document.getElementById('nssfChecked')
+            // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
         }
-        if (!cb.checked) {
-            // if off
-            markerCluster.removeMarkers(markers)
-        }
-
 
     })
 }
@@ -329,24 +379,26 @@ function getmobileMarkers(deliveriesData) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/place.png' style="height:20px;"/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
-    legend.appendChild(div);
+    div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
+    essentialLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('mobileCheck')
-        // if on
-        if (cb.checked) {
-            markerCluster.addMarkers(markers)
+        if (e.target.matches('#mobileCheck')) {
+            cb = document.getElementById('mobileCheck')
+            // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
         }
-        if (!cb.checked) {
-            // if off
-            markerCluster.removeMarkers(markers)
-        }
-
 
     })
 }
 
 function getColor(d) {
+    console.log('asdas');
     return d > 3318 ? '#800026' :
         d > 2878 ? '#BD0026' :
             d > 2437 ? '#E31A1C' :
@@ -390,24 +442,31 @@ function addUber(uber) {
             zIndex: 1000
         }
     });
-    map.data.addListener('click', function (event) {
+    map.data.addListener('mouseover', function (event) {
         map.data.revertStyle();
         map.data.overrideStyle(event.feature, { fillColor: '#CFD8DC' });
+        info = infoTab.querySelector('.info')
+        info.innerHTML = '';
     });
+    map.data.addListener('mouseout', () => {
+        info = infoTab.querySelector('.info').innerHTML = ''
+    });
+
     div = document.createElement('div');
     div.innerHTML = `Uber Data<input id="uberCheck" type="checkbox">`;
-    legend.appendChild(div);
+    mapLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('uberCheck')
-        // if on
-        if (cb.checked) {
-            map.data.addGeoJson(uDMGeoJSON);
-        }
-        if (!cb.checked) {
-            map.data.forEach(function (feature) {
-                // if off
-                map.data.remove(feature);
-            })
+        if (e.target.matches('#uberCheck')) {
+            cb = document.getElementById('uberCheck')
+            // if on
+            if (document.getElementById('uberCheck').checked) {
+                map.data.addGeoJson(uDMGeoJSON);
+            } else {
+                map.data.forEach(function (feature) {
+                    // if off
+                    map.data.remove(feature);
+                })
+            }
         }
     });
 }
@@ -468,7 +527,7 @@ function addSubLocations(subLocations) {
             '<h4>2019 Census Data</h4>' +
             '<table>' +
             '<tr><td>Area Name: </td>' + '<b></td><td>' + name + '</td></b></tr>' +
-            '<tr><td>Total Poulation: ' + '<b></td><td>' + parseValues(totalPopulation) + '</td></b></tr>' +
+            '<tr><td>Total Population: ' + '<b></td><td>' + parseValues(totalPopulation) + '</td></b></tr>' +
             '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(maleTotalPoulation) + '</td><br/>' +
             '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(femaleTotalPoulation) + '</td></b></tr>' +
             '<tr><td>Total HouseHolds: ' + '<b></td><td>' + parseValues(totalHouseHold) + '</td></b></tr>' +
@@ -480,15 +539,15 @@ function addSubLocations(subLocations) {
         info.innerHTML = `
         <div class="sublocLegend">
             <div>KEY</div>
-            <div><span class="subColor" style="background-color: #f7fcf0;"></span> >700 </div>
-            <div><span class="subColor" style="background-color: #e0f3db;"></span> >10400 </div>
-            <div><span class="subColor" style="background-color:#ccebc5;"></span> >20100 </div>
-            <div><span class="subColor" style="background-color: #a8ddb5;"></span> >29800 </div>
-            <div><span class="subColor" style="background-color: #7bccc4;"></span> >39500 </div>
-            <div><span class="subColor" style="background-color: #4eb3d3;"></span> >49200 </div>
-            <div><span class="subColor" style="background-color: #2b8cbe;"></span> >58900 </div>
-            <div><span class="subColor" style="background-color: #0868ac;"></span> >68600 </div>
-            <div><span class="subColor" style="background-color: #084081;"></span> >78339 </div>
+            <div><span class="subColor" style="background-color:#f7fcf0;" ></span> >700 </div>
+            <div><span class="subColor" style="background-color:#e0f3db;" ></span> >10400 </div>
+            <div><span class="subColor" style="background-color:#ccebc5;" ></span> >20100 </div>
+            <div><span class="subColor" style="background-color:#a8ddb5;" ></span> >29800 </div>
+            <div><span class="subColor" style="background-color:#7bccc4;" ></span> >39500 </div>
+            <div><span class="subColor" style="background-color:#4eb3d3;" ></span> >49200 </div>
+            <div><span class="subColor" style="background-color:#2b8cbe;" ></span> >58900 </div>
+            <div><span class="subColor" style="background-color:#0868ac;" ></span> >68600 </div>
+            <div><span class="subColor" style="background-color:#084081;" ></span> >78339 </div>
         </div>
         `
     }
@@ -501,24 +560,247 @@ function addSubLocations(subLocations) {
 
     div = document.createElement('div');
     div.innerHTML = `Nairobi Sublocations<input id="sublCheck" type="checkbox">`;
-    legend.appendChild(div);
+    mapLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        cb = document.getElementById('sublCheck')
-        // if on
-        if (cb.checked) {
-            map.data.addGeoJson(subLocationsGeoJSON);
-            key();
-        }
-        if (!cb.checked) {
-            // if off
-            map.data.forEach(function (feature) {
-                map.data.remove(feature);
-            })
-            infoTab.querySelector('.info').innerHTML = ''
+        if (e.target.matches('#sublCheck')) {
+            cb = document.getElementById('sublCheck')
+            // if on
+            if (cb.checked) {
+                map.data.addGeoJson(subLocationsGeoJSON);
+                key();
+            }
+            if (!cb.checked) {
+                // if off
+                map.data.forEach(function (feature) {
+                    map.data.remove(feature);
+                })
+                infoTab.querySelector('.info').innerHTML = ''
+            }
         }
     });
 }
 
+function ugPopProjColors(d) {
+    return d > 46200 ? '#014636' :
+        d > 35300 ? '#016c59' :
+            d > 28400 ? '#02818a' :
+                d > 23256 ? '#3690c0' :
+                    d > 19644 ? '#67a9cf' :
+                        d > 16200 ? '#a6bddb' :
+                            d > 12822 ? '#d0d1e6' :
+                                d > 9300 ? '#ece2f0' :
+                                    d > 1600 ? '#fff7fb' :
+                                        '#fdfdfd';
+}
+
+function addugPopProj(data) {
+    districtsJSON = [];
+    data.forEach(d => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'county': d.county,
+                'district': d.district,
+                'female': d.female,
+                'male': d.male,
+                'totalPopulation': d.total
+            },
+            geometry: JSON.parse(d.geojson),
+        }
+        districtsJSON.push(features);
+    });
+    districtsGeoJSON = {
+        "type": "FeatureCollection",
+        "features": districtsJSON
+    };
+    map.data.setStyle((feature) => {
+        totalPopulation = feature.getProperty('totalPopulation');
+        return {
+            fillColor: ugPopProjColors(totalPopulation),
+            fillOpacity: 1,
+            strokeColor: '#FFF9C4',
+            strokeWeight: 1,
+            zIndex: 10
+        }
+    });
+    const showDetails = (event) => {
+        map.data.revertStyle();
+        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        county = event.feature.getProperty('county');
+        totalPopulation = event.feature.getProperty('totalPopulation');
+        district = event.feature.getProperty('district');
+        male = event.feature.getProperty('male');
+        female = event.feature.getProperty('female');
+        info = infoTab.querySelector('.info')
+        info.innerHTML =
+            '<h4>2020 Population Projection</h4>' +
+            '<table>' +
+            '<tr><td>County: </td>' + '<b></td><td>' + county + '</td></b></tr>' +
+            '<tr><td>District: ' + '<b></td><td>' + parseValues(district) + '</td></b></tr>' +
+            '<tr><td>Total Population: ' + '<b></td><td>' + parseValues(totalPopulation) + '</td></b></tr>' +
+            '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(male) + '</td><br/>' +
+            '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(female) + '</td></b></tr>' +
+            '</table>';
+
+    }
+    const key = () => {
+        info = infoTab.querySelector('.info')
+        info.innerHTML = `
+        <div class="sublocLegend">
+            <div>KEY</div>
+            <div><span class="subColor" style="background-color:#014636;"></span> >46200</div>
+            <div><span class="subColor" style="background-color:#016c59;"></span> >35300</div>
+            <div><span class="subColor" style="background-color:#02818a;"></span> >28400</div>
+            <div><span class="subColor" style="background-color:#3690c0;"></span> >23256</div>
+            <div><span class="subColor" style="background-color:#67a9cf;"></span> >19644</div>
+            <div><span class="subColor" style="background-color:#a6bddb;"></span> >16200</div>
+            <div><span class="subColor" style="background-color:#d0d1e6;"></span> >12822</div>
+            <div><span class="subColor" style="background-color:#ece2f0;"></span> > 9300</div>
+            <div><span class="subColor" style="background-color:#fff7fb;"></span> > 1600</div>
+        </div>
+        `
+    }
+    map.data.addListener('click', showDetails, false);
+    map.data.addListener('mouseover', showDetails, false);
+    map.data.addListener('mouseout', () => {
+        info = infoTab.querySelector('.info').innerHTML = ''
+        key();
+    });
+
+    div = document.createElement('div');
+    div.innerHTML = `Uganda Districts<input id="ugPopProjCheck" type="checkbox" disabled>`;
+    mapLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#ugPopProjCheck')) {
+            cb = document.getElementById('ugPopProjCheck')
+            // if on
+            if (cb.checked) {
+                map.data.addGeoJson(districtsGeoJSON);
+                key();
+            }
+            if (!cb.checked) {
+                // if off
+                map.data.forEach(function (feature) {
+                    map.data.remove(feature);
+                })
+                infoTab.querySelector('.info').innerHTML = ''
+            }
+        }
+    });
+
+}
+
+function GHPopColors(d) {
+    return d > 2578715 ? '#014636' :
+        d > 297854 ? '#016c59' :
+            d > 221830 ? '#02818a' :
+                d > 191011 ? '#3690c0' :
+                    d > 167594 ? '#67a9cf' :
+                        d > 151123 ? '#a6bddb' :
+                            d > 132209 ? '#d0d1e6' :
+                                d > 114448 ? '#ece2f0' :
+                                    d > 101933 ? '#fff7fb' :
+                                        '#fdfdfd';
+}
+
+function addGhanaPopulation(data) {
+    districtsJSON = [];
+    data.forEach(d => {
+        let features = {
+            type: 'Feature',
+            properties: {
+                'areaName': d.adm2_name,
+                'female': d.females_cy,
+                'male': d.males_cy,
+                'totalPopulation': d.totpop_cy,
+                'purchasingPowerPC': d.purchppc,
+                'totalHouseHolds': d.tothh_cy
+            },
+            geometry: JSON.parse(d.geojson),
+        }
+        districtsJSON.push(features);
+    });
+    districtsGeoJSON = {
+        "type": "FeatureCollection",
+        "features": districtsJSON
+    };
+    map.data.setStyle((feature) => {
+        totalPopulation = feature.getProperty('totalPopulation');
+        return {
+            fillColor: GHPopColors(totalPopulation),
+            fillOpacity: 1,
+            strokeColor: '#FFF9C4',
+            strokeWeight: 1,
+            zIndex: 10
+        }
+    });
+    const showDetails = (event) => {
+        map.data.revertStyle();
+        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        areaName = event.feature.getProperty('areaName');
+        totalPopulation = event.feature.getProperty('totalPopulation');
+        purchasingPowerPC = event.feature.getProperty('purchasingPowerPC');
+        male = event.feature.getProperty('male');
+        female = event.feature.getProperty('female');
+        totalHouseHolds = event.feature.getProperty('totalHouseHolds');
+
+        info = infoTab.querySelector('.info')
+        info.innerHTML =
+            '<table>' +
+            '<tr><td>Area Name: </td>' + '<b></td><td>' + areaName + '</td></b></tr>' +
+            '<tr><td>Total Population: ' + '<b></td><td>' + parseValues(totalPopulation) + '</td></b></tr>' +
+            '<tr><td>Male Population: ' + '<b></td><td>' + parseValues(male) + '</td><br/>' +
+            '<tr><td>Female Population: ' + '<b></td><td>' + parseValues(female) + '</td></b></tr>' +
+            '<tr><td>Total Households: ' + '<b></td><td>' + parseValues(totalHouseHolds) + '</td></b></tr>' +
+            '<tr><td>Purchasing Power Per Capita(GH₵): ' + '<b></td><td>' + parseValues(purchasingPowerPC) + '</td></b></tr>' +
+            '</table>';
+
+    }
+    const key = () => {
+        info = infoTab.querySelector('.info')
+        info.innerHTML = `
+        <div class="sublocLegend">
+            <div>KEY</div>
+            <div><span class="subColor" style="background-color:#014636;"></span> >2578715</div>
+            <div><span class="subColor" style="background-color:#016c59;"></span> >297854</div>
+            <div><span class="subColor" style="background-color:#02818a;"></span> >221830</div>
+            <div><span class="subColor" style="background-color:#3690c0;"></span> >191011</div>
+            <div><span class="subColor" style="background-color:#67a9cf;"></span> >167594</div>
+            <div><span class="subColor" style="background-color:#a6bddb;"></span> >151123</div>
+            <div><span class="subColor" style="background-color:#d0d1e6;"></span> >132209</div>
+            <div><span class="subColor" style="background-color:#ece2f0;"></span> >114448</div>
+            <div><span class="subColor" style="background-color:#fff7fb;"></span> >101933</div>
+        </div>
+        `
+    }
+    map.data.addListener('mouseover', showDetails, false);
+    map.data.addListener('mouseout', () => {
+        info = infoTab.querySelector('.info').innerHTML = ''
+        key();
+    });
+
+    div = document.createElement('div');
+    div.innerHTML = `Ghana Districts<input id="ghPopCheck" type="checkbox">`;
+    mapLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#ghPopCheck')) {
+            cb = document.getElementById('ghPopCheck')
+            // if on
+            if (cb.checked) {
+                map.data.addGeoJson(districtsGeoJSON);
+                key();
+            }
+            if (!cb.checked) {
+                // if off
+                map.data.forEach(function (feature) {
+                    map.data.remove(feature);
+                })
+                infoTab.querySelector('.info').innerHTML = ''
+            }
+        }
+    });
+
+}
 function parseData(val) {
     if (val == null || val == undefined) {
         return ''

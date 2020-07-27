@@ -31,6 +31,7 @@ class database
         return self::$instance;
     }
 }
+
 class billboard
 {
     public $billboardi;
@@ -172,6 +173,7 @@ class billboard
         return http_response_code();
     }
 }
+
 class uber
 {
     public $movement_i;
@@ -210,6 +212,7 @@ class uber
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class subcounties
 {
 
@@ -238,6 +241,7 @@ class subcounties
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class sublocations
 {
 
@@ -260,6 +264,7 @@ class sublocations
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class atm
 {
 
@@ -273,7 +278,10 @@ class atm
         $sql = "
         SELECT
             ST_AsGeoJSON(SHAPE) As geojson, operator 
-        FROM atms  
+        FROM 
+            atms
+        LIMIT
+                20  
         ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -281,6 +289,7 @@ class atm
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class bank
 {
 
@@ -296,6 +305,8 @@ class bank
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             banks
+        LIMIT
+            20
         ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -303,6 +314,7 @@ class bank
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class hospital
 {
 
@@ -325,6 +337,7 @@ class hospital
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class kibera
 {
 
@@ -347,6 +360,7 @@ class kibera
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class mathare
 {
 
@@ -369,6 +383,7 @@ class mathare
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class police
 {
 
@@ -384,6 +399,8 @@ class police
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             police_post
+        LIMIT
+            20
         ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -391,6 +408,7 @@ class police
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class schools
 {
 
@@ -406,6 +424,8 @@ class schools
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
             schools
+        LIMIT
+            20
         ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -413,6 +433,7 @@ class schools
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class universities
 {
 
@@ -428,6 +449,8 @@ class universities
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
             universities
+        LIMIT
+            20
         ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -435,6 +458,7 @@ class universities
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class populationDensity
 {
     public $SHAPE;
@@ -496,6 +520,7 @@ class populationDensity
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class POI
 {
     public $title;
@@ -528,7 +553,9 @@ class POI
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class bar{
+
+class bar
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -541,6 +568,8 @@ class bar{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name 
             FROM 
                 bars 
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -548,7 +577,9 @@ class bar{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class fuel{
+
+class fuel
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -568,7 +599,9 @@ class fuel{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class grocery{
+
+class grocery
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -581,6 +614,8 @@ class grocery{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 grocery 
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -588,7 +623,9 @@ class grocery{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class kiosk{
+
+class kiosk
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -601,6 +638,8 @@ class kiosk{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 kiosks
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -608,7 +647,9 @@ class kiosk{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class pharmacy{
+
+class pharmacy
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -621,6 +662,8 @@ class pharmacy{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 pharmacy
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -628,7 +671,9 @@ class pharmacy{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class restaraunt{
+
+class restaraunt
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -641,6 +686,8 @@ class restaraunt{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 restaurant
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -648,7 +695,9 @@ class restaraunt{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class saloon{
+
+class saloon
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -661,6 +710,8 @@ class saloon{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 saloon
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -668,7 +719,9 @@ class saloon{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-class supermarket{
+
+class supermarket
+{
     public function __construct()
     {
         $this->db = database::getInstance();
@@ -681,6 +734,8 @@ class supermarket{
                 ST_AsGeoJSON(SHAPE, 5) As geojson, name
             FROM 
                 supermarket
+            LIMIT
+                20
          ";
         // query the sql
         $statement =  $this->db->query($sql);
@@ -688,6 +743,7 @@ class supermarket{
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+
 class nssf
 {
 
@@ -703,6 +759,50 @@ class nssf
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM ug_nssf  
         ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class ugPopProj
+{
+
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getPopulationProjection()
+    {
+        // sql
+        $sql = "
+            SELECT 
+                ST_AsGeoJSON(SHAPE) As geojson, county, district, subcounty, male, female, total
+            FROM 
+                ugcensusproj 
+            ";
+        // query the sql
+        $statement =  $this->db->query($sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class ghanaDistrictPop
+{
+    public function __construct()
+    {
+        $this->db = database::getInstance();
+    }
+    public function getPopulation()
+    {
+        // sql
+        $sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, adm2_name, totpop_cy, mrstsingle, mrstmarrie, mrstdiv, purchppc, males_cy, females_cy, tothh_cy, ttfoodbeva, alcoholbev, tobacco, clothing, electronis, toysportsg 
+        FROM 
+            ghanapopulation ";
         // query the sql
         $statement =  $this->db->query($sql);
         // fetch result
