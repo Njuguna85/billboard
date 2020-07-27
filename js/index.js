@@ -122,7 +122,7 @@ function addOverlays(data) {
     addNssf(data.nssf);
     addUber(data.uber);
     addSubLocations(data.subLocations);
-    addugPopProj(data.popProj);
+    // addugPopProj(data.popProj);
     addGhanaPopulation(data.ghanaDistrictPop);
     for (const [key, value] of Object.entries(data)) {
         if (commD.includes(key)) {

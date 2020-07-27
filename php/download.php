@@ -73,8 +73,8 @@ class getData
         $ga =  new ghanaDistrictPop();
         $ghanaDistrictPop = $ga->getPopulation();
 
-        $popPj = new ugPopProj();
-        $popProj = $popPj->getPopulationProjection();
+        // $popPj = new ugPopProj();
+        // $popProj = $popPj->getPopulationProjection();
 
         $data->billboards = $billboardData;
         $data->uber = $uber;
@@ -97,7 +97,7 @@ class getData
         $data->saloon = $saloon;
         $data->supermarket = $supermarket;
         $data->nssf = $nssf;
-        $data->popProj = $popProj;
+        // $data->popProj = $popProj;
         $data->ghanaDistrictPop = $ghanaDistrictPop;
 
         $final = json_encode($data);
