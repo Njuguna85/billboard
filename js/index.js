@@ -116,20 +116,19 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    // addBillboards(data.billboard);
-    addAQ(data.aq);
-    // addAtm(data.atm);
-    // addTrafficLayer();
-    // addNssf(data.nssf);
-    // addUber(data.uber);
-    // addSubLocations(data.sublocation);
+    addBillboards(data.billboard);
+    addAtm(data.atm);
+    addTrafficLayer();
+    addNssf(data.nssf);
+    addUber(data.uber);
+    addSubLocations(data.sublocation);
     // addugPopProj(data.ugPopProj);
-    // addGhanaPopulation(data.ghanaDistrictPopPulation);
-    // for (const [key, value] of Object.entries(data)) {
-    //     if (commD.includes(key)) {
-    //         add(key, value);
-    //     }
-    // }
+    addGhanaPopulation(data.ghanaDistrictPopPulation);
+    for (const [key, value] of Object.entries(data)) {
+        if (commD.includes(key)) {
+            add(key, value);
+        }
+    }
 }
 
 function addTrafficLayer() {
