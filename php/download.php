@@ -1,111 +1,50 @@
 <?php
 require 'dbase.php';
-
-class getData
+class ModelController
 {
+    public static function getModelRecords($modelName)
+    {
+        if (class_exists($modelName)) {
+            $model = new $modelName;
+            return $model->getRecords();
+        } else {
+            throw new BadMethodCallException("class" . $modelName . 'not found');
+        }
+    }
+}
+
+
+class getData 
+{
+    public $subcounty = [];
     public function __construct()
     {
-        $data = new stdClass();
 
-        $billboard = new billboard();
-        $billboardData = $billboard->getBillboardLocations();
+        $this->subcounty = ModelController::getModelRecords('subcounty');
+        $this->uber = ModelController::getModelRecords('uber');
+        $this->billboard = ModelController::getModelRecords('billboard');
+        $this->sublocation = ModelController::getModelRecords('sublocation');
+        $this->atm = ModelController::getModelRecords('atm');
+        $this->bank = ModelController::getModelRecords('bank');
+        $this->hospital = ModelController::getModelRecords('hospital');
+        $this->kibera = ModelController::getModelRecords('kibera');
+        $this->mathare = ModelController::getModelRecords('mathare');
+        $this->police = ModelController::getModelRecords('police');
+        $this->school = ModelController::getModelRecords('school');
+        $this->university = ModelController::getModelRecords('university');
+        $this->bar = ModelController::getModelRecords('bar');
+        $this->fuel = ModelController::getModelRecords('fuel');
+        $this->grocery = ModelController::getModelRecords('grocery');
+        $this->kiosk = ModelController::getModelRecords('kiosk');
+        $this->pharmacy = ModelController::getModelRecords('pharmacy');
+        $this->restaraunt = ModelController::getModelRecords('restaraunt');
+        $this->saloon = ModelController::getModelRecords('saloon');
+        $this->supermarket = ModelController::getModelRecords('supermarket');
+        $this->nssf = ModelController::getModelRecords('nssf');
+        $this->ugPopProj = ModelController::getModelRecords('ugPopProj');
+        $this->ghanaDistrictPopPulation = ModelController::getModelRecords('ghanaDistrictPopPulation');
 
-        $u = new uber();
-        $uber = $u->getUbertime();
-
-        // $sub = new subcounties();
-        // $subcounties = $sub->getsubcounties();
-
-        $at = new atm();
-        $atms = $at->getAtm();
-
-        $ba = new bank();
-        $banks = $ba->getBank();
-
-        $hos = new hospital();
-        $hospitals = $hos->getHospital();
-
-        // $ki = new kibera();
-        // $kibera = $ki->getKibera();
-
-        // $ma = new mathare();
-        // $mathare = $ma->getMathare();
-
-        $pol = new police();
-        $police = $pol->getPolicePost();
-
-        $sch = new schools();
-        $school = $sch->getSchools();
-
-        $uni = new universities();
-        $university = $uni->getUniversity();
-
-        $subl = new sublocations();
-        $sublocations = $subl->getsubLocations();
-
-        $ba = new bar();
-        $bars = $ba->getBar();
-
-        $fu = new fuel();
-        $petrolStations = $fu->getPetrolStation();
-
-        $gr = new grocery();
-        $grocery = $gr->getGrocery();
-
-        $ki = new kiosk();
-        $kiosk = $ki->getkiosk();
-
-        $ph = new pharmacy();
-        $pharmacy = $ph->getPharmacy();
-
-        $re = new restaraunt();
-        $restaraunt = $re->getRestaraunt();
-
-        $sa = new saloon();
-        $saloon = $sa->getSaloon();
-
-        $su = new supermarket();
-        $supermarket = $su->getsupermarket();
-
-        $ns = new nssf();
-        $nssf = $ns->getNssf();
-
-        $ga =  new ghanaDistrictPop();
-        $ghanaDistrictPop = $ga->getPopulation();
-
-        // $popPj = new ugPopProj();
-        // $popProj = $popPj->getPopulationProjection();
-
-        $data->billboards = $billboardData;
-        $data->uber = $uber;
-        // $data->subCounties = $subcounties;
-        $data->subLocations = $sublocations;
-        $data->atms = $atms;
-        // $data->kibera = $kibera;
-        // $data->mathare = $mathare;
-        $data->bank = $banks;
-        $data->hospital = $hospitals;
-        $data->police = $police;
-        $data->school = $school;
-        $data->university = $university;
-        $data->bar = $bars;
-        $data->petrolStation = $petrolStations;
-        $data->grocery = $grocery;
-        $data->kiosk = $kiosk;
-        $data->pharmacy = $pharmacy;
-        $data->restaraunt = $restaraunt;
-        $data->saloon = $saloon;
-        $data->supermarket = $supermarket;
-        $data->nssf = $nssf;
-        // $data->popProj = $popProj;
-        $data->ghanaDistrictPop = $ghanaDistrictPop;
-
-        $final = json_encode($data);
-        //$this->write_json_to_file($final);
-        echo $final;
     }
-
-
     //save to a file
     private function write_json_to_file($data)
     {
@@ -123,4 +62,4 @@ class getData
         fclose($json_file);
     }
 }
-new getData();
+echo json_encode(new getData());

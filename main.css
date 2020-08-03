@@ -84,7 +84,8 @@ p {
 
 .essentialLayers>div,
 .poiLayers>div,
-.mapLayers>div {
+.mapLayers>div,
+.aqLayers>div {
     display: flex;
     justify-content: space-between;
     padding: 2px;
@@ -95,7 +96,8 @@ p {
 
 .essentialLayers img,
 .poiLayers img,
-.mapLayers img {
+.mapLayers img,
+.aqLayers img {
     height: 20px;
 }
 

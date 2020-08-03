@@ -22,7 +22,6 @@ poiLayers.innerHTML = '<h5>POI</h5>';
 poiLayers.className = 'poiLayers';
 legend.appendChild(poiLayers);
 
-
 infoTab = document.createElement('div');
 infoTab.setAttribute('id', 'infoTab');
 infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
@@ -116,20 +115,21 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    addBillboards(data.billboards);
-    addAtm(data.atms);
+    addBillboards(data.billboard);
+    addAtm(data.atm);
     addTrafficLayer();
     addNssf(data.nssf);
     addUber(data.uber);
-    addSubLocations(data.subLocations);
-    // addugPopProj(data.popProj);
-    addGhanaPopulation(data.ghanaDistrictPop);
+    addSubLocations(data.sublocation);
+    addugPopProj(data.ugPopProj);
+    addGhanaPopulation(data.ghanaDistrictPopPulation);
     for (const [key, value] of Object.entries(data)) {
         if (commD.includes(key)) {
             add(key, value);
         }
     }
 }
+
 
 function addTrafficLayer() {
     const trafficLayer = new google.maps.TrafficLayer();
@@ -183,7 +183,7 @@ function add(key, value) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     );
     div = document.createElement('div');
-    div.innerHTML = `<img src='${iconUrl}'/> ${key}<input id="${key}Checked" type="checkbox" />`;
+    div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
     poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
         cb = document.getElementById(`${key}Checked`)
@@ -231,7 +231,7 @@ function addBillboards(data) {
         map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/marker.png'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
+    div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
     essentialLayers.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#billboardChecked')) {
@@ -271,11 +271,12 @@ function addAtm(data) {
         })(marker, el));
         return marker
     });
+
     const markerCluster = new MarkerClusterer(
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/atm.png'/>ATM<input id="atmCheck" type="checkbox">`;
+    div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
     poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#atmCheck')) {
@@ -321,7 +322,7 @@ function addNssf(data) {
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     )
     div = document.createElement('div');
-    div.innerHTML = `<img src='images/office.png'/>NSSF Offices<input id="nssfChecked" type="checkbox">`;
+    div.innerHTML = `<img src='images/office.png' alt="nssf Offices" />NSSF Offices<input id="nssfChecked" type="checkbox">`;
     poiLayers.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#nssfChecked')) {
@@ -398,7 +399,6 @@ function getmobileMarkers(deliveriesData) {
 }
 
 function getColor(d) {
-    console.log('asdas');
     return d > 3318 ? '#800026' :
         d > 2878 ? '#BD0026' :
             d > 2437 ? '#E31A1C' :
@@ -432,7 +432,10 @@ function addUber(uber) {
         "features": uDMJSON
     };
 
-    map.data.setStyle((feature) => {
+    uberLayer = new google.maps.Data();
+    uberLayer.addGeoJson(uDMGeoJSON);
+
+    uberLayer.setStyle((feature) => {
         travelTime = feature.getProperty('travelTime');
         return {
             fillColor: getColor(travelTime),
@@ -442,13 +445,13 @@ function addUber(uber) {
             zIndex: 1000
         }
     });
-    map.data.addListener('mouseover', function (event) {
-        map.data.revertStyle();
-        map.data.overrideStyle(event.feature, { fillColor: '#CFD8DC' });
+    uberLayer.addListener('mouseover', function (event) {
+        uberLayer.revertStyle();
+        uberLayer.overrideStyle(event.feature, { fillColor: '#CFD8DC' });
         info = infoTab.querySelector('.info')
         info.innerHTML = '';
     });
-    map.data.addListener('mouseout', () => {
+    uberLayer.addListener('mouseout', () => {
         info = infoTab.querySelector('.info').innerHTML = ''
     });
 
@@ -460,12 +463,9 @@ function addUber(uber) {
             cb = document.getElementById('uberCheck')
             // if on
             if (document.getElementById('uberCheck').checked) {
-                map.data.addGeoJson(uDMGeoJSON);
+                uberLayer.setMap(map);
             } else {
-                map.data.forEach(function (feature) {
-                    // if off
-                    map.data.remove(feature);
-                })
+                uberLayer.setMap(null);
             }
         }
     });
@@ -504,7 +504,8 @@ function addSubLocations(subLocations) {
         "type": "FeatureCollection",
         "features": subLocationsJSON
     };
-    map.data.setStyle((feature) => {
+    subLocationsLayer = new google.maps.Data();
+    subLocationsLayer.setStyle((feature) => {
         totalPopulation = feature.getProperty('totalPopulation');
         return {
             fillColor: sublocationsColors(totalPopulation),
@@ -515,8 +516,8 @@ function addSubLocations(subLocations) {
         }
     });
     const showDetails = (event) => {
-        map.data.revertStyle();
-        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        subLocationsLayer.revertStyle();
+        subLocationsLayer.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
         name = event.feature.getProperty('name');
         totalPopulation = event.feature.getProperty('totalPopulation');
         totalHouseHold = event.feature.getProperty('totalHouseHold');
@@ -551,9 +552,12 @@ function addSubLocations(subLocations) {
         </div>
         `
     }
-    map.data.addListener('click', showDetails, false);
-    map.data.addListener('mouseover', showDetails, false);
-    map.data.addListener('mouseout', () => {
+
+    subLocationsLayer.addGeoJson(subLocationsGeoJSON);
+
+    subLocationsLayer.addListener('click', showDetails, false);
+    subLocationsLayer.addListener('mouseover', showDetails, false);
+    subLocationsLayer.addListener('mouseout', () => {
         info = infoTab.querySelector('.info').innerHTML = ''
         key();
     });
@@ -566,15 +570,13 @@ function addSubLocations(subLocations) {
             cb = document.getElementById('sublCheck')
             // if on
             if (cb.checked) {
-                map.data.addGeoJson(subLocationsGeoJSON);
+                subLocationsLayer.setMap(map);
                 key();
             }
             if (!cb.checked) {
                 // if off
-                map.data.forEach(function (feature) {
-                    map.data.remove(feature);
-                })
-                infoTab.querySelector('.info').innerHTML = ''
+                subLocationsLayer.setMap(null);
+                infoTab.querySelector('.info').innerHTML = '';
             }
         }
     });
@@ -613,7 +615,8 @@ function addugPopProj(data) {
         "type": "FeatureCollection",
         "features": districtsJSON
     };
-    map.data.setStyle((feature) => {
+    districtsLayer = new google.maps.Data();
+    districtsLayer.setStyle((feature) => {
         totalPopulation = feature.getProperty('totalPopulation');
         return {
             fillColor: ugPopProjColors(totalPopulation),
@@ -624,8 +627,8 @@ function addugPopProj(data) {
         }
     });
     const showDetails = (event) => {
-        map.data.revertStyle();
-        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        districtsLayer.revertStyle();
+        districtsLayer.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
         county = event.feature.getProperty('county');
         totalPopulation = event.feature.getProperty('totalPopulation');
         district = event.feature.getProperty('district');
@@ -660,30 +663,30 @@ function addugPopProj(data) {
         </div>
         `
     }
-    map.data.addListener('click', showDetails, false);
-    map.data.addListener('mouseover', showDetails, false);
-    map.data.addListener('mouseout', () => {
+
+    districtsLayer.addGeoJson(districtsGeoJSON);
+
+    districtsLayer.addListener('click', showDetails, false);
+    districtsLayer.addListener('mouseover', showDetails, false);
+    districtsLayer.addListener('mouseout', () => {
         info = infoTab.querySelector('.info').innerHTML = ''
         key();
     });
 
     div = document.createElement('div');
-    div.innerHTML = `Uganda Districts<input id="ugPopProjCheck" type="checkbox" disabled>`;
+    div.innerHTML = `Uganda Districts<input id="ugPopProjCheck" type="checkbox">`;
     mapLayers.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#ugPopProjCheck')) {
             cb = document.getElementById('ugPopProjCheck')
             // if on
             if (cb.checked) {
-                map.data.addGeoJson(districtsGeoJSON);
+                districtsLayer.setMap(map)
                 key();
             }
             if (!cb.checked) {
-                // if off
-                map.data.forEach(function (feature) {
-                    map.data.remove(feature);
-                })
-                infoTab.querySelector('.info').innerHTML = ''
+                districtsLayer.setMap(null);
+                infoTab.querySelector('.info').innerHTML = '';
             }
         }
     });
@@ -724,7 +727,8 @@ function addGhanaPopulation(data) {
         "type": "FeatureCollection",
         "features": districtsJSON
     };
-    map.data.setStyle((feature) => {
+    ghanaLayer = new google.maps.Data();
+    ghanaLayer.setStyle((feature) => {
         totalPopulation = feature.getProperty('totalPopulation');
         return {
             fillColor: GHPopColors(totalPopulation),
@@ -735,8 +739,8 @@ function addGhanaPopulation(data) {
         }
     });
     const showDetails = (event) => {
-        map.data.revertStyle();
-        map.data.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
+        ghanaLayer.revertStyle();
+        ghanaLayer.overrideStyle(event.feature, { strokeColor: '#880E4F', strokeWeight: 3 });
         areaName = event.feature.getProperty('areaName');
         totalPopulation = event.feature.getProperty('totalPopulation');
         purchasingPowerPC = event.feature.getProperty('purchasingPowerPC');
@@ -773,8 +777,10 @@ function addGhanaPopulation(data) {
         </div>
         `
     }
-    map.data.addListener('mouseover', showDetails, false);
-    map.data.addListener('mouseout', () => {
+    ghanaLayer.addGeoJson(districtsGeoJSON);
+
+    ghanaLayer.addListener('mouseover', showDetails, false);
+    ghanaLayer.addListener('mouseout', () => {
         info = infoTab.querySelector('.info').innerHTML = ''
         key();
     });
@@ -787,20 +793,19 @@ function addGhanaPopulation(data) {
             cb = document.getElementById('ghPopCheck')
             // if on
             if (cb.checked) {
-                map.data.addGeoJson(districtsGeoJSON);
+                ghanaLayer.setMap(map)
                 key();
             }
             if (!cb.checked) {
                 // if off
-                map.data.forEach(function (feature) {
-                    map.data.remove(feature);
-                })
+                ghanaLayer.setMap(null)
                 infoTab.querySelector('.info').innerHTML = ''
             }
         }
     });
 
 }
+
 function parseData(val) {
     if (val == null || val == undefined) {
         return ''

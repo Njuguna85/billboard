@@ -1,17 +1,15 @@
 <?php
-
+require "config.php";
 class database
 {
-
-    private $host = "localhost";
-    private $db = "billboard";
-    private $username = "dennis";
-    private $password = "1234567890";
+    private $host = HOSTNAME;
+    private $db = DATABASE;
+    private $username = USERNAME;
+    private $password = PASSWORD;
     private static $instance = null;
 
     private function __construct()
     {
-        // $dsn = "pgsql:host=$this->host; dbname=$this->db";
         $dsn = "mysql:host=$this->host;charset=utf8; dbname=$this->db";
         $options = [
             PDO::ATTR_PERSISTENT,
@@ -32,7 +30,47 @@ class database
     }
 }
 
-class billboard
+abstract class Model
+{
+    protected static $db;
+    public $sql;
+
+    public function __construct()
+    {
+        self::$db = database::getInstance();
+    }
+
+    public function getRecords()
+    {
+        // query the sql
+        $statement =  self::$db->query($this->sql);
+        // fetch result
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+class subcounty extends Model
+{
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, male5above,
+            fema5above, totaldisab, maledisabl, femaledisa, totalable, maleable, 
+            femaleable, totalnotst, malenotsta, femalenots, percentdis, totalvisua, 
+            malevisual, femalevisu, totalheari, malehearin, femalehear, totalmobil,
+            malemobili, femalemobi, totalcogni, malecognit, femalecogn, totalselfc,
+            maleselfca, femaleself, totalcommu, malecommun, femalecomm, totalpopul,
+            malepopula, femalepopu, totalalbin, malealbini, femalealbi
+        FROM 
+            nairobisubcounties
+    ";
+    }
+}
+
+class billboard extends Model
 {
     public $billboardi;
     public $routename;
@@ -60,12 +98,19 @@ class billboard
     public $height;
     public $mediaowner;
     public $site_run_u;
-    public $db;
 
     public function __construct()
     {
-        $this->db = database::getInstance();
-
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            billboardi, routename, selectmedi, site_light, zone_, size_,'condition', orientatio, visibility, traffic, photo, road_type, lat As latitude, long_ As longitude
+        FROM 
+            billboard_locations
+        ";
+    }
+    public function addBillboard()
+    {
         $sql = "INSERT INTO 
                     billboard_locations
                     (billboardi, routename, selectmedi, site_light, zone_, size_, `condition`, 
@@ -81,7 +126,7 @@ class billboard
 
         //
         // prepare the statement
-        $this->statement = $this->db->prepare($sql);
+        // $this->statement = $this->db->prepare($sql);
 
         //
         // bind parameters
@@ -113,20 +158,6 @@ class billboard
         $this->statement->bindParam(':site_run_up', $this->site_run_u);
     }
 
-    public function getBillboardLocations()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                billboardi, routename, selectmedi, site_light, zone_, size_,'condition', orientatio, visibility, traffic, photo, road_type, lat As latitude, long_ As longitude
-            FROM 
-                billboard_locations
-            ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_CLASS);
-    }
     private function convertDate($date)
     {
         return date("Y-m-d", strtotime(str_replace('/', '-', $date)));
@@ -174,227 +205,130 @@ class billboard
     }
 }
 
-class uber
+class uber extends Model
 {
-    public $movement_i;
-    public $display_na;
-    public $moveid;
-    public $objectid_1;
-    public $origin_mov;
-    public $origin_dis;
-    public $destinatio;
-    public $destinat_1;
-    public $date_range;
-    public $mean_trave;
-    public $range___lo;
-    public $range___up;
-    public $destiid;
-    public $shape_leng;
-    public $shape_area;
-    public $SHAPE;
-    public $db;
 
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getUbertime()
-    {
-        // sql
-        $sql = "
+        $this->sql =  "
         SELECT 
             movement_i, display_na, moveid, objectid_1, origin_mov, origin_dis, destinatio, destinat_1, date_range, mean_trave, range___lo, range___up, destiid, shape_leng, shape_area, ST_AsGeoJSON(SHAPE) As geojson
         FROM 
             uber_mean_travel_time";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class subcounties
-{
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getsubcounties()
-    {
-        // sql
-        $sql = "
-                SELECT 
-                    ST_AsGeoJSON(SHAPE) As geojson, subcontnam, total5abov, male5above,
-                    fema5above, totaldisab, maledisabl, femaledisa, totalable, maleable, 
-                    femaleable, totalnotst, malenotsta, femalenots, percentdis, totalvisua, 
-                    malevisual, femalevisu, totalheari, malehearin, femalehear, totalmobil,
-                    malemobili, femalemobi, totalcogni, malecognit, femalecogn, totalselfc,
-                    maleselfca, femaleself, totalcommu, malecommun, femalecomm, totalpopul,
-                    malepopula, femalepopu, totalalbin, malealbini, femalealbi
-                FROM 
-                    nairobisubcounties
-            ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class sublocations
-{
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getsubLocations()
-    {
-        // sql
-        $sql = "
-                SELECT 
-                    ST_AsGeoJSON(SHAPE) As geojson, slname, aligned_su, subloc_20, count_, pop_09, male_09, female_09, pop_19, male_19, female_19, makeshift_, pop_makesh, total_hh, hh_convern, hh_group_q, densityper, percnt_50Plus, percnt_65Plus, percnt_pop, improved_w, unimproved, likely_pri, open_waste, percent_mo, mean_habit, median_hab, informal_s, selfemploy, percent_in, ratio_avg_ 
-                FROM 
-                    nairobisublocations
-            ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class atm
-{
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getAtm()
-    {
-        // sql
-        $sql = "
-        SELECT
-            ST_AsGeoJSON(SHAPE) As geojson, operator 
-        FROM 
-            atms
-        LIMIT
-                20  
-        ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class bank
-{
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getBank()
-    {
-        // sql
-        $sql = "
+class aq extends Model{
+    public function __construct(){
+        parent::__construct();
+        $this->sql = "
         SELECT 
-            ST_AsGeoJSON(SHAPE) As geojson, name 
+            customer_n, customer_t, address_1, address_2, latitude, longitude, customer_1, created_da, gt_country, bt_territo, bt_area, bt_town, cs_chanel, cs_type_of 
         FROM 
-            banks
-        LIMIT
-            20
+            africanqueenregister 
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class hospital
+class sublocation extends Model
 {
 
     public function __construct()
     {
-        $this->db = database::getInstance();
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, slname, aligned_su, subloc_20, count_, pop_09, male_09, female_09, pop_19, male_19, female_19, makeshift_, pop_makesh, total_hh, hh_convern, hh_group_q, densityper, percnt_50Plus, percnt_65Plus, percnt_pop, improved_w, unimproved, likely_pri, open_waste, percent_mo, mean_habit, median_hab, informal_s, selfemploy, percent_in, ratio_avg_ 
+        FROM 
+            nairobisublocations
+    ";
     }
-    public function getHospital()
+}
+
+class atm extends Model
+{
+
+    public function __construct()
     {
-        // sql
-        $sql = "
+        parent::__construct();
+        $this->sql = "
+            SELECT
+                ST_AsGeoJSON(SHAPE) As geojson, operator 
+            FROM 
+                atms
+            LIMIT
+                    20  
+        ";
+    }
+}
+
+class bank extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+            SELECT 
+                ST_AsGeoJSON(SHAPE) As geojson, name 
+            FROM 
+                banks
+            LIMIT
+                20
+        ";
+    }
+}
+
+class hospital extends Model
+{
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             hospitals
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class kibera
+class kibera extends Model
 {
-
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getKibera()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             kibera
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class mathare
+class mathare extends Model
 {
 
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getMathare()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             mathare
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class police
+class police extends Model
 {
-
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getPolicePost()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
@@ -402,24 +336,16 @@ class police
         LIMIT
             20
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class schools
+class school extends Model
 {
 
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getSchools()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
@@ -427,24 +353,16 @@ class schools
         LIMIT
             20
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class universities
+class university extends Model
 {
 
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getUniversity()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
@@ -452,360 +370,188 @@ class universities
         LIMIT
             20
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class populationDensity
-{
-    public $SHAPE;
-    public $subloactio;
-    public $areasqkm;
-    public $shape__are;
-    public $shape__len;
-    public $id;
-    public $sourcecoun;
-    public $enrich_fid;
-    public $aggregatio;
-    public $population;
-    public $apportionm;
-    public $hasdata;
-    public $totpop_cy;
-    public $pppc_cy;
-    public $males_cy;
-    public $females_cy;
-    public $page01_cy;
-    public $page02_cy;
-    public $page03_cy;
-    public $page04_cy;
-    public $page05_cy;
-    public $tothh_cy;
-    public $avghhsz_cy;
-    public $educ01a_cy;
-    public $educ02a_cy;
-    public $educ03a_cy;
-    public $educ04a_cy;
-    public $educ05a_cy;
-    public $educ06a_cy;
-    public $educ07a_cy;
-    public $educ08a_cy;
-    public $educ09a_cy;
-    public $pop_densit;
-    public $hhld_densi;
-    public $area_sqkm;
-    public $shape_leng;
-    public $shape_area;
-    public $db;
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getPopulationDensity()
-    {
-        // sql
-        $sql = "
-          SELECT 
-              subloactio as Area, areasqkm as AreaSize, totpop_cy as Population,
-              males_cy as Male, females_cy as Female, ST_AsGeoJSON(SHAPE, 5) As geojson
-          FROM 
-              population_density
-          ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class POI
-{
-    public $title;
-    public $location;
-    public $lat;
-    public $lon;
-    public $details;
-    public $type;
-    public $subtype;
-    public $level;
-    public $SHAPE;
-    public $db;
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getPOI()
-    {
-        // sql
-        $sql = "
-         SELECT 
-             title, type, subtype, level, ST_AsGeoJSON(SHAPE, 5) As geojson
-         FROM 
-             points_of_interest
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class bar
+class POI extends Model
 {
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getBar()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name 
-            FROM 
-                bars 
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class fuel
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getPetrolStation()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name 
-            FROM 
-                fuel 
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class grocery
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getGrocery()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                grocery 
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class kiosk
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getkiosk()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                kiosks
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class pharmacy
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getPharmacy()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                pharmacy
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class restaraunt
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getRestaraunt()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                restaurant
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class saloon
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getSaloon()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                saloon
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class supermarket
-{
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getsupermarket()
-    {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE, 5) As geojson, name
-            FROM 
-                supermarket
-            LIMIT
-                20
-         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-class nssf
-{
-
-    public function __construct()
-    {
-        $this->db = database::getInstance();
-    }
-    public function getNssf()
-    {
-        // sql
-        $sql = "
-        SELECT
-            ST_AsGeoJSON(SHAPE) As geojson, name 
-        FROM ug_nssf  
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            title, type, subtype, level, ST_AsGeoJSON(SHAPE, 5) As geojson
+        FROM 
+            points_of_interest
         ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class ugPopProj
+class bar extends Model
 {
-
     public function __construct()
     {
-        $this->db = database::getInstance();
+        parent::__construct();
+
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name 
+        FROM 
+            bars 
+        LIMIT
+            20
+     ";
     }
-    public function getPopulationProjection()
+}
+
+class fuel extends Model
+{
+    public function __construct()
     {
-        // sql
-        $sql = "
-            SELECT 
-                ST_AsGeoJSON(SHAPE) As geojson, county, district, subcounty, male, female, total
-            FROM 
-                ugcensusproj 
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name 
+        FROM 
+            fuel 
+     ";
+    }
+}
+
+class grocery extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            grocery 
+        LIMIT
+            20
+     ";
+    }
+}
+
+class kiosk extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            kiosks
+        LIMIT
+            20
+     ";
+    }
+}
+
+class pharmacy extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            pharmacy
+        LIMIT
+            20
+     ";;
+    }
+}
+
+class restaraunt extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            restaurant
+        LIMIT
+            20
+     ";
+    }
+}
+
+class saloon extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            saloon
+        LIMIT
+            20
+     ";
+    }
+}
+
+class supermarket extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE, 5) As geojson, name
+        FROM 
+            supermarket
+        LIMIT
+            20
+     ";
+    }
+}
+
+class nssf extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+            SELECT
+                ST_AsGeoJSON(SHAPE) As geojson, name 
+            FROM ug_nssf  
             ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
-class ghanaDistrictPop
+class ugPopProj extends Model
+{
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, county, district, subcounty, male, female, total
+        FROM 
+            ugcensusproj 
+        ";
+    }
+}
+
+class ghanaDistrictPopPulation extends Model
 {
     public function __construct()
     {
-        $this->db = database::getInstance();
-    }
-    public function getPopulation()
-    {
-        // sql
-        $sql = "
+        parent::__construct();
+
+        $this->sql = "
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, adm2_name, totpop_cy, mrstsingle, mrstmarrie, mrstdiv, purchppc, males_cy, females_cy, tothh_cy, ttfoodbeva, alcoholbev, tobacco, clothing, electronis, toysportsg 
         FROM 
             ghanapopulation ";
-        // query the sql
-        $statement =  $this->db->query($sql);
-        // fetch result
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
