@@ -157,7 +157,6 @@ function getmobileMarkers(deliveriesData) {
     })
 }
 
-
 function addAQ(data) {
     //
     // the pre-existing cusomer types
@@ -248,7 +247,6 @@ function parseValues(val) {
     }
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
 //
 // create routes
 const tracker = new Object();
@@ -315,6 +313,7 @@ function calcRoute(tracker) {
     }
 
 }
+
 // Your web app's Firebase configuration
 var firebaseConfig = {
     apiKey: "AIzaSyD-ntSGTmrq1JSf9a80bLiUMLWOPGI8As8",
