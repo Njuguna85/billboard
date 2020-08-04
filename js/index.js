@@ -22,11 +22,6 @@ poiLayers.innerHTML = '<h5>POI</h5>';
 poiLayers.className = 'poiLayers';
 legend.appendChild(poiLayers);
 
-aqLayers = document.createElement('div');
-aqLayers.innerHTML = '<h5>African Queen</h5>';
-aqLayers.className = 'aqLayers';
-legend.appendChild(aqLayers);
-
 infoTab = document.createElement('div');
 infoTab.setAttribute('id', 'infoTab');
 infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
@@ -121,195 +116,21 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    // addBillboards(data.billboard);
-    console.log(data);
-    addAQ(data.aq);
-    // addAtm(data.atm);
-    // addTrafficLayer();
-    // addNssf(data.nssf);
-    // addUber(data.uber);
-    // addSubLocations(data.sublocation);
-    // addugPopProj(data.ugPopProj);
-    // addGhanaPopulation(data.ghanaDistrictPopPulation);
-    // for (const [key, value] of Object.entries(data)) {
-    //     if (commD.includes(key)) {
-    //         add(key, value);
-    //     }
-    // }
-}
-
-function addAQ(data) {
-    console.log(data);
-    //
-    // the pre-existing cusomer types
-    const aQCustCat = ['Airline', 'Bar', 'Beauty shop', 'Bookshop', 'Border Duty Free Shop', 'Canteen', 'Cash', 'Clinic/ Surgery', 'College', 'Convenience store', 'Cosmetics', 'Dairy shop', 'Drug store', 'Foods', 'General Merchandiser', 'Hospital', 'Hotel', 'Hypermarket', 'Inn/ Motel', 'Key Account', 'Kiosk', 'Mini supermarket', 'Office', 'Other', 'Petrol station', 'Pharmacy', 'Primary School', 'Recreational', 'Restaurant', 'Sales Rep', 'Saloon', 'Secondary School', 'Spa', 'Staff', 'Stationary', 'Supermarket', 'University', 'Washing bay', 'Wholesaler'];
-    //
-    // create a new array of the same customers types with no spaces and special characters
-    const newaQCustCat = aQCustCat.map(el => {
-        newEl = el.split('/').join(' ').split(' ');
-        return newEl.join('');
-    });
-    //'
-    // add the customer types to the legend
-    // and listen to click events to add the customers to the dom
-    newaQCustCat.forEach((el, i) => {
-        div = document.createElement('div');
-        div.innerHTML = `<img src='images/pMarker.png' alt='${aQCustCat[i]}'/> ${aQCustCat[i]}<input id="${el}Checked" type="checkbox" />`;
-        aqLayers.appendChild(div);
-        legend.addEventListener('change', e => {
-            if (e.target.matches(`#${el}Checked`)) {
-                cb = document.getElementById(`${el}Checked`)
-                // if on
-                if (cb.checked) {
-                    // markerCluster.addMarkers(markers)
-                    clustMkGen(aQCustCat[i])
-                }
-                if (!cb.checked) {
-                    // if off
-                    // markerCluster.removeMarkers(markers)
-                    console.log('no');
-                }
-            }
-        })
-    })
-    //
-    // check if the caustomer categories are saved in the local storage
-    // if none create an array and add it to LS
-    const clustMkGen = (customerCategory) => {
-        if (localStorage.getItem(`${customerCategory}`)) {
-            return localStorage.getItem(`${customerCategory}`);
+    addBillboards(data.billboard);
+    addAtm(data.atm);
+    addTrafficLayer();
+    addNssf(data.nssf);
+    addUber(data.uber);
+    addSubLocations(data.sublocation);
+    addugPopProj(data.ugPopProj);
+    addGhanaPopulation(data.ghanaDistrictPopPulation);
+    for (const [key, value] of Object.entries(data)) {
+        if (commD.includes(key)) {
+            add(key, value);
         }
-        // else setitems
-
-        // start with an empty customerCategory array
-        var y = performance.now();
-        customerMarkers = [];
-
-        const x = data.filter(x => x.customer_t == customerCategory).map(value => {
-            let latlng = new google.maps.LatLng(value.latitude, value.longitude);
-            iconUrl = `images/pMarker.png`;
-            let markerStringDet =
-                '<div>' + 'Customer Name: <b>' + parseData(value.customer_n) + '</b></div>' +
-                '<div>' + 'Customer Type: <b>' + parseData(value.customer_t) + '</b></div>' +
-                '<div>' + 'Address: <b>' + parseData(value.address_1) + '</b></div>' +
-                '<div>' + 'BT Territory: <b>' + parseData(value.bt_territo) + '</b></div>' +
-                '<div>' + 'BT Area: <b>' + parseData(value.bt_area) + '</b></div>' +
-                '<div>' + 'BT Town: <b>' + parseData(value.bt_town) + '</b></div>' +
-                '<div>' + 'CS Channel: <b>' + parseData(value.cs_chanel) + '</b></div>' +
-                '<button class="btn end" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Go Here</button>' +
-                '<button class="btn stop" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Add Stop</button>' +
-                '<button class="btn start" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Start Here</button>'
-                ;
-            let marker = new google.maps.Marker({
-                position: latlng,
-                icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
-                optimized: false,
-            });
-            google.maps.event.addListener(marker, 'click', ((marker, value) => {
-                return () => {
-                    infoWindow.setContent(markerStringDet);
-                    infoWindow.open(map, marker);
-                }
-            })(marker, value));
-            return marker;
-        })
-        /*
-        for (const [key, value] of Object.entries(data)) {
-            if (value.customer_t == customerCategory) {
-                let latlng = new google.maps.LatLng(value.latitude, value.longitude);
-                iconUrl = `images/pMarker.png`;
-                let markerStringDet =
-                    '<div>' + 'Customer Name: <b>' + parseData(value.customer_n) + '</b></div>' +
-                    '<div>' + 'Customer Type: <b>' + parseData(value.customer_t) + '</b></div>' +
-                    '<div>' + 'Address: <b>' + parseData(value.address_1) + '</b></div>' +
-                    '<div>' + 'BT Territory: <b>' + parseData(value.bt_territo) + '</b></div>' +
-                    '<div>' + 'BT Area: <b>' + parseData(value.bt_area) + '</b></div>' +
-                    '<div>' + 'BT Town: <b>' + parseData(value.bt_town) + '</b></div>' +
-                    '<div>' + 'CS Channel: <b>' + parseData(value.cs_chanel) + '</b></div>' +
-                    '<button class="btn end" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Go Here</button>' +
-                    '<button class="btn stop" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Add Stop</button>' +
-                    '<button class="btn start" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Start Here</button>'
-                    ;
-                let marker = new google.maps.Marker({
-                    position: latlng,
-                    icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
-                    optimized: false,
-                });
-                google.maps.event.addListener(marker, 'click', ((marker, value) => {
-                    return () => {
-                        infoWindow.setContent(markerStringDet);
-                        infoWindow.open(map, marker);
-                    }
-                })(marker, value));
-                customerMarkers.push(marker);
-            }
-        }
-        */
-        // add the cluster to the map
-        const markerCluster = new MarkerClusterer(
-            map, x, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-        );
-        // save it to the LS
-        // localStorage.setItem(`${customerCategory}`, (markerCluster))
-        /*
-        const markers = data.map(el => {
-            let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-            iconUrl = `images/pMarker.png`;
-            let markerStringDet =
-                '<div>' + 'Customer Name: <b>' + parseData(el.customer_n) + '</b></div>' +
-                '<div>' + 'Address: <b>' + parseData(el.address_1) + '</b></div>' +
-                '<div>' + 'BT Territory: <b>' + parseData(el.bt_territo) + '</b></div>' +
-                '<div>' + 'BT Area: <b>' + parseData(el.bt_area) + '</b></div>' +
-                '<div>' + 'BT Town: <b>' + parseData(el.bt_town) + '</b></div>' +
-                '<div>' + 'CS Channel: <b>' + parseData(el.cs_chanel) + '</b></div>' +
-                '<button class="btn end" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Go Here</button>' +
-                '<button class="btn stop" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Add Stop</button>' +
-                '<button class="btn start" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Start Here</button>'
-                ;
-            let marker = new google.maps.Marker({
-                position: latlng,
-                icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
-                optimized: false,
-            });
-            google.maps.event.addListener(marker, 'click', ((marker, el) => {
-                return () => {
-                    infoWindow.setContent(markerStringDet);
-                    infoWindow.open(map, marker);
-                }
-            })(marker, el));
-            return marker
-        });
-        const markerCluster = new MarkerClusterer(
-            map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-        );
-        div = document.createElement('div');
-        div.innerHTML = `<img src='${iconUrl}'/> aq<input id="aqChecked" type="checkbox" />`;
-        aqLayers.appendChild(div);
-        legend.addEventListener('change', e => {
-            cb = document.getElementById(`aqChecked`)
-            // if on
-            if (cb.checked) {
-                markerCluster.addMarkers(markers)
-            }
-            if (!cb.checked) {
-                // if off
-                markerCluster.removeMarkers(markers)
-            }
-        })
-        */
-
-        console.log(performance.now() - y);
     }
-
-    // we have different categories which we want to add as different layers. 
-    // 
-    // the function is going to return a markercluster with all its
-    // strings for incormation and event listeners set
-    // its will be called once a person checks on a customer category
-    // if it will then save the customers to the localstorage to
-    // reduce dom painting time
-
 }
+
 
 function addTrafficLayer() {
     const trafficLayer = new google.maps.TrafficLayer();

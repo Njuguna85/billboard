@@ -1,20 +1,30 @@
 const mapContainer = document.getElementById("map");
 let infoWindow;
+let map, heatmap;
 
 let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
 legend.innerHTML = `<h3>Map Legend</h3>`;
 
+aqLayers = document.createElement('div');
+aqLayers.innerHTML = '<h5>African Queen</h5>';
+aqLayers.className = 'aqLayers';
+legend.appendChild(aqLayers);
+
 essentialLayers = document.createElement('div');
 essentialLayers.className = 'essentialLayers';
 legend.appendChild(essentialLayers);
+
+const directionsPanel = document.createElement('div');
+directionsPanel.className = 'directionsPanel';
+directionsPanel.innerHTML = ` <h3>Directions</h3>`;
 
 function initMap() {
     // set the zoom, scale, street view and full screen controls
     // also create a custom map style 
     const mapOptions = {
-        zoom: 12,
-        center: { lat: -1.28333, lng: 36.816667 },
+        zoom: 8,
+        center: { lat: 0.31628, lng: 32.58219 },
         mapTypeControl: true,
         mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -46,10 +56,23 @@ function initMap() {
     infoWindow = new google.maps.InfoWindow;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     fetchMobileUploads();
+    fetchData();
     // initialize directions service
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
+
+}
+
+async function fetchData() {
+    let response = await fetch('./php/aq.php');
+    if (response.ok) {
+        data = await response.json();
+        localStorage.setItem('aq', JSON.stringify(data.aq))
+        addAQ(data.aq)
+    } else {
+        alert('Something went wrong while fetching data. Error: ' + response.status);
+    }
 }
 
 async function fetchMobileUploads() {
@@ -134,6 +157,7 @@ function getmobileMarkers(deliveriesData) {
     })
 }
 
+
 function addAQ(data) {
     //
     // the pre-existing cusomer types
@@ -144,35 +168,9 @@ function addAQ(data) {
         newEl = el.split('/').join(' ').split(' ');
         return newEl.join('');
     });
-    //'
-    // add the customer types to the legend
-    // and listen to click events to add the customers to the dom
-    newaQCustCat.forEach((el, i) => {
-        div = document.createElement('div');
-        div.innerHTML = `<img src='images/pMarker.png' alt='${aQCustCat[i]}'/> ${aQCustCat[i]}<input id="${el}Checked" type="checkbox" />`;
-        aqLayers.appendChild(div);
-        legend.addEventListener('change', e => {
-            if (e.target.matches(`#${el}Checked`)) {
-                cb = document.getElementById(`${el}Checked`)
-                // if on
-                if (cb.checked) {
-                    // markerCluster.addMarkers(markers)
-                    clustMkGen(aQCustCat[i])
-                }
-                if (!cb.checked) {
-                    // if off
-                    // markerCluster.removeMarkers(markers)
-                    console.log('no');
-                }
-            }
-        })
-    })
-
     const clustMkGen = (customerCategory) => {
-        // start with an empty customerCategory array
-        customerMarkers = [];
 
-        const x = data.filter(x => x.customer_t == customerCategory).map(value => {
+        const markers = data.filter(x => x.customer_t == customerCategory).map(value => {
             let latlng = new google.maps.LatLng(value.latitude, value.longitude);
             iconUrl = `images/pMarker.png`;
             let markerStringDet =
@@ -185,8 +183,8 @@ function addAQ(data) {
                 '<div>' + 'CS Channel: <b>' + parseData(value.cs_chanel) + '</b></div>' +
                 '<button class="btn end" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Go Here</button>' +
                 '<button class="btn stop" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Add Stop</button>' +
-                '<button class="btn start" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Start Here</button>'
-                ;
+                '<button class="btn start" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Start Here</button>';
+
             let marker = new google.maps.Marker({
                 position: latlng,
                 icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
@@ -198,22 +196,42 @@ function addAQ(data) {
                     infoWindow.open(map, marker);
                 }
             })(marker, value));
-            return marker;
-        })
 
-        // add the cluster to the map
-        const markerCluster = new MarkerClusterer(
-            map, x, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-        );
+            return marker;
+        });
+        return markers;
     }
 
-    // we have different categories which we want to add as different layers. 
-    // 
-    // the function is going to return a markercluster with all its
-    // strings for incormation and event listeners set
-    // its will be called once a person checks on a customer category
-    // if it will then save the customers to the localstorage to
-    // reduce dom painting time
+    // add the cluster to the map
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    );
+    //'
+    // add the customer types to the legend
+    // and listen to click events to add the customers to the dom
+    newaQCustCat.forEach((el, i) => {
+        div = document.createElement('div');
+        div.innerHTML =
+            `
+            <img src='images/pMarker.png' alt='${aQCustCat[i]}'/> ${aQCustCat[i]}<input id="${el}Checked" type="checkbox" />
+        `;
+        aqLayers.appendChild(div);
+        const markers = clustMkGen(aQCustCat[i])
+        legend.addEventListener('change', e => {
+            if (e.target.matches(`#${el}Checked`)) {
+                cb = document.getElementById(`${el}Checked`)
+                // if on
+                if (cb.checked) {
+
+                    markerCluster.addMarkers(markers)
+                }
+                if (!cb.checked) {
+                    // if off
+                    markerCluster.removeMarkers(markers)
+                }
+            }
+        })
+    })
 
 }
 
@@ -230,6 +248,7 @@ function parseValues(val) {
     }
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 //
 // create routes
 const tracker = new Object();
@@ -296,3 +315,46 @@ function calcRoute(tracker) {
     }
 
 }
+// Your web app's Firebase configuration
+var firebaseConfig = {
+    apiKey: "AIzaSyD-ntSGTmrq1JSf9a80bLiUMLWOPGI8As8",
+    authDomain: "gis-preductive-analytics.firebaseapp.com",
+    databaseURL: "https://gis-preductive-analytics.firebaseio.com",
+    projectId: "gis-preductive-analytics",
+    storageBucket: "gis-preductive-analytics.appspot.com",
+    messagingSenderId: "21440633703",
+    appId: "1:21440633703:web:fbf8da3a993579c3fc6dc2",
+    measurementId: "G-GJGHDHNJHD"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+const signInBtn = document.querySelector('#signIn');
+
+if (signInBtn) { signInBtn.addEventListener('click', e => logIn(e)); }
+
+function logIn(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const promise = auth.signInWithEmailAndPassword(email.value, password.value);
+    promise.catch(e => {
+        window.alert(e.message)
+    });
+    window.alert('Welcome Back');
+
+}
+auth.onAuthStateChanged(function (user) {
+    if (user) {
+        // User is signed in. 
+        document.querySelector('#loginContainer').style.display = 'none';
+        document.querySelector('#map').style.display = 'block';
+    } else {
+        // No user is signed in.
+        document.querySelector('#loginContainer').style.display = 'flex';
+        document.querySelector('#map').style.display = 'none';
+    }
+})

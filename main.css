@@ -19,6 +19,71 @@ body {
     height: 99%;
 }
 
+/* aq*/
+
+#loginContainer {
+    box-sizing: border-box;
+    width: 380px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #CFD8DC;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+#userForm {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-item {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#userForm input[type="password"],
+#userForm input[type="email"] {
+    border: none;
+    background: transparent;
+    text-align: center;
+    outline: none;
+    padding: 8px;
+    background-image: none;
+    border: 1px solid #3498db;
+    width: 70%;
+
+}
+
+.btn {
+    display: block;
+    background: #3949AB;
+    outline: none;
+    border: 1px #27ae60;
+    padding: 10px 15px;
+    color: white;
+}
+
+.btn:hover {
+    background: #9ea8e6;
+    transition: all .2s;
+    transform: scale(1.1);
+}
+.signin-item{
+    margin: 0 auto;
+}
+
 .description {
     font-family: 'Open Sans', sans-serif;
     text-align: center;

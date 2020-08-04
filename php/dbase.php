@@ -230,6 +230,7 @@ class aq extends Model
             africanqueenregister 
         ";
     }
+    /*
     public function getRecords()
     {
         // query the sql
@@ -254,7 +255,7 @@ class aq extends Model
         array_push($data, $custCategory);
 
         return $data;
-    }
+    }*/
 }
 
 class sublocation extends Model

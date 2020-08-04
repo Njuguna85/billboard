@@ -5,16 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="main.css">
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-auth.js"></script>
     <title>Geo Location Intelligent System</title>
 </head>
 
 <body>
-    <div id="map"></div>
+    <div id="loginContainer">
+        <div id="userForm">
+            <div class="form-item">
+                <label for="email">Email: </label><input type="email" name="email" id="email" placeholder="email"
+                    required>
+            </div>
+            <div class="form-item">
+                <label for="password">Password: </label><input type="password" name="password" id="password"
+                    placeholder="password" required>
+            </div>
+            <div class="signin-item">
+                <button class="btn" id="signIn">Log In</button>
+            </div>
+        </div>
+    </div>
+    <div id="map" style="display: none;"></div>
     <script src="aq.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <script src="https://unpkg.com/@google/markerclustererplus@4.0.1/dist/markerclustererplus.min.js"></script>
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbMbpTY8u3RUhX8KUrvq0eSLHxkNZUp-k&callback=initMap&libraries==visualization&v=weekly"></script>
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbMbpTY8u3RUhX8KUrvq0eSLHxkNZUp-k&callback=initMap&v=weekly&libraries=visualization"></script>
 </body>
 
 </html>
