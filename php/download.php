@@ -41,7 +41,7 @@ class getData
         $this->saloon = ModelController::getModelRecords('saloon');
         $this->supermarket = ModelController::getModelRecords('supermarket');
         $this->nssf = ModelController::getModelRecords('nssf');
-        $this->ugPopProj = ModelController::getModelRecords('ugPopProj');
+        // $this->ugPopProj = ModelController::getModelRecords('ugPopProj');
         $this->ghanaDistrictPopPulation = ModelController::getModelRecords('ghanaDistrictPopPulation');
         $this->aq = ModelController::getModelRecords('aq');
 
