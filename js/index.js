@@ -1,3 +1,13 @@
+// import { config } from './config.js';
+const isDev = true;
+const config = isDev ? {
+    url: 'http://localhost/billboard_api/public/index.php'
+} : {
+        url: 'predictiveanalytics.co.ke/billboard_api/public/index.php'
+    }
+
+
+
 let map;
 let infoWindow;
 var directionsService;
@@ -8,21 +18,27 @@ let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
 legend.innerHTML = `<h3>Map Legend</h3>`;
 
-essentialLayers = document.createElement('div');
+const essentialLayers = document.createElement('div');
 essentialLayers.className = 'essentialLayers';
 legend.appendChild(essentialLayers);
 
-mapLayers = document.createElement('div');
-mapLayers.innerHTML = '<h5>Map Layers</h5>';
+const mapLayers = document.createElement('div');
+mapLayers.innerHTML = '<h5 class="accordion">Map Layers</h5>';
 mapLayers.className = 'mapLayers';
 legend.appendChild(mapLayers);
+const mapLayersAccordion = document.createElement('div');
+mapLayersAccordion.className = 'accordion-content';
+mapLayers.append(mapLayersAccordion);
 
-poiLayers = document.createElement('div');
-poiLayers.innerHTML = '<h5>POI</h5>';
+const poiLayers = document.createElement('div');
+poiLayers.innerHTML = '<h5 class="accordion">POIs</h5>';
 poiLayers.className = 'poiLayers';
 legend.appendChild(poiLayers);
+const poiLayersAccordion = document.createElement('div');
+poiLayersAccordion.className = 'accordion-content';
+poiLayers.appendChild(poiLayersAccordion);
 
-infoTab = document.createElement('div');
+const infoTab = document.createElement('div');
 infoTab.setAttribute('id', 'infoTab');
 infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
 
@@ -75,6 +91,7 @@ function initMap() {
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
     fetchMobileUploads();
     fetchData();
+
     // initialize directions service
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
@@ -82,7 +99,7 @@ function initMap() {
 }
 
 async function fetchData() {
-    let response = await fetch('./php/download.php');
+    let response = await fetch(`./php/download.php`);
     if (response.ok) {
         data = await response.json();
         addOverlays(data);
@@ -129,8 +146,8 @@ function addOverlays(data) {
             add(key, value);
         }
     }
+    setTimeout(loader, 100);
 }
-
 
 function addTrafficLayer() {
     const trafficLayer = new google.maps.TrafficLayer();
@@ -138,7 +155,7 @@ function addTrafficLayer() {
     div = document.createElement('div');
     div.innerHTML = `Traffic Layer <input id="trafficChecked" type="checkbox" />`;
 
-    mapLayers.appendChild(div);
+    mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#trafficChecked')) {
             cb = document.getElementById(`trafficChecked`)
@@ -185,7 +202,7 @@ function add(key, value) {
     );
     div = document.createElement('div');
     div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
-    poiLayers.appendChild(div);
+    poiLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         cb = document.getElementById(`${key}Checked`)
         // if on
@@ -278,7 +295,7 @@ function addAtm(data) {
     )
     div = document.createElement('div');
     div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
-    poiLayers.appendChild(div);
+    poiLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#atmCheck')) {
             cb = document.getElementById('atmCheck')
@@ -324,7 +341,7 @@ function addNssf(data) {
     )
     div = document.createElement('div');
     div.innerHTML = `<img src='images/office.png' alt="nssf Offices" />NSSF Offices<input id="nssfChecked" type="checkbox">`;
-    poiLayers.appendChild(div);
+    poiLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#nssfChecked')) {
             cb = document.getElementById('nssfChecked')
@@ -458,7 +475,7 @@ function addUber(uber) {
 
     div = document.createElement('div');
     div.innerHTML = `Uber Data<input id="uberCheck" type="checkbox">`;
-    mapLayers.appendChild(div);
+    mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#uberCheck')) {
             cb = document.getElementById('uberCheck')
@@ -565,7 +582,7 @@ function addSubLocations(subLocations) {
 
     div = document.createElement('div');
     div.innerHTML = `Nairobi Sublocations<input id="sublCheck" type="checkbox">`;
-    mapLayers.appendChild(div);
+    mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#sublCheck')) {
             cb = document.getElementById('sublCheck')
@@ -676,7 +693,7 @@ function addugPopProj(data) {
 
     div = document.createElement('div');
     div.innerHTML = `Uganda Districts<input id="ugPopProjCheck" type="checkbox">`;
-    mapLayers.appendChild(div);
+    mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#ugPopProjCheck')) {
             cb = document.getElementById('ugPopProjCheck')
@@ -788,7 +805,7 @@ function addGhanaPopulation(data) {
 
     div = document.createElement('div');
     div.innerHTML = `Ghana Districts<input id="ghPopCheck" type="checkbox">`;
-    mapLayers.appendChild(div);
+    mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#ghPopCheck')) {
             cb = document.getElementById('ghPopCheck')
@@ -848,6 +865,18 @@ mapContainer.addEventListener('click', e => {
         tracker.stop = stopPoints;
         calcRoute(tracker);
     }
+    if (e.target.matches('.accordion')) {
+        // console.log(e);
+        e.target.classList.toggle('is-open');
+        const content = e.target.nextElementSibling;
+        if (content.style.maxHeight) {
+            // accordion is currently open, so close it
+            content.style.maxHeight = null;
+        } else {
+            // accordion is currently cloed so open it
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }
+    }
 });
 
 function calcRoute(tracker) {
@@ -878,11 +907,18 @@ function calcRoute(tracker) {
                 directionsRenderer.setDirections(response);
                 directionsRenderer.setPanel(div);
                 directionsPanel.appendChild(div);
-                map.controls[google.maps.ControlPosition.LEFT_TOP].push(directionsPanel);
+                map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(directionsPanel);
             } else {
                 window.alert("Directions request failed due to " + status);
             }
         });
     }
 
+}
+// window.addEventListener('load', function () {
+//     alert("It's loaded!")
+// })
+function loader() {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("billboardDetails").style.display = "block";
 }

@@ -11,12 +11,56 @@ body {
     width: 98vw;
     background-color: #EEEEEE;
     box-sizing: border-box;
+    position: relative;
+}
+
+/* // loader */
+#loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid blue;
+    border-bottom: 16px solid blue;
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /*                 MAP             */
 #billboardDetails {
     width: 100%;
     height: 99%;
+    position: relative;
+    animation: pullup .5s ;
+}
+@keyframes pullup{
+    from {bottom:-80%; opacity: 0;}
+    to{ bottom: 0; opacity: 1;}
 }
 
 /* aq*/
@@ -67,11 +111,12 @@ body {
 }
 
 .btn {
-    display: block;
+    display: inline-block;
     background: #3949AB;
     outline: none;
     border: 1px #27ae60;
-    padding: 10px 15px;
+    padding: 5px;
+    margin: 2px;
     color: white;
 }
 
@@ -80,7 +125,8 @@ body {
     transition: all .2s;
     transform: scale(1.1);
 }
-.signin-item{
+
+.signin-item {
     margin: 0 auto;
 }
 
@@ -139,7 +185,7 @@ p {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     background: #fffeee;
     color: #050303;
-    padding: 10px;
+    padding: 5px;
     font-weight: bold;
     width: fit-content;
     max-height: 80%;
@@ -148,15 +194,55 @@ p {
 }
 
 .essentialLayers>div,
-.poiLayers>div,
-.mapLayers>div,
-.aqLayers>div {
+.aqLayers>div,
+.accordion-content>div {
     display: flex;
     justify-content: space-between;
     padding: 2px;
     align-items: center;
     font-size: 11px;
     text-transform: capitalize;
+}
+
+h5.accordion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background-color: whitesmoke;
+    border: none;
+    outline: none;
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    color: #745141;
+    cursor: pointer;
+    transition: background-color .2s linear;
+}
+
+h5.accordion:after {
+    content: '\002B';
+    font-size: 20px;
+    float: right;
+}
+
+h5.is-open:after {
+    content: '\2212';
+    font-size: 20px;
+    float: right;
+}
+
+h5.accordion:hover,
+h5.accordion.is-open {
+    background-color: #dddddd;
+}
+
+.accordion-content {
+    border-left: 1px solid whitesmoke;
+    border-right: 1px solid whitesmoke;
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .2s ease-in-out;
 }
 
 .essentialLayers img,
@@ -178,13 +264,6 @@ p {
     text-align: center;
 }
 
-#legend h5 {
-    font-size: 12px;
-    color: rgb(122, 74, 10);
-    font-weight: 800;
-    margin: 0;
-    padding-top: 10px;
-}
 
 #legend img {
     vertical-align: middle;
@@ -216,7 +295,7 @@ p {
 
 .infoWindow>div {
     display: flex;
-    justify-content: start;
+    justify-content: centre;
 }
 
 .billboardImage {
@@ -228,8 +307,9 @@ p {
 .directionsPanel {
     width: 320px;
     background: #fffeee;
+    height: 55%;
     overflow-y: scroll;
-    top: 175px !important;
+
 }
 
 .sublocLegend {
@@ -343,7 +423,64 @@ tr:nth-child(even) {
     ##Screen = B/w 481px to 767px
   */
 
-@media (min-width: 481px) and (max-width: 767px) {}
+@media (min-width: 481px) and (max-width: 767px) {
+    .header {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+    }
+
+    .header h2 {
+        font-size: 15px;
+    }
+
+    .header .btn {
+        margin: 5px 0;
+        padding: 2px;
+        align-self: flex-end;
+    }
+
+    .description {
+        font-size: 12px;
+    }
+
+    .description__open {
+        font-size: 13px;
+    }
+
+    .description__modules {
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+        align-items: center;
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+        direction: unset;
+    }
+
+    .module {
+        display: flex;
+        flex-direction: column;
+        min-width: 70%;
+        min-height: 200px;
+        align-items: center;
+        margin: 10px;
+        background-color: whitesmoke;
+        padding: 0;
+        transition: ease-in-out .2s;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+
+    }
+    .footer{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: fit-content;
+        font-size: 11px;
+    }
+   
+}
 
 /* 
     ##Device = Most of the Smartphones Mobiles (Portrait)
@@ -378,6 +515,8 @@ tr:nth-child(even) {
     .description__modules {
         display: flex;
         flex-direction: row;
+        justify-content: start;
+        align-items: center;
         flex-wrap: nowrap;
         overflow-x: scroll;
         direction: unset;
@@ -396,6 +535,13 @@ tr:nth-child(even) {
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 
     }
-
-
+    .footer{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: fit-content;
+        font-size: 11px;
+    }
+   
 }

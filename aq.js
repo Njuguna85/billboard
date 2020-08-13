@@ -53,6 +53,10 @@ function initMap() {
     };
 
     map = new google.maps.Map(mapContainer, mapOptions);
+    // heatmap = new google.maps.visualization.HeatmapLayer({
+    //     data: getPoints(),
+    //     map: map
+    // });
     infoWindow = new google.maps.InfoWindow;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     fetchMobileUploads();
@@ -61,7 +65,6 @@ function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
-
 }
 
 async function fetchData() {
@@ -158,6 +161,7 @@ function getmobileMarkers(deliveriesData) {
 }
 
 function addAQ(data) {
+    localStorage.setItem('data', JSON.stringify(data));
     //
     // the pre-existing cusomer types
     const aQCustCat = ['Airline', 'Bar', 'Beauty shop', 'Bookshop', 'Border Duty Free Shop', 'Canteen', 'Cash', 'Clinic/ Surgery', 'College', 'Convenience store', 'Cosmetics', 'Dairy shop', 'Drug store', 'Foods', 'General Merchandiser', 'Hospital', 'Hotel', 'Hypermarket', 'Inn/ Motel', 'Key Account', 'Kiosk', 'Mini supermarket', 'Office', 'Other', 'Petrol station', 'Pharmacy', 'Primary School', 'Recreational', 'Restaurant', 'Sales Rep', 'Saloon', 'Secondary School', 'Spa', 'Staff', 'Stationary', 'Supermarket', 'University', 'Washing bay', 'Wholesaler'];
@@ -232,6 +236,11 @@ function addAQ(data) {
         })
     })
 
+}
+
+async function getPoints() {
+    data = await JSON.parse(localStorage.getItem('data'))
+    console.log(data);
 }
 
 function parseData(val) {

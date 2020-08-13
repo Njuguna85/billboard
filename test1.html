@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+    <title>Accordion</title>
+</head>
+
+<body>
+    <style>
+        body {
+            background-color: #6dc4f4;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 5px auto;
+        }
+
+        button.accordion {
+            width: 100%;
+            background-color: whitesmoke;
+            border: none;
+            outline: none;
+            text-align: left;
+            padding: 15px 20px;
+            font-size: 18px;
+            color: #333333;
+            cursor: pointer;
+            transition: background-color .2s linear;
+        }
+
+        button.accordion:after {
+            content: '\002B';
+            /* font-family: 'fontawesome'; */
+            font-size: 20px;
+            float: right;
+        }
+
+        button.accordion:hover,
+        button.accordion.is-open {
+            background-color: #dddddd;
+        }
+
+        button.is-open:after {
+            /* font-family: 'fontawesome'; */
+            content: '\2212';
+            font-size: 20px;
+            float: right;
+            color: tomato;
+        }
+
+        .accordion-content {
+            background-color: white;
+            border-left: 1px solid whitesmoke;
+            border-right: 1px solid whitesmoke;
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .5s ease-in-out;
+        }
+    </style>
+
+    <div class="container">
+        <button class="accordion">Accordion 1</button>
+        <div class="accordion-content">
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt exercitationem explicabo doloribus ea
+                eius minima? Amet, neque iure. Eum, et?</p>
+            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quod, fugit.</p>
+            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eaque nobis laudantium velit et odit doloribus?
+            </p>
+        </div>
+        <button class="accordion">Accordion 2</button>
+        <div class="accordion-content">
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit corrupti doloremque in praesentium vel!
+            </p>
+        </div>
+        <button class="accordion">Accordion 3</button>
+        <div class="accordion-content">
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate quae, libero voluptas tenetur
+                provident voluptate molestiae unde! Fugiat, perferendis, enim dicta delectus neque, obcaecati cumque
+                veniam facere laborum autem iste.</p>
+        </div>
+    </div>
+    <script>
+        const accordions = document.getElementsByClassName('accordion');
+        for (let i = 0; i < accordions.length; i++) {
+            accordions[i].onclick = function () {
+                this.classList.toggle('is-open');
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    // accordion is currently open, so clode it
+                    content.style.maxHeight = null;
+                } else {
+                    // accordion is currently cloed so open it
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
