@@ -565,8 +565,21 @@ class ugPopProj extends Model
         SELECT 
             ST_AsGeoJSON(SHAPE) As geojson, county, district, subcounty, male, female, total
         FROM 
-            ugcensusproj 
+            ugpop 
         ";
+    }
+}
+class metalworks extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+            SELECT
+                ST_AsGeoJSON(SHAPE) As geojson, name 
+            FROM 
+                ughardwareblacksmith
+            ";
     }
 }
 

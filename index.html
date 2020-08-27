@@ -8,6 +8,9 @@
                  to visualize locational information in any location to enhance decision
                  making for your brand">
     <title>Geo Location Intelligent System</title>
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs-rtl.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="main.css">
 </head>
 
@@ -17,33 +20,31 @@
         <div class="header">
             <h2>Geo Location Intelligent System</h2>
         </div>
-        <article class="description">
-            <p class="description__open">This platform empowers organizations to visualize
-                location information in any specified geographic
-                location automatically, thereby enhancing decisions for
-                your brand, service, product or organization.
-            </p>
-            <div class="description__modules">
-                <div class="module">
-                    <h5>Module 1. Gather and View:</h5>
-                    <p>The platform is interlinked with our mobile app and has the capability of gathering a wide
-                        spectrum of data across a diverse geographical location and interlay with multiple layers of
-                        data to give a more precise view of information.
-                    </p>
+        <a target="_blank" class="modalBtn" rel="noopener noreferrer">Get Started <span
+                class="modalBtn__cta">&crarr;</span></a>
+        <article class="description modal">
+            <div class="modal-content">
+                <span class="closeBtn closeModal">&times;</span>
+                <p class="description__open">This platform empowers organizations to visualize location information in any specified geographic location automatically, thereby enhancing decisions for your brand, service, product or organization.
+                </p>
+                <div class="description__modules">
+                    <div class="module">
+                        <h5>Module 1. Gather and View:</h5>
+                        <p>The platform is interlinked with our mobile app and has the capability of gathering a wide spectrum of data across a diverse geographical location and interlay with multiple layers of data to give a more precise view of information.
+                        </p>
+                    </div>
+                    <div class="module">
+                        <h5>Module 2. Visualize and Analyze</h5>
+                        <p>Using various cutting edge visualization formats, the system infuses models into graphical mapping displays and built in analytics with an easy user interface to identify, curate and understand relevant insights for your organisation.
+                        </p>
+                    </div>
+                    <div class="module">
+                        <h5>Module 3. Strategize and Act</h5>
+                        <p>The inbuilt Machine Learning recommender engine enables a telescopic view to guide effective strategies, informed decisions and proactive strategies.
+                        </p>
+                    </div>
                 </div>
-                <div class="module">
-                    <h5>Module 2. Visualize and Analyze</h5>
-                    <p>Using various cutting edge visualization formats, the system infuses models into graphical
-                        mapping displays and built in analytics with an easy user interface to identify, curate and
-                        understand relevant insights for your organisation.
-                    </p>
-                </div>
-                <div class="module">
-                    <h5>Module 3. Strategize and Act</h5>
-                    <p>The inbuilt Machine Learning recommender engine enables a telescopic view to guide
-                        effective strategies, informed decisions and proactive strategies.
-                    </p>
-                </div>
+                <a target="_blank" class="btn" id="annon" rel="noopener noreferrer">Learn More</a>
             </div>
         </article>
         <div id="map"></div>
@@ -54,12 +55,11 @@
             <a href="https://icons8.com/"><img src="images/icons8.png" alt="icons8" id="icons8"></a>
         </footer>
     </div>
-    
+
     <script src="js/index.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <script src="https://unpkg.com/@google/markerclustererplus@4.0.1/dist/markerclustererplus.min.js"></script>
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbMbpTY8u3RUhX8KUrvq0eSLHxkNZUp-k&callback=initMap&libraries==visualization&v=weekly"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbMbpTY8u3RUhX8KUrvq0eSLHxkNZUp-k&callback=initMap&libraries==visualization&v=weekly"></script>
 </body>
 
 </html>

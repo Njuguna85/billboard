@@ -3,8 +3,8 @@ const isDev = true;
 const config = isDev ? {
     url: 'http://localhost/billboard_api/public/index.php'
 } : {
-        url: 'predictiveanalytics.co.ke/billboard_api/public/index.php'
-    }
+    url: 'predictiveanalytics.co.ke/billboard_api/public/index.php'
+}
 
 
 
@@ -26,6 +26,7 @@ const mapLayers = document.createElement('div');
 mapLayers.innerHTML = '<h5 class="accordion">Map Layers</h5>';
 mapLayers.className = 'mapLayers';
 legend.appendChild(mapLayers);
+
 const mapLayersAccordion = document.createElement('div');
 mapLayersAccordion.className = 'accordion-content';
 mapLayers.append(mapLayersAccordion);
@@ -44,7 +45,10 @@ infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
 
 const directionsPanel = document.createElement('div');
 directionsPanel.className = 'directionsPanel';
-directionsPanel.innerHTML = ` <h3>Directions</h3>`;
+directionsPanel.innerHTML = ` 
+            <h3>Directions</h3>
+            <span class="closeBtn closeDirPanel">&times;</span>
+            `;
 
 const commD = [
     'bank', 'hospital', 'police', 'school', 'university',
@@ -137,10 +141,11 @@ function addOverlays(data) {
     addAtm(data.atm);
     addTrafficLayer();
     addNssf(data.nssf);
-    addUber(data.uber);
-    addSubLocations(data.sublocation);
-    // addugPopProj(data.ugPopProj);
-    addGhanaPopulation(data.ghanaDistrictPopPulation);
+    addMetalWorks(data.metalworks)
+        // addUber(data.uber);
+        // addSubLocations(data.sublocation);
+    addugPopProj(data.ugPopProj);
+    // addGhanaPopulation(data.ghanaDistrictPopPulation);
     for (const [key, value] of Object.entries(data)) {
         if (commD.includes(key)) {
             add(key, value);
@@ -159,7 +164,7 @@ function addTrafficLayer() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#trafficChecked')) {
             cb = document.getElementById(`trafficChecked`)
-            // if on
+                // if on
             if (cb.checked) {
                 trafficLayer.setMap(map);
             }
@@ -205,7 +210,7 @@ function add(key, value) {
     poiLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         cb = document.getElementById(`${key}Checked`)
-        // if on
+            // if on
         if (cb.checked) {
             markerCluster.addMarkers(markers)
         }
@@ -254,7 +259,7 @@ function addBillboards(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#billboardChecked')) {
             cb = document.getElementById('billboardChecked')
-            // if on
+                // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -299,7 +304,7 @@ function addAtm(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#atmCheck')) {
             cb = document.getElementById('atmCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -345,7 +350,54 @@ function addNssf(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#nssfChecked')) {
             cb = document.getElementById('nssfChecked')
-            // if on
+                // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
+        }
+
+    })
+}
+
+function addMetalWorks(data) {
+    const markers = data.map(el => {
+        latitude = JSON.parse(el.geojson).coordinates[1];
+        longitude = JSON.parse(el.geojson).coordinates[0];
+        let latlng = new google.maps.LatLng(latitude, longitude);
+
+        let contentString =
+            '<p><strong>' + parseData(el.name) + '<strong></p>' +
+            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/hammer.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/hammer.png' alt="Hardware" />Hardware BlackSmiths<input id="hardwareChecked" type="checkbox">`;
+    poiLayersAccordion.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#hardwareChecked')) {
+            cb = document.getElementById('hardwareChecked')
+                // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -403,7 +455,7 @@ function getmobileMarkers(deliveriesData) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#mobileCheck')) {
             cb = document.getElementById('mobileCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -419,12 +471,12 @@ function getmobileMarkers(deliveriesData) {
 function getColor(d) {
     return d > 3318 ? '#800026' :
         d > 2878 ? '#BD0026' :
-            d > 2437 ? '#E31A1C' :
-                d > 1997 ? '#FC4E2A' :
-                    d > 1556 ? '#FD8D3C' :
-                        d > 1116 ? '#FEB24C' :
-                            d > 675 ? '#FED976' :
-                                '#FFEDA0';
+        d > 2437 ? '#E31A1C' :
+        d > 1997 ? '#FC4E2A' :
+        d > 1556 ? '#FD8D3C' :
+        d > 1116 ? '#FEB24C' :
+        d > 675 ? '#FED976' :
+        '#FFEDA0';
 }
 
 function addUber(uber) {
@@ -463,7 +515,7 @@ function addUber(uber) {
             zIndex: 1000
         }
     });
-    uberLayer.addListener('mouseover', function (event) {
+    uberLayer.addListener('mouseover', function(event) {
         uberLayer.revertStyle();
         uberLayer.overrideStyle(event.feature, { fillColor: '#CFD8DC' });
         info = infoTab.querySelector('.info')
@@ -479,7 +531,7 @@ function addUber(uber) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#uberCheck')) {
             cb = document.getElementById('uberCheck')
-            // if on
+                // if on
             if (document.getElementById('uberCheck').checked) {
                 uberLayer.setMap(map);
             } else {
@@ -492,14 +544,14 @@ function addUber(uber) {
 function sublocationsColors(d) {
     return d > 78340 ? '#084081' :
         d > 68600 ? '#0868ac' :
-            d > 58900 ? '#2b8cbe' :
-                d > 49200 ? '#4eb3d3' :
-                    d > 39500 ? '#7bccc4' :
-                        d > 29800 ? '#a8ddb5' :
-                            d > 20100 ? '#ccebc5' :
-                                d > 10400 ? '#e0f3db' :
-                                    d > 700 ? '#f7fcf0' :
-                                        '#fdfdfd';
+        d > 58900 ? '#2b8cbe' :
+        d > 49200 ? '#4eb3d3' :
+        d > 39500 ? '#7bccc4' :
+        d > 29800 ? '#a8ddb5' :
+        d > 20100 ? '#ccebc5' :
+        d > 10400 ? '#e0f3db' :
+        d > 700 ? '#f7fcf0' :
+        '#fdfdfd';
 }
 
 function addSubLocations(subLocations) {
@@ -586,7 +638,7 @@ function addSubLocations(subLocations) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#sublCheck')) {
             cb = document.getElementById('sublCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 subLocationsLayer.setMap(map);
                 key();
@@ -603,14 +655,14 @@ function addSubLocations(subLocations) {
 function ugPopProjColors(d) {
     return d > 46200 ? '#014636' :
         d > 35300 ? '#016c59' :
-            d > 28400 ? '#02818a' :
-                d > 23256 ? '#3690c0' :
-                    d > 19644 ? '#67a9cf' :
-                        d > 16200 ? '#a6bddb' :
-                            d > 12822 ? '#d0d1e6' :
-                                d > 9300 ? '#ece2f0' :
-                                    d > 1600 ? '#fff7fb' :
-                                        '#fdfdfd';
+        d > 28400 ? '#02818a' :
+        d > 23256 ? '#3690c0' :
+        d > 19644 ? '#67a9cf' :
+        d > 16200 ? '#a6bddb' :
+        d > 12822 ? '#d0d1e6' :
+        d > 9300 ? '#ece2f0' :
+        d > 1600 ? '#fff7fb' :
+        '#fdfdfd';
 }
 
 function addugPopProj(data) {
@@ -692,12 +744,12 @@ function addugPopProj(data) {
     });
 
     div = document.createElement('div');
-    div.innerHTML = `Uganda Districts<input id="ugPopProjCheck" type="checkbox">`;
+    div.innerHTML = `Uganda SubCounties<input id="ugPopProjCheck" type="checkbox">`;
     mapLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         if (e.target.matches('#ugPopProjCheck')) {
             cb = document.getElementById('ugPopProjCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 districtsLayer.setMap(map)
                 key();
@@ -714,14 +766,14 @@ function addugPopProj(data) {
 function GHPopColors(d) {
     return d > 2578715 ? '#014636' :
         d > 297854 ? '#016c59' :
-            d > 221830 ? '#02818a' :
-                d > 191011 ? '#3690c0' :
-                    d > 167594 ? '#67a9cf' :
-                        d > 151123 ? '#a6bddb' :
-                            d > 132209 ? '#d0d1e6' :
-                                d > 114448 ? '#ece2f0' :
-                                    d > 101933 ? '#fff7fb' :
-                                        '#fdfdfd';
+        d > 221830 ? '#02818a' :
+        d > 191011 ? '#3690c0' :
+        d > 167594 ? '#67a9cf' :
+        d > 151123 ? '#a6bddb' :
+        d > 132209 ? '#d0d1e6' :
+        d > 114448 ? '#ece2f0' :
+        d > 101933 ? '#fff7fb' :
+        '#fdfdfd';
 }
 
 function addGhanaPopulation(data) {
@@ -809,7 +861,7 @@ function addGhanaPopulation(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#ghPopCheck')) {
             cb = document.getElementById('ghPopCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 ghanaLayer.setMap(map)
                 key();
@@ -841,6 +893,7 @@ function parseValues(val) {
 // create routes
 const tracker = new Object();
 const stopPoints = [];
+
 mapContainer.addEventListener('click', e => {
     if (e.target.matches('.start')) {
         const lat = parseFloat(e.target.closest('.start').dataset.lat);
@@ -877,6 +930,19 @@ mapContainer.addEventListener('click', e => {
             content.style.maxHeight = content.scrollHeight + 'px';
         }
     }
+    if (e.target.matches('.closeDirPanel')) {
+        directionsRenderer.setMap(null);
+        directionsRenderer = null;
+        directionsPanel.parentElement.removeChild(directionsPanel);
+    }
+    if (e.target.matches('#annon')) {
+        //Anno website tour
+        const anno1 = new anno1([{
+            target: '#legend',
+            position: 'center-left',
+            content: 'This is a legend'
+        }])
+    }
 });
 
 function calcRoute(tracker) {
@@ -902,7 +968,7 @@ function calcRoute(tracker) {
             optimizeWaypoints: true,
             travelMode: 'DRIVING'
         };
-        directionsService.route(request, function (response, status) {
+        directionsService.route(request, function(response, status) {
             if (status == 'OK') {
                 directionsRenderer.setDirections(response);
                 directionsRenderer.setPanel(div);
@@ -915,10 +981,36 @@ function calcRoute(tracker) {
     }
 
 }
-// window.addEventListener('load', function () {
-//     alert("It's loaded!")
-// })
+
 function loader() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("billboardDetails").style.display = "block";
+}
+// create a modal
+// get modal elements
+const modal = document.querySelector('.modal');
+// open modal btn
+const modalBtn = document.querySelector('.modalBtn');
+//close btn
+const closeBtn = document.querySelector('.closeModal');
+// listen for open click
+modalBtn.addEventListener('click', openModal);
+// listen for close click
+closeBtn.addEventListener('click', closeModal);
+// listen for outside click
+window.addEventListener('click', clickOutside)
+
+function openModal(e) {
+    modal.style.display = 'block';
+}
+
+function closeModal(e) {
+    modal.style.display = 'none';
+}
+
+function clickOutside(e) {
+    if (e.target == modal) {
+        modal.style.display = 'none';
+    }
+
 }
