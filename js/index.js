@@ -142,9 +142,9 @@ function addOverlays(data) {
     addTrafficLayer();
     addNssf(data.nssf);
     addMetalWorks(data.metalworks)
-        // addUber(data.uber);
-        // addSubLocations(data.sublocation);
-    addugPopProj(data.ugPopProj);
+    addUber(data.uber);
+    addSubLocations(data.sublocation);
+    // addugPopProj(data.ugPopProj);
     // addGhanaPopulation(data.ghanaDistrictPopPulation);
     for (const [key, value] of Object.entries(data)) {
         if (commD.includes(key)) {

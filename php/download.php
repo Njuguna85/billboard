@@ -21,9 +21,9 @@ class getData
     {
 
         $this->subcounty = ModelController::getModelRecords('subcounty');
-        // $this->uber = ModelController::getModelRecords('uber');
+        $this->uber = ModelController::getModelRecords('uber');
         $this->billboard = ModelController::getModelRecords('billboard');
-        // $this->sublocation = ModelController::getModelRecords('sublocation');
+        $this->sublocation = ModelController::getModelRecords('sublocation');
         $this->atm = ModelController::getModelRecords('atm');
         $this->bank = ModelController::getModelRecords('bank');
         $this->hospital = ModelController::getModelRecords('hospital');
@@ -41,7 +41,7 @@ class getData
         $this->saloon = ModelController::getModelRecords('saloon');
         $this->supermarket = ModelController::getModelRecords('supermarket');
         $this->nssf = ModelController::getModelRecords('nssf');
-        $this->ugPopProj = ModelController::getModelRecords('ugPopProj');
+        // $this->ugPopProj = ModelController::getModelRecords('ugPopProj');
         // $this->ghanaDistrictPopPulation = ModelController::getModelRecords('ghanaDistrictPopPulation');
         $this->aq = ModelController::getModelRecords('aq');
         $this->metalworks = ModelController::getModelRecords('metalworks');
