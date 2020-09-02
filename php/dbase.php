@@ -230,32 +230,7 @@ class aq extends Model
             africanqueenregister 
         ";
     }
-    /*
-    public function getRecords()
-    {
-        // query the sql
-        $statement =  self::$db->query($this->sql);
-        // fetch result
-        $this->values = $statement->fetchAll(PDO::FETCH_ASSOC);
-        // start with an empty categories array
-        // this will store all our data in their specific arrays
-        $data = array();
-
-        $custCategories = array('Airline', 'Bar', 'Beauty shop', 'Bookshop', 'Border Duty Free Shop', 'Canteen', 'Cash', 'Clinic/ Surgery', 'College', 'Convenience store', 'Cosmetics', 'Dairy shop', 'Drug store', 'Foods', 'General Merchandiser', 'Hospital', 'Hotel', 'Hypermarket', 'Inn/ Motel', 'Key Account', 'Kiosk', 'Mini supermarket', 'Office', 'Other', 'Petrol station', 'Pharmacy', 'Primary School', 'Recreational', 'Restaurant', 'Sales Rep', 'Saloon', 'Secondary School', 'Spa', 'Staff', 'Stationary', 'Supermarket', 'University', 'Washing bay', 'Wholesaler');
-
-        foreach ($custCategories as $cat) {
-            $custCategory = new stdClass();
-            $category = array();
-            $passedFilter = array_filter($this->values, function ($key) use ($cat) {
-                return $key['customer_t'] == $cat;
-            });
-            array_push($category, $passedFilter);
-        }
-        $custCategory->$cat = $category;
-        array_push($data, $custCategory);
-
-        return $data;
-    }*/
+    
 }
 
 class sublocation extends Model
@@ -283,9 +258,7 @@ class atm extends Model
             SELECT
                 ST_AsGeoJSON(SHAPE) As geojson, operator 
             FROM 
-                atms
-            LIMIT
-                    20  
+                atms 
         ";
     }
 }
@@ -300,8 +273,6 @@ class bank extends Model
                 ST_AsGeoJSON(SHAPE) As geojson, name 
             FROM 
                 banks
-            LIMIT
-                20
         ";
     }
 }
@@ -361,8 +332,6 @@ class police extends Model
             ST_AsGeoJSON(SHAPE) As geojson, name 
         FROM 
             police_post
-        LIMIT
-            20
         ";
     }
 }
@@ -378,8 +347,6 @@ class school extends Model
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
             schools
-        LIMIT
-            20
         ";
     }
 }
@@ -395,8 +362,6 @@ class university extends Model
             ST_AsGeoJSON(SHAPE) As geojson, name
         FROM 
             universities
-        LIMIT
-            20
         ";
     }
 }
@@ -426,8 +391,7 @@ class bar extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name 
         FROM 
             bars 
-        LIMIT
-            20
+
      ";
     }
 }
@@ -456,8 +420,6 @@ class grocery extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             grocery 
-        LIMIT
-            20
      ";
     }
 }
@@ -472,8 +434,6 @@ class kiosk extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             kiosks
-        LIMIT
-            20
      ";
     }
 }
@@ -488,9 +448,7 @@ class pharmacy extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             pharmacy
-        LIMIT
-            20
-     ";;
+     ";
     }
 }
 
@@ -504,8 +462,6 @@ class restaraunt extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             restaurant
-        LIMIT
-            20
      ";
     }
 }
@@ -520,8 +476,6 @@ class saloon extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             saloon
-        LIMIT
-            20
      ";
     }
 }
@@ -536,8 +490,6 @@ class supermarket extends Model
             ST_AsGeoJSON(SHAPE, 5) As geojson, name
         FROM 
             supermarket
-        LIMIT
-            20
      ";
     }
 }

@@ -23,12 +23,12 @@ class getData
         $this->subcounty = ModelController::getModelRecords('subcounty');
         $this->uber = ModelController::getModelRecords('uber');
         $this->billboard = ModelController::getModelRecords('billboard');
-        $this->sublocation = ModelController::getModelRecords('sublocation');
+        // $this->sublocation = ModelController::getModelRecords('sublocation');
         $this->atm = ModelController::getModelRecords('atm');
         $this->bank = ModelController::getModelRecords('bank');
         $this->hospital = ModelController::getModelRecords('hospital');
-        $this->kibera = ModelController::getModelRecords('kibera');
-        $this->mathare = ModelController::getModelRecords('mathare');
+        // $this->kibera = ModelController::getModelRecords('kibera');
+        // $this->mathare = ModelController::getModelRecords('mathare');
         $this->police = ModelController::getModelRecords('police');
         $this->school = ModelController::getModelRecords('school');
         $this->university = ModelController::getModelRecords('university');
