@@ -440,6 +440,15 @@ function nairobiSublWMS() {
     });
 }
 
+mapContainer.addEventListener('click', e => {
+
+    if (e.target.matches('.closeDirPanel')) {
+        directionsRenderer.setMap(null);
+        directionsRenderer = null;
+        directionsPanel.parentElement.removeChild(directionsPanel);
+    }
+})
+
 function parseData(val) {
     if (val == null || val == undefined) {
         return ''
