@@ -6,25 +6,32 @@ let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
 legend.innerHTML = `<h3>Map Legend</h3>`;
 
+essentialLayers = document.createElement('div');
+essentialLayers.className = 'essentialLayers';
+legend.appendChild(essentialLayers);
+
 eablpoiLayer = document.createElement('div');
 eablpoiLayer.innerHTML = '<h5>Points of Interest</h5>';
 eablpoiLayer.className = 'eablpoiLayer';
 legend.appendChild(eablpoiLayer);
 
-essentialLayers = document.createElement('div');
-essentialLayers.className = 'essentialLayers';
-legend.appendChild(essentialLayers);
-
 const directionsPanel = document.createElement('div');
 directionsPanel.className = 'directionsPanel';
-directionsPanel.innerHTML = ` <h3>Directions</h3>`;
+directionsPanel.innerHTML = ` 
+            <h3>Directions</h3>
+            <span class="closeBtn closeDirPanel">&times;</span>
+            `;
+
+const infoTab = document.createElement('div');
+infoTab.setAttribute('id', 'infoTab');
+infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
 
 function initMap() {
     // set the zoom, scale, street view and full screen controls
     // also create a custom map style 
     const mapOptions = {
-        zoom: 7,
-        center: { lat: 0.35462, lng: 37.58218 },
+        zoom: 12,
+        center: { lat: -1.28333, lng: 36.816667 },
         mapTypeControl: true,
         mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -56,6 +63,8 @@ function initMap() {
 
     infoWindow = new google.maps.InfoWindow;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
+
     fetchMobileUploads();
     fetchData();
     // initialize directions service
@@ -157,7 +166,6 @@ function getmobileMarkers(deliveriesData) {
 }
 
 function addOverlays(data) {
-    // console.log(data);
     commD = ['university', 'police'];
     eablCat = ['bar', 'casino', 'pub', 'restaraunt', 'nightClub']
     for (const [key, value] of Object.entries(data)) {
@@ -165,6 +173,10 @@ function addOverlays(data) {
             add(key, value);
         }
     }
+    addBillboards(data.billboard);
+    addTrafficLayer();
+    nairobiSublWMS();
+
     const clusterMkGen = (cat) => {
             const markers = data.eabl.filter(el =>
                 el.type == cat).map(val => {
@@ -221,8 +233,8 @@ function addOverlays(data) {
             }
         })
     })
-}
 
+}
 
 function addBillboards(data) {
     const markers = data.map(el => {
@@ -318,6 +330,114 @@ function add(key, value) {
             markerCluster.removeMarkers(markers)
         }
     })
+}
+
+function addTrafficLayer() {
+    const trafficLayer = new google.maps.TrafficLayer();
+
+    div = document.createElement('div');
+    div.innerHTML = `Traffic Layer <input id="trafficChecked" type="checkbox" />`;
+
+    essentialLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#trafficChecked')) {
+            cb = document.getElementById(`trafficChecked`)
+                // if on
+            if (cb.checked) {
+                trafficLayer.setMap(map);
+            }
+            if (!cb.checked) {
+                // if off
+                trafficLayer.setMap(null);
+            }
+        }
+    })
+}
+
+function nairobiSublWMS() {
+    const getTiles = (lyr) => {
+        const fullURl = (coord, zoom) => {
+            // get map projection
+            const proj = map.getProjection();
+            const zfactor = Math.pow(2, zoom);
+            const top = proj.fromPointToLatLng(new google.maps.Point(coord.x * 256 / zfactor, coord.y * 256 / zfactor));
+            const bot = proj.fromPointToLatLng(new google.maps.Point((coord.x + 1) * 256 / zfactor, (coord.y + 1) * 256 / zfactor));
+            // corrections for the slight shift of the map server
+            const deltaX = 0.0013;
+            const deltaY = 0.00058;
+
+            // create bounding box string
+            const bbox = (top.lng() + deltaX) + "," +
+                (bot.lat() + deltaY) + "," +
+                (bot.lng() + deltaX) + "," +
+                (top.lat() + deltaY);
+            const url =
+                'http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?' +
+                '&service=WMS' +
+                '&version=1.1.0' +
+                '&request=GetMap' +
+                `&layers=${lyr}` +
+                `&bbox=${bbox}` +
+                '&bgcolor=0xFFFFFF' +
+                '&transparent=true' +
+                '&width=256' +
+                '&height=256' +
+                '&srs=EPSG:4326' +
+                '&format=image%2Fpng';
+            return url
+
+        }
+        return fullURl;
+    }
+    const key = () => {
+        info = infoTab.querySelector('.info')
+        info.innerHTML = `
+        <div class="sublocLegend">
+            <div>KEY</div>
+            <div><span class="subColor" style="background-color:#fcfbfd;"></span>743 - 6783</div>
+            <div><span class="subColor" style="background-color:#f1eff7;"></span>6783 - 9882</div>
+            <div><span class="subColor" style="background-color:#e0e0ee;"></span>9882 - 13901</div>
+            <div><span class="subColor" style="background-color:#c9cae3;"></span>13901 - 19082</div>
+            <div><span class="subColor" style="background-color:#b0afd4;"></span>19082 - 23712</div>
+            <div><span class="subColor" style="background-color:#9692c4;"></span>23712 - 28932</div>
+            <div><span class="subColor" style="background-color:#7c76b6;"></span>28932 - 31603</div>
+            <div><span class="subColor" style="background-color:#66499f;"></span>31603 - 40523</div>
+            <div><span class="subColor" style="background-color:#552a91;"></span>40523 - 60613</div>
+            <div><span class="subColor" style="background-color:#3f007d;"></span>60613 - 88039</div>
+        </div>
+        `
+    }
+    const nrbtile = getTiles('Predictive:nairobisublocations');
+
+    const nairobisublocations = new google.maps.ImageMapType({
+        getTileUrl: nrbtile,
+        minZoom: 0,
+        maxZoom: 19,
+        opacity: 1.0,
+        alt: 'Nairobi County Sublocations Population 2019',
+        name: 'nrbtile',
+        isPng: true,
+        tileSize: new google.maps.Size(256, 256)
+    });
+
+    div = document.createElement('div');
+    div.innerHTML = `Nairobi Sublocations<input id="sublCheck" type="checkbox" />`;
+    essentialLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#sublCheck')) {
+            cb = document.getElementById('sublCheck')
+                // if on
+            if (cb.checked) {
+                map.overlayMapTypes.setAt(0, nairobisublocations);
+                key();
+            }
+            if (!cb.checked) {
+                // if off
+                map.overlayMapTypes.removeAt(0);
+                infoTab.querySelector('.info').innerHTML = '';
+            }
+        }
+    });
 }
 
 function parseData(val) {
