@@ -311,7 +311,8 @@ p {
 
 .essentialLayers>div,
 .aqLayers>div,
-.accordion-content>div {
+.accordion-content>div,
+.eablpoiLayer>div {
     display: flex;
     justify-content: space-between;
     padding: 2px;
@@ -364,7 +365,8 @@ h5.accordion.is-open {
 .essentialLayers img,
 .poiLayers img,
 .mapLayers img,
-.aqLayers img {
+.aqLayers img,
+.eablpoiLayer img {
     height: 20px;
 }
 

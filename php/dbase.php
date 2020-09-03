@@ -232,7 +232,20 @@ class aq extends Model
     }
     
 }
-
+class eabl extends Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sql = "
+        SELECT 
+            ST_AsGeoJSON(SHAPE) As geojson, name , type
+        FROM 
+            eabl 
+        ";
+    }
+    
+}
 class sublocation extends Model
 {
 

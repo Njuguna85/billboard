@@ -6,10 +6,10 @@ let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
 legend.innerHTML = `<h3>Map Legend</h3>`;
 
-aqLayers = document.createElement('div');
-aqLayers.innerHTML = '<h5>African Queen</h5>';
-aqLayers.className = 'aqLayers';
-legend.appendChild(aqLayers);
+eablpoiLayer = document.createElement('div');
+eablpoiLayer.innerHTML = '<h5>Points of Interest</h5>';
+eablpoiLayer.className = 'eablpoiLayer';
+legend.appendChild(eablpoiLayer);
 
 essentialLayers = document.createElement('div');
 essentialLayers.className = 'essentialLayers';
@@ -23,8 +23,8 @@ function initMap() {
     // set the zoom, scale, street view and full screen controls
     // also create a custom map style 
     const mapOptions = {
-        zoom: 8,
-        center: { lat: 0.31628, lng: 32.58219 },
+        zoom: 7,
+        center: { lat: 0.35462, lng: 37.58218 },
         mapTypeControl: true,
         mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -53,10 +53,7 @@ function initMap() {
     };
 
     map = new google.maps.Map(mapContainer, mapOptions);
-    // heatmap = new google.maps.visualization.HeatmapLayer({
-    //     data: getPoints(),
-    //     map: map
-    // });
+
     infoWindow = new google.maps.InfoWindow;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     fetchMobileUploads();
@@ -68,11 +65,10 @@ function initMap() {
 }
 
 async function fetchData() {
-    let response = await fetch('./php/aq.php');
+    let response = await fetch('./php/eabl.php');
     if (response.ok) {
         data = await response.json();
-        localStorage.setItem('aq', JSON.stringify(data.aq))
-        addAQ(data.aq)
+        addOverlays(data)
     } else {
         alert('Something went wrong while fetching data. Error: ' + response.status);
     }
@@ -147,7 +143,7 @@ function getmobileMarkers(deliveriesData) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#mobileCheck')) {
             cb = document.getElementById('mobileCheck')
-            // if on
+                // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -160,70 +156,60 @@ function getmobileMarkers(deliveriesData) {
     })
 }
 
-function addAQ(data) {
-    localStorage.setItem('data', JSON.stringify(data));
-    //
-    // the pre-existing cusomer types
-    const aQCustCat = ['Airline', 'Bar', 'Beauty shop', 'Bookshop', 'Border Duty Free Shop', 'Canteen', 'Cash', 'Clinic/ Surgery', 'College', 'Convenience store', 'Cosmetics', 'Dairy shop', 'Drug store', 'Foods', 'General Merchandiser', 'Hospital', 'Hotel', 'Hypermarket', 'Inn/ Motel', 'Key Account', 'Kiosk', 'Mini supermarket', 'Office', 'Other', 'Petrol station', 'Pharmacy', 'Primary School', 'Recreational', 'Restaurant', 'Sales Rep', 'Saloon', 'Secondary School', 'Spa', 'Staff', 'Stationary', 'Supermarket', 'University', 'Washing bay', 'Wholesaler'];
-    //
-    // create a new array of the same customers types with no spaces and special characters
-    const newaQCustCat = aQCustCat.map(el => {
-        newEl = el.split('/').join(' ').split(' ');
-        return newEl.join('');
-    });
-    const clustMkGen = (customerCategory) => {
-
-        const markers = data.filter(x => x.customer_t == customerCategory).map(value => {
-            let latlng = new google.maps.LatLng(value.latitude, value.longitude);
-            iconUrl = `images/pMarker.png`;
-            let markerStringDet =
-                '<div>' + 'Customer Name: <b>' + parseData(value.customer_n) + '</b></div>' +
-                '<div>' + 'Customer Type: <b>' + parseData(value.customer_t) + '</b></div>' +
-                '<div>' + 'Address: <b>' + parseData(value.address_1) + '</b></div>' +
-                '<div>' + 'BT Territory: <b>' + parseData(value.bt_territo) + '</b></div>' +
-                '<div>' + 'BT Area: <b>' + parseData(value.bt_area) + '</b></div>' +
-                '<div>' + 'BT Town: <b>' + parseData(value.bt_town) + '</b></div>' +
-                '<div>' + 'CS Channel: <b>' + parseData(value.cs_chanel) + '</b></div>' +
-                '<button class="btn end" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Go Here</button>' +
-                '<button class="btn stop" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Add Stop</button>' +
-                '<button class="btn start" data-lat=' + value.latitude + ' data-long=' + value.longitude + ' >Start Here</button>';
-
-            let marker = new google.maps.Marker({
-                position: latlng,
-                icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
-                optimized: false,
-            });
-            google.maps.event.addListener(marker, 'click', ((marker, value) => {
-                return () => {
-                    infoWindow.setContent(markerStringDet);
-                    infoWindow.open(map, marker);
-                }
-            })(marker, value));
-
-            return marker;
-        });
-        return markers;
+function addOverlays(data) {
+    // console.log(data);
+    commD = ['university', 'police'];
+    eablCat = ['bar', 'casino', 'pub', 'restaraunt', 'nightClub']
+    for (const [key, value] of Object.entries(data)) {
+        if (commD.includes(key)) {
+            add(key, value);
+        }
     }
+    const clusterMkGen = (cat) => {
+            const markers = data.eabl.filter(el =>
+                el.type == cat).map(val => {
+                latitude = JSON.parse(val.geojson).coordinates[1];
+                longitude = JSON.parse(val.geojson).coordinates[0];
+                let latlng = new google.maps.LatLng(latitude, longitude);
+                let iconUrl = `images/${val.type}.png`;
+                let markerString =
+                    '<p><strong>' + val.name + '<strong></p>' +
+                    '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+                    '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+                    '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+                let marker = new google.maps.Marker({
+                    position: latlng,
+                    icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
+                    optimized: false,
+                });
+                google.maps.event.addListener(marker, 'click', ((marker, val) => {
+                    return () => {
+                        infoWindow.setContent(markerString);
+                        infoWindow.open(map, marker);
+                    }
+                })(marker, val));
 
-    // add the cluster to the map
+                return marker;
+            })
+            return markers;
+        }
+        // add the cluster to the map
     const markerCluster = new MarkerClusterer(
         map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
     );
     //'
-    // add the customer types to the legend
-    // and listen to click events to add the customers to the dom
-    newaQCustCat.forEach((el, i) => {
+    // add the eabl types to the legend
+    // and listen to click events to the dom
+    eablCat.forEach((el, i) => {
         div = document.createElement('div');
         div.innerHTML =
-            `
-            <img src='images/pMarker.png' alt='${aQCustCat[i]}'/> ${aQCustCat[i]}<input id="${el}Checked" type="checkbox" />
-        `;
-        aqLayers.appendChild(div);
-        const markers = clustMkGen(aQCustCat[i])
+            `<img src='images/${el}.png' alt='${el}'/> ${el}<input id="${el}Checked" type="checkbox" /> `;
+        eablpoiLayer.appendChild(div);
+        const markers = clusterMkGen(el)
         legend.addEventListener('change', e => {
             if (e.target.matches(`#${el}Checked`)) {
                 cb = document.getElementById(`${el}Checked`)
-                // if on
+                    // if on
                 if (cb.checked) {
 
                     markerCluster.addMarkers(markers)
@@ -235,12 +221,103 @@ function addAQ(data) {
             }
         })
     })
+}
+
+
+function addBillboards(data) {
+    const markers = data.map(el => {
+        let latlng = new google.maps.LatLng(el.latitude, el.longitude)
+        let contentString =
+            '<div class ="infoWindow">' +
+            '<div>' + 'Name: <b>' + parseData(el.billboardi) + '</b></div>' +
+            '<div>' + 'Route: <b>' + parseData(el.routename) + '</b></div>' +
+            '<div>' + 'Size: <b>' + parseData(el.size) + '</b></div>' +
+            '<div>' + 'Visibility: <b>' + parseData(el.visibility) + '</b> </div>' +
+            '<div>' + 'Medium: <b>' + parseData(el.selectmedi) + '</b> </div>' +
+            '<div>' + 'Traffic: <b>' + parseData(el.traffic) + '</b> </div>' +
+            '</div>' +
+            '<img class="billboardImage" alt="billboard photo" src=' + el.photo + '>' +
+            '<button class="btn end" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + el.latitude + ' data-long=' + el.longitude + ' >Start Here</button>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: `images/marker.png`, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    )
+    div = document.createElement('div');
+    div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
+    essentialLayers.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#billboardChecked')) {
+            cb = document.getElementById('billboardChecked')
+                // if on
+            if (cb.checked) {
+                markerCluster.addMarkers(markers)
+            }
+            if (!cb.checked) {
+                // if off
+                markerCluster.removeMarkers(markers)
+            }
+        }
+    })
 
 }
 
-async function getPoints() {
-    data = await JSON.parse(localStorage.getItem('data'))
-    console.log(data);
+function add(key, value) {
+    // create a markers array 
+    const markers = value.map(el => {
+        // the x and y of the marker
+        latitude = JSON.parse(el.geojson).coordinates[1];
+        longitude = JSON.parse(el.geojson).coordinates[0];
+        let latlng = new google.maps.LatLng(latitude, longitude);
+        iconUrl = `images/${key}.png`
+        let contentString = '<p><strong>' + el.name + '<strong></p>' +
+            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+        let marker = new google.maps.Marker({
+            position: latlng,
+            icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
+            optimized: false,
+        });
+        // open a popup on click
+        google.maps.event.addListener(marker, 'click', ((marker, el) => {
+            return () => {
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+            }
+        })(marker, el));
+        return marker
+    });
+    const markerCluster = new MarkerClusterer(
+        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+    );
+    div = document.createElement('div');
+    div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
+    eablpoiLayer.appendChild(div);
+    legend.addEventListener('change', e => {
+        cb = document.getElementById(`${key}Checked`)
+            // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
+        }
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+    })
 }
 
 function parseData(val) {
@@ -309,7 +386,7 @@ function calcRoute(tracker) {
             optimizeWaypoints: true,
             travelMode: 'DRIVING'
         };
-        directionsService.route(request, function (response, status) {
+        directionsService.route(request, function(response, status) {
             if (status == 'OK') {
                 directionsRenderer.setDirections(response);
                 directionsRenderer.setPanel(div);
@@ -355,14 +432,42 @@ function logIn(e) {
     window.alert('Welcome Back');
 
 }
-auth.onAuthStateChanged(function (user) {
-    if (user) {
-        // User is signed in. 
-        document.querySelector('#loginContainer').style.display = 'none';
-        document.querySelector('#map').style.display = 'block';
-    } else {
-        // No user is signed in.
-        document.querySelector('#loginContainer').style.display = 'flex';
-        document.querySelector('#map').style.display = 'none';
+auth.onAuthStateChanged(function(user) {
+        if (user) {
+            // User is signed in. 
+            document.querySelector('#loginContainer').style.display = 'none';
+            document.querySelector('#billboardDetails').style.display = 'block';
+        } else {
+            // No user is signed in.
+            document.querySelector('#loginContainer').style.display = 'flex';
+            document.querySelector('#billboardDetails').style.display = 'none';
+        }
+    })
+    // create a modal
+    // get modal elements
+const modal = document.querySelector('.modal');
+// open modal btn
+const modalBtn = document.querySelector('.modalBtn');
+//close btn
+const closeBtn = document.querySelector('.closeModal');
+// listen for open click
+modalBtn.addEventListener('click', openModal);
+// listen for close click
+closeBtn.addEventListener('click', closeModal);
+// listen for outside click
+window.addEventListener('click', clickOutside)
+
+function openModal(e) {
+    modal.style.display = 'block';
+}
+
+function closeModal(e) {
+    modal.style.display = 'none';
+}
+
+function clickOutside(e) {
+    if (e.target == modal) {
+        modal.style.display = 'none';
     }
-})
+
+}
