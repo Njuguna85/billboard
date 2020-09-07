@@ -135,19 +135,19 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    // addBillboards(data.billboard);
-    // addAtm(data.atm);
-    // addTrafficLayer();
-    // addNssf(data.nssf);
-    // addMetalWorks(data.metalworks)
+    addBillboards(data.billboard);
+    addAtm(data.atm);
+    addTrafficLayer();
+    addNssf(data.nssf);
+    addMetalWorks(data.metalworks)
     nairobiSublWMS();
-    // addugPopProj();
-    // addGhanaPopulation();
-    // for (const [key, value] of Object.entries(data)) {
-    //     if (commD.includes(key)) {
-    //         add(key, value);
-    //     }
-    // }
+    addugPopProj();
+    addGhanaPopulation();
+    for (const [key, value] of Object.entries(data)) {
+        if (commD.includes(key)) {
+            add(key, value);
+        }
+    }
     setTimeout(loader, 100);
 }
 
@@ -298,39 +298,39 @@ function nairobiSublWMS() {
             }
         }
     });
+    /*
+        map.addListener('click', async(e) => {
+            const tileCoords = getTileCoordinates(e.latLng.lat(), e.latLng.lng(), map.getZoom())
+            const tileBounds = getTileBoundingBox(map, tileCoords);
+            const tileXYOffset = latLonToTileXYOffset(e.latLng.lat(), e.latLng.lng(), map.getZoom());
 
-    map.addListener('click', async(e) => {
-        const tileCoords = getTileCoordinates(e.latLng.lat(), e.latLng.lng(), map.getZoom())
-        const tileBounds = getTileBoundingBox(map, tileCoords);
-        const tileXYOffset = latLonToTileXYOffset(e.latLng.lat(), e.latLng.lng(), map.getZoom());
+            let getFeatureInfoUrl =
+                `http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=${wmsLayer}&QUERY_LAYERS=${wmsLayer}&STYLES=&INFO_FORMAT=application/json`;
+            getFeatureInfoUrl +=
+                "&BBOX=" + tileBounds.lonMin + "," + tileBounds.latMin + "," + tileBounds.lonMax + "," + tileBounds.latMax;
+            getFeatureInfoUrl += "&X=50" + "&Y=50" + "&WIDTH=256&HEIGHT=256&exceptions=application%2Fvnd.ogc.se_xml";
 
-        let getFeatureInfoUrl =
-            `http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=${wmsLayer}&QUERY_LAYERS=${wmsLayer}&STYLES=&INFO_FORMAT=application/json`;
-        getFeatureInfoUrl +=
-            "&BBOX=" + tileBounds.lonMin + "," + tileBounds.latMin + "," + tileBounds.lonMax + "," + tileBounds.latMax;
-        getFeatureInfoUrl += "&X=50" + "&Y=50" + "&WIDTH=256&HEIGHT=256&exceptions=application%2Fvnd.ogc.se_xml";
+            let response = await fetch(getFeatureInfoUrl, {
+                method: "GET",
+                headers: {
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        let response = await fetch(getFeatureInfoUrl, {
-            method: "GET",
-            headers: {
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Origin': '*',
-                "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-                'Content-Type': 'application/json'
-            }
+            console.log(response)
+                // if (response.ok) {
+                //     info = await response.json()
+                //     console.log(info);
+                // }
+
+            // infoWindow.setContent(getFeatureInfoUrl);
+            // infoWindow.open(map);
+            // window.open(getFeatureInfoUrl);
         });
-
-        console.log(response)
-            // if (response.ok) {
-            //     info = await response.json()
-            //     console.log(info);
-            // }
-
-        // infoWindow.setContent(getFeatureInfoUrl);
-        // infoWindow.open(map);
-        // window.open(getFeatureInfoUrl);
-    });
-
+    */
 }
 
 function addTrafficLayer() {
