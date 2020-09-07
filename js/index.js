@@ -308,7 +308,7 @@ function nairobiSublWMS() {
             `http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=${wmsLayer}&QUERY_LAYERS=${wmsLayer}&STYLES=&INFO_FORMAT=application/json`;
         getFeatureInfoUrl +=
             "&BBOX=" + tileBounds.lonMin + "," + tileBounds.latMin + "," + tileBounds.lonMax + "," + tileBounds.latMax;
-        getFeatureInfoUrl += "&X=50" + "&Y=50" + "&WIDTH=256&HEIGHT=256&exceptions=application%2Fvnd.ogc.se_xml/cors-anywhere.html";
+        getFeatureInfoUrl += "&X=50" + "&Y=50" + "&WIDTH=256&HEIGHT=256&exceptions=application%2Fvnd.ogc.se_xml";
 
         let response = await fetch(getFeatureInfoUrl, {
             method: "GET",
