@@ -135,19 +135,19 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    addBillboards(data.billboard);
-    addAtm(data.atm);
-    addTrafficLayer();
-    addNssf(data.nssf);
-    addMetalWorks(data.metalworks)
+    // addBillboards(data.billboard);
+    // addAtm(data.atm);
+    // addTrafficLayer();
+    // addNssf(data.nssf);
+    // addMetalWorks(data.metalworks)
     nairobiSublWMS();
-    addugPopProj();
-    addGhanaPopulation();
-    for (const [key, value] of Object.entries(data)) {
-        if (commD.includes(key)) {
-            add(key, value);
-        }
-    }
+    // addugPopProj();
+    // addGhanaPopulation();
+    // for (const [key, value] of Object.entries(data)) {
+    //     if (commD.includes(key)) {
+    //         add(key, value);
+    //     }
+    // }
     setTimeout(loader, 100);
 }
 
@@ -186,7 +186,69 @@ const getTiles = (lyr) => {
     return fullURl;
 }
 
+const latLonToXY = (lat, lon, zoom) => {
+    // Convert to radians
+    lat = lat * Math.PI / 180;
+    lon = lon * Math.PI / 180;
+
+    var circumference = 256 * Math.pow(2, zoom);
+    var falseEasting = circumference / 2.0;
+    var falseNorthing = circumference / 2.0;
+    var radius = circumference / (2 * Math.PI);
+
+    var point = {
+        y: radius / 2.0 * Math.log((1.0 + Math.sin(lat)) / (1.0 - Math.sin(lat))),
+        x: radius * lon
+    };
+
+    point.x = falseEasting + point.x;
+    point.y = falseNorthing - point.y;
+
+    return point;
+}
+
+const getTileCoordinates = (lat, lon, zoom) => {
+    const point = latLonToXY(lat, lon, zoom);
+    const tileXY = {
+        x: Math.floor(point.x / 256),
+        y: Math.floor(point.y / 256)
+    };
+    return tileXY;
+}
+
+const getTileBoundingBox = (map, tileCoords) => {
+    const projection = map.getProjection();
+    const zpow = Math.pow(2, map.getZoom());
+
+    const ul = new google.maps.Point(tileCoords.x * 256.0 / zpow, (tileCoords.y + 1) * 256.0 / zpow);
+    const lr = new google.maps.Point((tileCoords.x + 1) * 256.0 / zpow, (tileCoords.y) * 256.0 / zpow);
+    const ulw = projection.fromPointToLatLng(ul);
+    const lrw = projection.fromPointToLatLng(lr);
+    // const bbox = ulw.lat() + "," + ulw.lng() + "," + lrw.lat() + "," + lrw.lng();
+
+    const bbox = {
+        latMin: ulw.lat(),
+        latMax: lrw.lat(),
+        lonMin: ulw.lng(),
+        lonMax: lrw.lng()
+    };
+
+    return bbox;
+}
+
+const latLonToTileXYOffset = (lat, lon, zoom) => {
+    point = latLonToXY(lat, lon, zoom);
+
+    const tileOffset = {
+        x: point.x % 256,
+        y: point.y % 256
+    };
+
+    return tileOffset;
+}
+
 function nairobiSublWMS() {
+    const wmsLayer = 'Predictive:nairobisublocations';
     const key = () => {
         info = infoTab.querySelector('.info')
         info.innerHTML = `
@@ -205,7 +267,7 @@ function nairobiSublWMS() {
         </div>
         `
     }
-    const nrbtile = getTiles('Predictive:nairobisublocations');
+    const nrbtile = getTiles(wmsLayer);
 
     const nairobisublocations = new google.maps.ImageMapType({
         getTileUrl: nrbtile,
@@ -236,6 +298,39 @@ function nairobiSublWMS() {
             }
         }
     });
+
+    map.addListener('click', async(e) => {
+        const tileCoords = getTileCoordinates(e.latLng.lat(), e.latLng.lng(), map.getZoom())
+        const tileBounds = getTileBoundingBox(map, tileCoords);
+        const tileXYOffset = latLonToTileXYOffset(e.latLng.lat(), e.latLng.lng(), map.getZoom());
+
+        let getFeatureInfoUrl =
+            `http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?REQUEST=GetFeatureInfo&SERVICE=WMS&VERSION=1.1.1&SRS=EPSG:4326&LAYERS=${wmsLayer}&QUERY_LAYERS=${wmsLayer}&STYLES=&INFO_FORMAT=application/json`;
+        getFeatureInfoUrl +=
+            "&BBOX=" + tileBounds.lonMin + "," + tileBounds.latMin + "," + tileBounds.lonMax + "," + tileBounds.latMax;
+        getFeatureInfoUrl += "&X=50" + "&Y=50" + "&WIDTH=256&HEIGHT=256&exceptions=application%2Fvnd.ogc.se_xml/cors-anywhere.html";
+
+        let response = await fetch(getFeatureInfoUrl, {
+            method: "GET",
+            headers: {
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Origin': '*',
+                "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log(response)
+            // if (response.ok) {
+            //     info = await response.json()
+            //     console.log(info);
+            // }
+
+        // infoWindow.setContent(getFeatureInfoUrl);
+        // infoWindow.open(map);
+        // window.open(getFeatureInfoUrl);
+    });
+
 }
 
 function addTrafficLayer() {
