@@ -380,7 +380,7 @@ function addNairobiUberSpeeds() {
             }
             if (!cb.checked) {
                 // if off
-                map.overlayMapTypes.removeAt(0);
+                map.overlayMapTypes.removeAt(3);
                 infoTab.querySelector('.info').innerHTML = '';
             }
         }
