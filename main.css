@@ -438,6 +438,13 @@ h5.accordion.is-open {
     margin-right: 5px;
 }
 
+.rdspeed {
+    width: 15px;
+    height: 4px;
+    margin: 5px;
+    transform: rotate(50deg);
+}
+
 .sublocLegend>div {
     display: flex;
     justify-content: start;

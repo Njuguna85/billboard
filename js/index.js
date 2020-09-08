@@ -141,6 +141,7 @@ function addOverlays(data) {
     addNssf(data.nssf);
     addMetalWorks(data.metalworks)
     nairobiSublWMS();
+    addNairobiUberSpeeds()
     addugPopProj();
     addGhanaPopulation();
     for (const [key, value] of Object.entries(data)) {
@@ -253,7 +254,7 @@ function nairobiSublWMS() {
         info = infoTab.querySelector('.info')
         info.innerHTML = `
         <div class="sublocLegend">
-            <div>KEY</div>
+            <div>Census Population 2019</div>
             <div><span class="subColor" style="background-color:#fcfbfd;"></span>743 - 6783</div>
             <div><span class="subColor" style="background-color:#f1eff7;"></span>6783 - 9882</div>
             <div><span class="subColor" style="background-color:#e0e0ee;"></span>9882 - 13901</div>
@@ -331,6 +332,59 @@ function nairobiSublWMS() {
             // window.open(getFeatureInfoUrl);
         });
     */
+}
+
+function addNairobiUberSpeeds() {
+    const wmsLayer = '	Predictive:nairobi roads travel speeds February';
+    const key = () => {
+        info = infoTab.querySelector('.info')
+        info.innerHTML = `
+        <div class="sublocLegend">
+            <div>February 2020 Speeds in Kph</div>
+            <div><span class="rdspeed" style="background-color:#9e0142;"></span>2 - 11.8</div>
+            <div><span class="rdspeed" style="background-color:#d53e4f;"></span>11.8 - 21.6</div>
+            <div><span class="rdspeed" style="background-color:#f46d43;"></span>21.6 - 31.4</div>
+            <div><span class="rdspeed" style="background-color:#fdae61;"></span>31.4 - 41.2</div>
+            <div><span class="rdspeed" style="background-color:#fee08b;"></span>41.2 - 51</div>
+            <div><span class="rdspeed" style="background-color:#e6f598;"></span>51 - 60.8</div>
+            <div><span class="rdspeed" style="background-color:#abdda4;"></span>60.8 - 70.6</div>
+            <div><span class="rdspeed" style="background-color:#66c2a5;"></span>70.6 - 80.4</div>
+            <div><span class="rdspeed" style="background-color:#3288bd;"></span>80.4 - 90.2</div>
+            <div><span class="rdspeed" style="background-color:#5e4fa2;"></span>90.2 - 100</div>
+        </div>
+        `
+    }
+    const uberspeedstile = getTiles(wmsLayer);
+
+    const uberspeeds = new google.maps.ImageMapType({
+        getTileUrl: uberspeedstile,
+        minZoom: 0,
+        maxZoom: 19,
+        opacity: 1.0,
+        alt: 'Nairobi roads travel speeds February',
+        name: 'uberspeedstile',
+        isPng: true,
+        tileSize: new google.maps.Size(256, 256)
+    });
+
+    div = document.createElement('div');
+    div.innerHTML = `Nairobi Travel Speeds<input id="uberCheck" type="checkbox" />`;
+    mapLayersAccordion.appendChild(div);
+    legend.addEventListener('change', e => {
+        if (e.target.matches('#uberCheck')) {
+            cb = document.getElementById('uberCheck')
+                // if on
+            if (cb.checked) {
+                map.overlayMapTypes.setAt(3, uberspeeds);
+                key();
+            }
+            if (!cb.checked) {
+                // if off
+                map.overlayMapTypes.removeAt(0);
+                infoTab.querySelector('.info').innerHTML = '';
+            }
+        }
+    });
 }
 
 function addTrafficLayer() {
@@ -652,7 +706,7 @@ function addugPopProj() {
         info = infoTab.querySelector('.info')
         info.innerHTML = `
         <div class="sublocLegend">
-            <div>KEY</div>
+            <div>SubCounty Population Projection 2020</div>
             <div><span class="subColor" style="background-color:#f7fbff;"></span>1600 - 9200</div>
             <div><span class="subColor" style="background-color:#e2eef9;"></span>9200 - 12600</div>
             <div><span class="subColor" style="background-color:#cde0f2;"></span>12600 - 15530</div>
@@ -706,7 +760,7 @@ function addGhanaPopulation() {
         info = infoTab.querySelector('.info');
         info.innerHTML =
             ` <div class="sublocLegend">
-                <div> KEY </div> 
+                <div> Ghana Districts Population </div> 
                 <div><span class="subColor" style="background-color:#ffffcc;"></span>241 - 99580</div>
                 <div><span class="subColor" style="background-color:#e4f4b6;"></span>99580 - 113844</div>
                 <div><span class="subColor" style="background-color:#c9e99f;"></span>113844 - 128037</div>
