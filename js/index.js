@@ -945,3 +945,75 @@ function clickOutside(e) {
     }
 
 }
+
+function readFile() {
+    const fileUpload = document.getElementById('xlsFile');
+    //Validate whether File is valid Excel file.
+    const regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+
+    const expectedrows = ['angle', 'billboard_empty', 'billboard_id', 'condition', 'constituency', 'date', 'direction_from_cbd', 'height', 'lat', 'long', 'orientation', 'photo', 'photo_longrange', 'road_type', 'route_name', 'scout_name', 'select_medium', 'site_lighting_illumination', 'site_run_up', 'size', 'traffic', 'visibility', 'zone'];
+
+    if (regex.test(fileUpload.value.toLowerCase())) {
+        if (typeof(FileReader) != "undefined") {
+            const reader = new FileReader();
+            const files = fileUpload.files,
+                f = files[0];
+            reader.onload = function(e) {
+
+                const data = e.target.result;
+
+                const workbook = XLSX.read(data, { type: 'binary' });
+
+                //get the name of First Sheet.
+                const Sheet = workbook.SheetNames[0];
+                const workSheet = workbook.Sheets[Sheet];
+
+                // convert the data in the first sheet to json
+                const jsonData = XLSX.utils.sheet_to_row_object_array(workSheet);
+
+                // check if the sheet has the expected columns
+                let hasexpectedColumn;
+
+                expectedrows.forEach(expRow => {
+                    if (jsonData[0].hasOwnProperty(expRow)) {
+                        hasexpectedColumn = true;
+                    } else {
+                        hasexpectedColumn = false;
+                    }
+                });
+                if (hasexpectedColumn) { saveSheet(jsonData) } else { alert('The Excel file does not have the necessary columns. Please check it.') }
+            };
+            reader.readAsBinaryString(f);
+
+        } else {
+            alert("This browser does not support HTML5.");
+        }
+    } else {
+        alert("Please upload a valid Excel file.");
+    }
+
+}
+async function saveSheet(data) {
+    //
+    //Create a form data object to hold the property data json and photos.
+    const formData = new FormData();
+
+    // url where the data will be posted
+    const url = './upload.php';
+
+    console.log(data)
+    formData.append('billboardData', JSON.stringify(data));
+
+    const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+    });
+    if (response.status == 201) {
+        alert('File saved successfully');
+        my_map.remove();
+        fetchData();
+    } else if (response.status == 500) {
+        alert('The file could not be saved. There is something wrong its format');
+    }
+
+}
